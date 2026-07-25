@@ -1,0 +1,551 @@
+/* ─── Arqui Tejas — Inventario ───────────────────────────────────────────── */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
+
+:root {
+  --at-bg:           #F4EBD9;
+  --at-surface:      #FDF8F2;
+  --at-surface-2:    #F0E6D6;
+  --at-surface-3:    #E5D8C4;
+
+  --at-border:       rgba(150, 85, 35, 0.2);
+  --at-border-soft:  rgba(150, 85, 35, 0.11);
+
+  --at-terra:        #B5501F;
+  --at-terra-light:  #C96228;
+  --at-terra-dim:    rgba(181, 80, 31, 0.12);
+  --at-amber:        #B8720A;
+  --at-green:        #2E8A52;
+  --at-red:          #C0392B;
+
+  --at-text:         #1C1208;
+  --at-text-2:       #3D2B18;
+  --at-muted:        #7A6045;
+  --at-caption:      #A8906E;
+
+  --at-r-sm:  7px;
+  --at-r-md:  11px;
+  --at-r-lg:  16px;
+  --at-ease:  140ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Página base ─────────────────────────────────────────────────────────── */
+.inventario-page {
+  min-height: 100vh;
+  padding: 2.25rem 2.75rem;
+  background: var(--at-bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(181,80,31,0.06) 0%, transparent 70%);
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--at-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.inventario-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--at-border-soft);
+}
+
+.inventario-titulo {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.03em;
+  color: var(--at-text);
+}
+
+.inventario-titulo span {
+  color: var(--at-terra);
+}
+
+/* ── Pestañas principales ────────────────────────────────────────────────── */
+.inventario-pestanas {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1.75rem;
+  background: var(--at-surface-2);
+  border: 1px solid var(--at-border-soft);
+  border-radius: var(--at-r-md);
+  padding: 0.28rem;
+  width: fit-content;
+}
+
+.inventario-pestana-boton {
+  padding: 0.48rem 1.15rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--at-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  transition: color var(--at-ease), background var(--at-ease);
+  white-space: nowrap;
+}
+
+.inventario-pestana-boton:hover {
+  color: var(--at-text-2);
+  background: var(--at-surface-3);
+}
+
+.inventario-pestana-activa {
+  background: var(--at-terra) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(181, 80, 31, 0.3);
+}
+
+/* ── Tipos de teja ───────────────────────────────────────────────────────── */
+.inventario-tipos {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.inventario-tipo-boton {
+  flex: 1;
+  min-width: 90px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--at-border-soft);
+  border-radius: var(--at-r-sm);
+  background: var(--at-surface);
+  color: var(--at-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: center;
+  transition: all var(--at-ease);
+}
+
+.inventario-tipo-boton:hover {
+  color: var(--at-text-2);
+  border-color: var(--at-border);
+  background: var(--at-surface-2);
+}
+
+.inventario-tipo-activo {
+  background: var(--at-terra-dim) !important;
+  color: var(--at-terra) !important;
+  border-color: rgba(181, 80, 31, 0.35) !important;
+  font-weight: 700 !important;
+}
+
+/* ── Botones ─────────────────────────────────────────────────────────────── */
+.inventario-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: var(--at-r-sm);
+  background: var(--at-terra);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--at-ease), box-shadow var(--at-ease), transform var(--at-ease);
+  box-shadow: 0 1px 4px rgba(181, 80, 31, 0.25), 0 3px 10px rgba(181, 80, 31, 0.15);
+  letter-spacing: 0.01em;
+}
+
+.inventario-boton:hover {
+  background: var(--at-terra-light);
+  box-shadow: 0 2px 8px rgba(181, 80, 31, 0.35), 0 4px 16px rgba(181, 80, 31, 0.18);
+}
+
+.inventario-boton:active {
+  transform: scale(0.97);
+  box-shadow: 0 1px 3px rgba(181, 80, 31, 0.2);
+}
+
+.inventario-boton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.inventario-boton-cancelar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
+  background: transparent;
+  color: var(--at-muted);
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--at-ease), border-color var(--at-ease), background var(--at-ease);
+}
+
+.inventario-boton-cancelar:hover {
+  color: var(--at-text);
+  background: var(--at-surface-2);
+  border-color: var(--at-border);
+}
+
+/* ── Buscador ────────────────────────────────────────────────────────────── */
+.inventario-buscador {
+  margin-bottom: 1.25rem;
+  position: relative;
+  max-width: 420px;
+}
+
+.inventario-buscador::before {
+  content: "⌕";
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--at-caption);
+  font-size: 1.1rem;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.inventario-buscador input {
+  width: 100%;
+  background: var(--at-surface);
+  border: 1px solid var(--at-border-soft);
+  border-radius: var(--at-r-sm);
+  padding: 0.6rem 0.9rem 0.6rem 2.1rem;
+  color: var(--at-text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--at-ease), box-shadow var(--at-ease);
+}
+
+.inventario-buscador input::placeholder {
+  color: var(--at-caption);
+}
+
+.inventario-buscador input:focus {
+  border-color: var(--at-terra);
+  box-shadow: 0 0 0 3px rgba(181, 80, 31, 0.1);
+}
+
+/* ── Formulario ──────────────────────────────────────────────────────────── */
+.inventario-form {
+  background: var(--at-surface);
+  border: 1px solid var(--at-border-soft);
+  border-top: 2px solid var(--at-terra);
+  border-radius: var(--at-r-lg);
+  padding: 1.6rem;
+  margin-bottom: 1.75rem;
+  max-width: 700px;
+  box-shadow:
+    0 1px 3px rgba(120, 70, 20, 0.05),
+    0 8px 28px rgba(120, 70, 20, 0.09);
+}
+
+.inventario-form-subtitulo {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0 0 1.3rem;
+  color: var(--at-terra);
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--at-border-soft);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+.inventario-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 1.1rem;
+}
+
+.inventario-form-grid label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--at-muted);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.inventario-form-grid input,
+.inventario-form-grid select,
+.inventario-form-grid textarea {
+  width: 100%;
+  background: var(--at-bg);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
+  padding: 0.6rem 0.85rem;
+  color: var(--at-text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--at-ease), box-shadow var(--at-ease);
+  -webkit-appearance: none;
+}
+
+.inventario-form-grid input::placeholder,
+.inventario-form-grid textarea::placeholder {
+  color: var(--at-caption);
+}
+
+.inventario-form-grid input:focus,
+.inventario-form-grid select:focus,
+.inventario-form-grid textarea:focus {
+  border-color: var(--at-terra);
+  box-shadow: 0 0 0 3px rgba(181, 80, 31, 0.1);
+  background: var(--at-surface);
+}
+
+.inventario-form-grid select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%237A6045' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  padding-right: 2.2rem;
+  cursor: pointer;
+}
+
+.inventario-observaciones {
+  grid-column: 1 / -1;
+}
+
+.inventario-form-botones {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--at-border-soft);
+}
+
+/* ── Mensajes ─────────────────────────────────────────────────────────────── */
+.inventario-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--at-red);
+  font-size: 0.82rem;
+  margin-top: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  background: rgba(192, 57, 43, 0.07);
+  border: 1px solid rgba(192, 57, 43, 0.2);
+  border-radius: var(--at-r-sm);
+}
+
+.inventario-exito {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--at-green);
+  font-size: 0.82rem;
+  margin-top: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  background: rgba(46, 138, 82, 0.07);
+  border: 1px solid rgba(46, 138, 82, 0.2);
+  border-radius: var(--at-r-sm);
+}
+
+/* ── Tabla ───────────────────────────────────────────────────────────────── */
+.inventario-tabla-contenedor {
+  background: var(--at-surface);
+  border: 1px solid var(--at-border-soft);
+  border-radius: var(--at-r-lg);
+  overflow-x: auto;
+  box-shadow:
+    0 1px 3px rgba(120, 70, 20, 0.05),
+    0 8px 28px rgba(120, 70, 20, 0.09);
+  scrollbar-width: thin;
+  scrollbar-color: var(--at-surface-3) transparent;
+}
+
+.inventario-tabla-contenedor::-webkit-scrollbar { height: 4px; }
+.inventario-tabla-contenedor::-webkit-scrollbar-track { background: transparent; }
+.inventario-tabla-contenedor::-webkit-scrollbar-thumb {
+  background: var(--at-surface-3);
+  border-radius: 99px;
+}
+
+.inventario-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inventario-tabla thead {
+  background: var(--at-surface-2);
+  border-bottom: 1px solid var(--at-border);
+}
+
+.inventario-tabla th {
+  text-align: left;
+  font-size: 0.7rem;
+  color: var(--at-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 700;
+  padding: 0.9rem 1.15rem;
+  white-space: nowrap;
+}
+
+.inventario-tabla td {
+  padding: 0.82rem 1.15rem;
+  border-bottom: 1px solid var(--at-border-soft);
+  font-size: 0.875rem;
+  color: var(--at-text);
+}
+
+.inventario-tabla tr:last-child td {
+  border-bottom: none;
+}
+
+.inventario-tabla tbody tr {
+  transition: background var(--at-ease);
+}
+
+.inventario-tabla tbody tr:hover td {
+  background: var(--at-surface-2);
+}
+
+.inventario-tabla tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 var(--at-terra);
+}
+
+/* Filas alternas muy sutiles */
+.inventario-tabla tbody tr:nth-child(even) td {
+  background: rgba(150, 85, 35, 0.025);
+}
+
+.inventario-tabla tbody tr:nth-child(even):hover td {
+  background: var(--at-surface-2);
+}
+
+/* ── Acciones de tabla ───────────────────────────────────────────────────── */
+.inventario-acciones {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.inventario-acciones button {
+  padding: 0.28rem 0.65rem;
+  border-radius: var(--at-r-sm);
+  border: 1px solid var(--at-border);
+  background: var(--at-surface-2);
+  color: var(--at-text-2);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all var(--at-ease);
+}
+
+.inventario-acciones button:hover {
+  background: var(--at-surface-3);
+  color: var(--at-text);
+}
+
+.inventario-boton-eliminar {
+  border-color: rgba(192, 57, 43, 0.22) !important;
+  color: var(--at-red) !important;
+  background: rgba(192, 57, 43, 0.05) !important;
+}
+
+.inventario-boton-eliminar:hover {
+  border-color: rgba(192, 57, 43, 0.45) !important;
+  background: rgba(192, 57, 43, 0.11) !important;
+}
+
+/* ── Estado vacío y cargando ─────────────────────────────────────────────── */
+.inventario-vacio {
+  text-align: center;
+  color: var(--at-caption);
+  padding: 4rem 2rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.inventario-cargando {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--at-muted);
+  font-size: 0.85rem;
+  padding: 1.25rem 0;
+}
+
+.inventario-cargando::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--at-surface-3);
+  border-top-color: var(--at-terra);
+  border-radius: 50%;
+  animation: at-spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Animaciones ─────────────────────────────────────────────────────────── */
+@keyframes at-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .inventario-page {
+    padding: 1.25rem 1rem;
+  }
+
+  .inventario-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .inventario-pestanas {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .inventario-buscador {
+    max-width: 100%;
+  }
+
+  .inventario-tipo-boton {
+    flex: 1 1 calc(50% - 0.25rem);
+  }
+
+  .inventario-tabla th:nth-child(n+5),
+  .inventario-tabla td:nth-child(n+5) {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .inventario-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inventario-tabla th:nth-child(n+4),
+  .inventario-tabla td:nth-child(n+4) {
+    display: none;
+  }
+
+  .inventario-form-botones {
+    flex-direction: column;
+  }
+
+  .inventario-boton,
+  .inventario-boton-cancelar {
+    width: 100%;
+    justify-content: center;
+  }
+}

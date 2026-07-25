@@ -1,0 +1,582 @@
+/* ─── Arqui Tejas — Recepción y Verificación ─────────────────────────────── */
+
+:root {
+  --at-bg:           #F4EBD9;
+  --at-surface:      #FDF8F2;
+  --at-surface-2:    #F0E6D6;
+  --at-surface-3:    #E5D8C4;
+
+  --at-border:       rgba(150, 85, 35, 0.2);
+  --at-border-soft:  rgba(150, 85, 35, 0.11);
+
+  --at-terra:        #B5501F;
+  --at-terra-light:  #C96228;
+  --at-terra-dim:    rgba(181, 80, 31, 0.12);
+  --at-amber:        #B8720A;
+  --at-green:        #2E8A52;
+  --at-red:          #C0392B;
+
+  --at-text:         #1C1208;
+  --at-text-2:       #3D2B18;
+  --at-muted:        #7A6045;
+  --at-caption:      #A8906E;
+
+  --at-r-sm:  7px;
+  --at-r-md:  11px;
+  --at-r-lg:  16px;
+  --at-ease:  140ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.recepcion-page {
+  min-height: 100vh;
+  padding: 2.25rem 2.75rem;
+  background: var(--at-bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(181,80,31,0.06) 0%, transparent 70%);
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--at-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Barra superior ──────────────────────────────────────────────────────── */
+.recepcion-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--at-border-soft);
+}
+
+.recepcion-marca {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--at-terra);
+}
+
+.recepcion-bodega {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  color: var(--at-muted);
+}
+
+.recepcion-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.recepcion-link {
+  color: var(--at-terra);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.recepcion-link:hover {
+  text-decoration: underline;
+}
+
+.recepcion-boton-salir {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
+  background: var(--at-surface);
+  color: var(--at-text-2);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background var(--at-ease);
+}
+
+.recepcion-boton-salir:hover {
+  background: var(--at-surface-2);
+}
+
+/* ── Encabezados ─────────────────────────────────────────────────────────── */
+.recepcion-titulo {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.03em;
+}
+
+.recepcion-subtitulo {
+  color: var(--at-muted);
+  font-size: 0.92rem;
+  margin: 0 0 1.5rem;
+  max-width: 640px;
+}
+
+/* ── Indicador de pasos ──────────────────────────────────────────────────── */
+.recepcion-pasos {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.recepcion-paso {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: var(--at-surface-2);
+  border: 1px solid var(--at-border-soft);
+  color: var(--at-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.recepcion-paso.activo {
+  background: var(--at-terra-dim);
+  border-color: var(--at-terra);
+  color: var(--at-terra);
+}
+
+/* ── Tarjetas ─────────────────────────────────────────────────────────────── */
+.recepcion-tarjeta {
+  background: var(--at-surface);
+  border: 1px solid var(--at-border-soft);
+  border-radius: var(--at-r-lg);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 8px 24px rgba(28, 18, 8, 0.04);
+}
+
+.recepcion-tarjeta h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.05rem;
+  color: var(--at-text);
+}
+
+.recepcion-texto-ayuda {
+  color: var(--at-muted);
+  font-size: 0.85rem;
+  margin: 0 0 1.1rem;
+}
+
+/* ── Carga de archivo ─────────────────────────────────────────────────────── */
+.recepcion-boton-cargar {
+  display: inline-block;
+  padding: 0.75rem 1.4rem;
+  border-radius: var(--at-r-sm);
+  background: var(--at-terra);
+  color: #FDF8F2;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: opacity var(--at-ease);
+}
+
+.recepcion-boton-cargar:hover {
+  opacity: 0.92;
+}
+
+/* ── Mapeo de columnas ────────────────────────────────────────────────────── */
+.recepcion-mapeo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.recepcion-mapeo-campo label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--at-muted);
+  margin-bottom: 0.35rem;
+}
+
+.recepcion-req {
+  color: var(--at-red);
+  margin-left: 0.2rem;
+}
+
+.recepcion-mapeo-campo select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
+  background: var(--at-surface);
+  color: var(--at-text);
+  font-size: 0.88rem;
+}
+
+/* ── Acciones ─────────────────────────────────────────────────────────────── */
+.recepcion-acciones {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin: 1rem 0 1.5rem;
+}
+
+.recepcion-boton-primario {
+  padding: 0.7rem 1.4rem;
+  border: none;
+  border-radius: var(--at-r-sm);
+  background: var(--at-terra);
+  color: #FDF8F2;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity var(--at-ease);
+}
+
+.recepcion-boton-primario:hover {
+  opacity: 0.92;
+}
+
+.recepcion-boton-primario:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.recepcion-boton-secundario {
+  padding: 0.7rem 1.4rem;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
+  background: var(--at-surface);
+  color: var(--at-text-2);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.recepcion-boton-secundario:hover {
+  background: var(--at-surface-2);
+}
+
+/* ── Resumen de verificación ──────────────────────────────────────────────── */
+.recepcion-resumen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.recepcion-estado-badge {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--at-surface-2);
+  color: var(--at-muted);
+}
+
+.recepcion-estado-badge.estado-verificada_sin_diferencias,
+.recepcion-estado-badge.estado-registrada_en_inventario {
+  background: rgba(46, 138, 82, 0.14);
+  color: var(--at-green);
+}
+
+.recepcion-estado-badge.estado-verificada_con_diferencias {
+  background: rgba(184, 114, 10, 0.15);
+  color: var(--at-amber);
+}
+
+.recepcion-estado-badge.estado-pendiente_verificacion {
+  background: rgba(192, 57, 43, 0.13);
+  color: var(--at-red);
+}
+
+.recepcion-tolerancia {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.recepcion-tolerancia label {
+  font-size: 0.85rem;
+  color: var(--at-muted);
+}
+
+.recepcion-tolerancia input {
+  width: 90px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
+  background: var(--at-surface);
+  color: var(--at-text);
+}
+
+.recepcion-resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.recepcion-resumen-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.9rem 0.5rem;
+  border-radius: var(--at-r-md);
+  background: var(--at-surface-2);
+  font-size: 0.78rem;
+  color: var(--at-muted);
+}
+
+.recepcion-resumen-item .numero {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--at-text);
+  font-family: "DM Mono", monospace;
+}
+
+.recepcion-resumen-item.ok .numero { color: var(--at-green); }
+.recepcion-resumen-item.warn .numero { color: var(--at-red); }
+.recepcion-resumen-item.info .numero { color: var(--at-amber); }
+.recepcion-resumen-item.danger .numero { color: var(--at-red); }
+
+/* ── Tabla de rollos ──────────────────────────────────────────────────────── */
+.recepcion-tabla-wrap {
+  overflow-x: auto;
+}
+
+.recepcion-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.recepcion-tabla th {
+  text-align: left;
+  padding: 0.6rem 0.7rem;
+  color: var(--at-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--at-border-soft);
+}
+
+.recepcion-tabla td {
+  padding: 0.65rem 0.7rem;
+  border-bottom: 1px solid var(--at-border-soft);
+  font-family: "DM Mono", monospace;
+  font-size: 0.83rem;
+}
+
+.recepcion-tabla tr.fila-nueva {
+  background: rgba(184, 114, 10, 0.05);
+}
+
+.recepcion-tag-nuevo {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--at-amber);
+  color: #FDF8F2;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: "Inter", sans-serif;
+}
+
+.recepcion-input-peso {
+  width: 90px;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--at-terra);
+  border-radius: var(--at-r-sm);
+  background: var(--at-surface);
+  font-family: "DM Mono", monospace;
+}
+
+.recepcion-resultado {
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: "Inter", sans-serif;
+}
+
+.recepcion-resultado.resultado-correcto {
+  background: rgba(46, 138, 82, 0.14);
+  color: var(--at-green);
+}
+
+.recepcion-resultado.resultado-faltante {
+  background: rgba(192, 57, 43, 0.13);
+  color: var(--at-red);
+}
+
+.recepcion-resultado.resultado-adicional {
+  background: rgba(184, 114, 10, 0.15);
+  color: var(--at-amber);
+}
+
+.recepcion-resultado.resultado-faltan_datos {
+  background: var(--at-surface-3);
+  color: var(--at-muted);
+}
+
+/* ── Materiales nuevos ────────────────────────────────────────────────────── */
+.recepcion-materiales-nuevos {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--at-border-soft);
+}
+
+.recepcion-materiales-nuevos h4 {
+  margin: 0 0 0.3rem;
+  font-size: 0.95rem;
+}
+
+.recepcion-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--at-text-2);
+  margin: 0.4rem 0;
+}
+
+/* ── Mensajes ─────────────────────────────────────────────────────────────── */
+.recepcion-error {
+  color: var(--at-red);
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0;
+}
+
+.recepcion-exito {
+  color: var(--at-green);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* ── Texto secundario en celdas (ej. color debajo del tipo) ──────────────── */
+.recepcion-texto-secundario {
+  display: inline-block;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--at-caption);
+  font-family: "Inter", sans-serif;
+}
+
+/* ── Búsqueda por código de clasificación / rollo ─────────────────────────── */
+.recepcion-busqueda {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  max-width: 360px;
+}
+
+.recepcion-busqueda label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--at-muted);
+}
+
+.recepcion-busqueda input {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
+  background: var(--at-surface);
+  color: var(--at-text);
+  font-size: 0.88rem;
+  transition: border-color var(--at-ease);
+}
+
+.recepcion-busqueda input:focus {
+  outline: none;
+  border-color: var(--at-terra);
+}
+
+/* ── Aviso de equivalencias faltantes (tipo / color / espesor) ───────────── */
+.recepcion-aviso-equivalencias {
+  border-left: 3px solid var(--at-amber);
+  background: rgba(184, 114, 10, 0.06);
+}
+
+.recepcion-aviso-equivalencias h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.98rem;
+  color: var(--at-amber);
+}
+
+.recepcion-lista-faltantes {
+  margin: 0.4rem 0 1rem;
+  padding-left: 1.2rem;
+}
+
+.recepcion-lista-faltantes li {
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--at-text-2);
+}
+
+/* ── Panel de administración de tablas de equivalencias ──────────────────── */
+.recepcion-admin-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.recepcion-admin-columna {
+  border: 1px solid var(--at-border-soft);
+  border-radius: var(--at-r-md);
+  padding: 1rem;
+  background: var(--at-surface-2);
+}
+
+.recepcion-admin-columna h4 {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+  color: var(--at-text);
+}
+
+.recepcion-admin-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+.recepcion-admin-tabla th,
+.recepcion-admin-tabla td {
+  padding: 0.35rem 0.4rem;
+  border-bottom: 1px solid var(--at-border-soft);
+  text-align: left;
+  font-family: "DM Mono", monospace;
+}
+
+.recepcion-admin-tabla th {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  color: var(--at-muted);
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+.recepcion-admin-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.recepcion-admin-form input {
+  flex: 1 1 100px;
+  min-width: 90px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
+  background: var(--at-surface);
+  color: var(--at-text);
+  font-size: 0.82rem;
+}
+
+.recepcion-admin-form input:focus {
+  outline: none;
+  border-color: var(--at-terra);
+}
+
+.recepcion-admin-form button {
+  flex: 1 1 100%;
+  margin-top: 0.25rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+}
