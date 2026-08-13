@@ -1,7 +1,6 @@
 import { useControladorInicio } from "../Componentes/Inicio.jsx";
 import "../Style/Inicio.css";
 
-// Pantalla de login: dibuja el formulario y usa la lógica de useControladorInicio.
 function InicioPage({ onLogin }) {
   const {
     correo,
@@ -52,10 +51,7 @@ function InicioPage({ onLogin }) {
           </button>
         </form>
 
-        {/* Solo mientras no hay backend: recordatorio de las cuentas demo */}
-        <p className="inicio-subtitulo" style={{ marginTop: "1.25rem", fontSize: "0.75rem" }}>
-          Demo: central@arquitejas.com / norte@arquitejas.com — contraseña 123456
-        </p>
+       
       </div>
     </div>
   );

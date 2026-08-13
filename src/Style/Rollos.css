@@ -1,0 +1,355 @@
+/* ─── Arqui Tejas — Rollos almacenados ────────────────────────────────────── */
+
+.rollos-page {
+  min-height: 100vh;
+  padding: 2.25rem 2.75rem;
+  background: var(--at-bg, #F3F5F2);
+  font-family: var(--at-font-sans, "Inter", system-ui, sans-serif);
+  color: var(--at-text, #17221D);
+}
+
+.rollos-titulo {
+  font-size: 1.45rem;
+  font-weight: 800;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.03em;
+}
+
+.rollos-subtitulo {
+  color: var(--at-muted, #66756B);
+  font-size: 0.92rem;
+  margin: 0 0 1.5rem;
+  max-width: 700px;
+}
+
+.rollos-tarjeta {
+  background: var(--at-surface, #FFFFFF);
+  border: 1px solid var(--at-border-soft, #E5E9E5);
+  border-radius: var(--at-r-lg, 18px);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.1rem;
+  box-shadow: var(--at-shadow-md, 0 12px 28px -12px rgba(23,34,29,0.18));
+}
+
+.rollos-tarjeta h2 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+}
+
+.rollos-vacio {
+  color: var(--at-muted, #66756B);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* ── Filtros ──────────────────────────────────────────────────────────────── */
+.rollos-filtros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.rollos-filtros-grid label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--at-muted, #66756B);
+  margin-bottom: 0.3rem;
+}
+
+.rollos-filtros-grid input,
+.rollos-filtros-grid select {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--at-border, #D2D9D3);
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-surface-2, #F7F8F6);
+  color: var(--at-text, #17221D);
+  font-size: 0.85rem;
+}
+
+.rollos-boton-secundario {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--at-border, #D2D9D3);
+  border-radius: var(--at-r-sm, 7px);
+  background: transparent;
+  color: var(--at-text-2, #34443A);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.rollos-boton-secundario:hover {
+  background: var(--at-surface-3, #E9EDE8);
+}
+
+/* ── Grupo por código interno ─────────────────────────────────────────────── */
+.rollos-grupo {
+  padding: 0;
+  overflow: hidden;
+  border-left: 4px solid var(--rollo-color, var(--at-border));
+}
+
+.rollos-color-azul { --rollo-color: #2278c9; }
+.rollos-color-blanco { --rollo-color: #b9c2bd; }
+.rollos-color-negro { --rollo-color: #1b2020; }
+.rollos-color-rojo { --rollo-color: #d33f35; }
+.rollos-color-verde { --rollo-color: #358654; }
+.rollos-color-amarillo { --rollo-color: #db9f14; }
+.rollos-color-gris { --rollo-color: #79847d; }
+.rollos-color-plata { --rollo-color: #9da9ac; }
+.rollos-color-natural { --rollo-color: #b7824b; }
+.rollos-color-otro { --rollo-color: var(--at-terra); }
+
+.rollos-grupo-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.rollos-grupo-header:hover {
+  background: var(--at-surface-2, #F7F8F6);
+}
+
+.rollos-grupo-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.rollos-grupo-codigo {
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-family: "DM Mono", monospace;
+}
+
+.rollos-grupo-detalle {
+  font-size: 0.8rem;
+  color: var(--at-muted, #66756B);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.rollos-color-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  border: 1px solid color-mix(in srgb, var(--rollo-color) 36%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rollo-color) 11%, white);
+  color: var(--at-text-2, #34443A);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.rollos-color-muestra {
+  width: 0.66rem;
+  height: 0.66rem;
+  flex: 0 0 auto;
+  border: 1px solid rgb(0 0 0 / 18%);
+  border-radius: 50%;
+  background: var(--rollo-color);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%);
+}
+
+.rollos-color-etiqueta.color-blanco {
+  background: #fff;
+  border-color: #cbd3ce;
+}
+
+.rollos-grupo-cantidad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--at-r-md, 11px);
+  background: var(--at-terra-dim, rgba(181, 80, 31, 0.1));
+}
+
+.rollos-grupo-cantidad .numero {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--at-terra, #B5501F);
+}
+
+.rollos-grupo-cantidad span:last-child {
+  font-size: 0.68rem;
+  color: var(--at-muted, #7A6045);
+}
+
+.rollos-grupo-flecha {
+  color: var(--at-muted, #7A6045);
+  font-size: 0.8rem;
+}
+
+/* ── Tabla de rollos individuales ─────────────────────────────────────────── */
+.rollos-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+}
+
+.rollos-tabla th {
+  text-align: left;
+  padding: 0.55rem 1rem;
+  color: var(--at-muted, #7A6045);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-top: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
+  background: var(--at-surface-2, #F0E6D6);
+}
+
+.rollos-tabla td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
+  font-family: "DM Mono", monospace;
+}
+
+.rollos-estado-badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: "Inter", sans-serif;
+}
+
+.rollos-estado-badge.estado-cerrado {
+  background: var(--at-surface-3, #E5D8C4);
+  color: var(--at-muted, #7A6045);
+}
+
+.rollos-estado-badge.estado-abierto {
+  background: rgba(184, 114, 10, 0.15);
+  color: var(--at-amber, #B8720A);
+}
+
+.rollos-estado-badge.estado-agotado {
+  background: rgba(192, 57, 43, 0.13);
+  color: var(--at-red, #C0392B);
+}
+
+.rollos-boton-consumo {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-terra, #B5501F);
+  color: #FDF8F2;
+  font-weight: 600;
+  font-size: 0.78rem;
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rollos-boton-consumo:hover {
+  opacity: 0.92;
+}
+
+.rollos-boton-consumo:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Modal de consumo ─────────────────────────────────────────────────────── */
+.rollos-modal-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 18, 8, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.rollos-modal {
+  width: 100%;
+  max-width: 420px;
+  padding: 1.75rem;
+  background: var(--at-surface, #FDF8F2);
+  border-radius: var(--at-r-lg, 16px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+
+.rollos-modal h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  font-family: "DM Mono", monospace;
+}
+
+.rollos-texto-ayuda {
+  color: var(--at-muted, #7A6045);
+  font-size: 0.85rem;
+  margin: 0 0 1.1rem;
+  font-family: "Inter", sans-serif;
+}
+
+.rollos-modal label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--at-muted, #7A6045);
+  margin: 0.75rem 0 0.35rem;
+}
+
+.rollos-modal input,
+.rollos-modal textarea {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--at-border, rgba(150, 85, 35, 0.2));
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-surface, #FDF8F2);
+  color: var(--at-text, #1C1208);
+  font-size: 0.88rem;
+  font-family: "Inter", sans-serif;
+  resize: vertical;
+}
+
+.rollos-modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.rollos-boton-primario {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-terra, #B5501F);
+  color: #FDF8F2;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.rollos-boton-primario:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rollos-error {
+  color: var(--at-red, #C0392B);
+  font-size: 0.85rem;
+  margin: 0.6rem 0 0;
+  font-family: "Inter", sans-serif;
+}
+.rollos-grupo {
+  overflow-x: auto;
+}
+
+.rollos-tabla {
+  min-width: 900px;
+}

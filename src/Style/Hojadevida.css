@@ -1,0 +1,301 @@
+/* ─── Arqui Tejas — Hoja de Vida (Historial de Producción) ────────────────── */
+/*
+  Reutiliza los tokens de color de Produccion.css (--at-*). Este archivo
+  define su propio espacio de nombres (hv-*) para que el tratamiento de
+  tabla densa de este reporte no interfiera con el formulario de registro.
+*/
+
+:root {
+  --hv-transition: 160ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --hv-transition: 0ms;
+  }
+}
+
+/* ── Layout base (sidebar + contenido) ───────────────────────────────────── */
+.layout-con-sidebar {
+  display: flex;
+  min-height: 100vh;
+  background: var(--at-bg, #F4EBD9);
+}
+
+.layout-contenido {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Página ───────────────────────────────────────────────────────────────── */
+.hv-page {
+  min-height: 100vh;
+  padding: 3rem 3.5rem 5rem;
+  background: var(--at-bg, #F4EBD9);
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--at-text, #1C1208);
+}
+
+.hv-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.15));
+}
+
+.hv-header-texto {
+  max-width: 640px;
+}
+
+.hv-titulo {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin: 0 0 0.45rem;
+  letter-spacing: -0.03em;
+}
+
+.hv-subtitulo {
+  color: var(--at-muted, #7A6045);
+  font-size: 0.96rem;
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* Contador de registros junto al título — da contexto inmediato del volumen */
+.hv-conteo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--at-r-lg, 16px);
+  background: var(--at-surface, #FDF8F2);
+  border: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.15));
+  white-space: nowrap;
+}
+
+.hv-conteo strong {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--at-terra, #B5501F);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.hv-conteo span {
+  font-size: 0.76rem;
+  color: var(--at-muted, #7A6045);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Tarjeta contenedora ──────────────────────────────────────────────────── */
+.hv-card {
+  background: var(--at-surface, #FDF8F2);
+  border: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
+  border-radius: var(--at-r-lg, 16px);
+  box-shadow: 0 8px 24px rgba(28, 18, 8, 0.04);
+  overflow: hidden;
+}
+
+.hv-card > h2 {
+  margin: 0;
+  padding: 1.4rem 1.75rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
+}
+
+/* ── Tabla ────────────────────────────────────────────────────────────────── */
+.hv-tabla-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* sombra tenue en el borde derecho como pista de que hay más contenido */
+  background:
+    linear-gradient(to right, var(--at-surface, #FDF8F2) 30%, rgba(253, 248, 242, 0)),
+    linear-gradient(to right, rgba(28, 18, 8, 0.06), rgba(28, 18, 8, 0)) 100% 0,
+    linear-gradient(to left, var(--at-surface, #FDF8F2) 30%, rgba(253, 248, 242, 0)) 100% 0,
+    linear-gradient(to left, rgba(28, 18, 8, 0.06), rgba(28, 18, 8, 0));
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 12px 100%, 40px 100%, 12px 100%;
+  background-attachment: local, scroll, local, scroll;
+}
+
+.hv-tabla {
+  width: 100%;
+  min-width: 1080px;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.hv-tabla thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background: var(--at-surface-2, #F0E6D6);
+  color: var(--at-muted, #7A6045);
+  font-weight: 600;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.15));
+  white-space: nowrap;
+}
+
+.hv-tabla thead th.num,
+.hv-tabla td.num {
+  text-align: right;
+}
+
+.hv-tabla tbody td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.09));
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.hv-tabla tbody td.hv-observaciones {
+  white-space: normal;
+  min-width: 200px;
+  color: var(--at-text-2, #3D2B18);
+}
+
+.hv-tabla tbody tr {
+  transition: background-color var(--hv-transition);
+}
+
+.hv-tabla tbody tr:nth-child(even) {
+  background: rgba(150, 85, 35, 0.025);
+}
+
+.hv-tabla tbody tr:hover {
+  background: var(--at-surface-2, #F0E6D6);
+}
+
+.hv-tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Código de producción — identificador principal de la fila */
+.hv-codigo {
+  font-family: "DM Mono", monospace;
+  font-weight: 700;
+  color: var(--at-terra, #B5501F);
+  letter-spacing: 0.01em;
+}
+
+/* Código de rollo — identificador secundario, estilo pill discreto */
+.hv-codigo-rollo {
+  display: inline-block;
+  font-family: "DM Mono", monospace;
+  font-size: 0.78rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--at-surface-3, #E5D8C4);
+  border-radius: 999px;
+  color: var(--at-text-2, #3D2B18);
+}
+
+/* Valores numéricos con unidad — números tabulares para que alineen en columna */
+.hv-metros {
+  font-variant-numeric: tabular-nums;
+  font-family: "DM Mono", monospace;
+}
+
+.hv-saldo {
+  font-variant-numeric: tabular-nums;
+  font-family: "DM Mono", monospace;
+  font-weight: 700;
+  color: var(--at-green, #2E8A52);
+}
+
+.hv-fecha {
+  color: var(--at-muted, #7A6045);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Estado vacío ─────────────────────────────────────────────────────────── */
+.hv-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  color: var(--at-muted, #7A6045);
+  background: var(--at-surface, #FDF8F2);
+  border: 1px dashed var(--at-border, rgba(150, 85, 35, 0.25));
+  border-radius: var(--at-r-lg, 16px);
+}
+
+.hv-vacio-icono {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--at-surface-2, #F0E6D6);
+  color: var(--at-terra, #B5501F);
+  font-size: 1.3rem;
+}
+
+.hv-vacio p {
+  margin: 0;
+  font-size: 0.92rem;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hv-page {
+    padding: 1.5rem 1.15rem 3rem;
+  }
+
+  .hv-titulo {
+    font-size: 1.5rem;
+  }
+
+  .hv-header {
+    align-items: flex-start;
+  }
+
+  .hv-card > h2 {
+    padding: 1.15rem 1.25rem;
+  }
+}
+
+/* ── Impresión ────────────────────────────────────────────────────────────── */
+@media print {
+  .layout-con-sidebar > :first-child {
+    display: none;
+  }
+
+  .hv-page {
+    background: #fff;
+    padding: 0;
+  }
+
+  .hv-card {
+    box-shadow: none;
+    border: none;
+  }
+
+  .hv-tabla-wrap {
+    background: none;
+    overflow: visible;
+  }
+
+  .hv-tabla {
+    min-width: 0;
+  }
+
+  .hv-tabla thead th {
+    position: static;
+  }
+}

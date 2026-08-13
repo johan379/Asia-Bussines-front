@@ -1,9 +1,12 @@
-/* ─── Arqui Tejas — Barra lateral y layout ───────────────────────────────── */
+/* ─── Asia Business (Tejas) — Barra lateral y layout ─────────────────────
+   Panel de control: acero oscuro, ítem activo marcado con un borde de
+   acento sólido (no degradado) para que se lea como un selector físico,
+   no como una insignia decorativa. Requiere tokens.css. ────────────────── */
 
 .layout-con-sidebar {
   display: flex;
   min-height: 100vh;
-  background: var(--at-bg, #F4EBD9);
+  background: var(--at-bg, #EFF1EE);
 }
 
 .layout-contenido {
@@ -12,38 +15,75 @@
 }
 
 .barra-lateral {
-  width: 240px;
+  width: 252px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding: 1.75rem 1.25rem;
-  background: var(--at-surface, #FDF8F2);
-  border-right: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
-  font-family: "Inter", system-ui, sans-serif;
+  padding: 1.75rem 1.15rem;
+  background: var(--at-steel, #14181A);
+  border-right: 1px solid var(--at-steel-border, #2B3437);
+  color: var(--at-steel-text, #ECEFEC);
+  font-family: var(--at-font-sans, "Inter", system-ui, sans-serif);
+
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden; /* el scroll vive dentro de .barra-nav */
 }
 
 .barra-marca {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--at-text, #1C1208);
-  margin-bottom: 0.15rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 0.2rem;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-shrink: 0;
 }
 
 .barra-marca-icono {
-  color: var(--at-terra, #B5501F);
+  color: var(--at-terra-light, #E2600F);
 }
 
 .barra-bodega {
-  font-size: 0.8rem;
-  color: var(--at-muted, #7A6045);
-  margin: 0 0 1.75rem;
+  font-size: 0.78rem;
+  color: var(--at-steel-muted, #93A19B);
+  margin: 0 0 1.85rem;
+  font-weight: 600;
+  font-family: var(--at-font-mono, monospace);
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--at-steel-border, #2B3437);
 }
 
 .barra-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.25rem;
   flex: 1;
+
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 0.25rem;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--at-steel-3, #262E31) transparent;
+}
+
+.barra-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.barra-nav::-webkit-scrollbar-thumb {
+  background: var(--at-steel-3, #262E31);
+  border-radius: 999px;
+}
+
+.barra-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--at-steel-border, #2B3437);
 }
 
 .barra-item-grupo {
@@ -52,29 +92,53 @@
 }
 
 .barra-item {
-  display: block;
-  padding: 0.65rem 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.68rem 0.8rem;
   border-radius: var(--at-r-sm, 7px);
-  color: var(--at-text-2, #3D2B18);
-  font-size: 0.88rem;
+  border-left: 2px solid transparent;
+  color: #B7C0BB;
+  font-size: 0.87rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background 140ms ease;
+  transition: background var(--at-ease, 160ms), color var(--at-ease, 160ms),
+    border-color var(--at-ease, 160ms);
+}
+
+.barra-notificacion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--at-red, #B23A2E);
+  color: #FFFFFF;
+  font-family: var(--at-font-mono, monospace);
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .barra-item:hover {
-  background: var(--at-surface-2, #F0E6D6);
+  background: var(--at-steel-2, #1D2326);
+  color: #FFFFFF;
+  border-left-color: var(--at-steel-border, #2B3437);
 }
 
 .barra-item-activo {
-  background: var(--at-terra-dim, rgba(181, 80, 31, 0.12));
-  color: var(--at-terra, #B5501F);
+  background: var(--at-steel-2, #1D2326);
+  border-left-color: var(--at-terra-light, #E2600F);
+  color: #FFFFFF !important;
 }
 
 .barra-item-nota {
-  margin: 0.1rem 0 0.5rem 0.85rem;
+  margin: 0.1rem 0 0.5rem 0.8rem;
   font-size: 0.72rem;
-  color: var(--at-caption, #A8906E);
+  color: var(--at-steel-muted, #93A19B);
+  opacity: 0.75;
 }
 
 .barra-item-deshabilitado {
@@ -82,43 +146,49 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.65rem 0.8rem;
-  color: var(--at-caption, #A8906E);
-  font-size: 0.88rem;
+  padding: 0.68rem 0.8rem;
+  border-left: 2px solid transparent;
+  color: #556259;
+  font-size: 0.87rem;
   font-weight: 600;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .barra-badge {
-  padding: 0.15rem 0.45rem;
-  border-radius: 999px;
-  background: var(--at-surface-3, #E5D8C4);
-  color: var(--at-muted, #7A6045);
-  font-size: 0.62rem;
+  padding: 0.16rem 0.48rem;
+  border-radius: var(--at-r-xs, 5px);
+  background: var(--at-steel-3, #262E31);
+  color: var(--at-steel-muted, #93A19B);
+  font-family: var(--at-font-mono, monospace);
+  font-size: 0.63rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.06em;
   white-space: nowrap;
 }
 
 .barra-boton-salir {
-  margin-top: 1.25rem;
-  padding: 0.6rem;
-  border: 1px solid var(--at-border, rgba(150, 85, 35, 0.2));
+  margin-top: 1.1rem;
+  padding: 0.65rem;
+  border: 1px solid var(--at-steel-border, #2B3437);
   border-radius: var(--at-r-sm, 7px);
   background: transparent;
-  color: var(--at-text-2, #3D2B18);
-  font-size: 0.85rem;
+  color: #B7C0BB;
+  font-size: 0.84rem;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  transition: background 140ms ease;
+  transition: all var(--at-ease, 160ms);
+  flex-shrink: 0;
 }
 
 .barra-boton-salir:hover {
-  background: var(--at-surface-2, #F0E6D6);
+  background: var(--at-red-dim, rgba(178, 58, 46, 0.14));
+  border-color: var(--at-red, #B23A2E);
+  color: #F1B3AB;
 }
 
-/* En pantallas angostas, la barra pasa a ocupar el ancho completo arriba. */
+/* Adaptación responsive */
 @media (max-width: 720px) {
   .layout-con-sidebar {
     flex-direction: column;
@@ -132,12 +202,33 @@
     gap: 0.75rem;
     padding: 1rem 1.25rem;
     border-right: none;
-    border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
+    border-bottom: 1px solid var(--at-steel-border, #2B3437);
+
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .barra-bodega {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
   }
 
   .barra-nav {
     flex-direction: row;
     flex-wrap: wrap;
+    overflow-y: visible;
+  }
+
+  .barra-item {
+    border-left: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  .barra-item-activo {
+    border-left: none;
+    border-bottom-color: var(--at-terra-light, #E2600F);
   }
 
   .barra-item-nota {

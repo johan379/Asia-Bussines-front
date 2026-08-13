@@ -1,9 +1,10 @@
 import { useState } from "react";
 import BarraLateral from "../Componentes/BarraLateral.jsx";
 import { useControladorInventario } from "../Componentes/Inventario.jsx";
+import Paginacion from "../Componentes/Paginacion.jsx";
 import "../Style/Inventario.css";
 
-function InventarioPage({ sesion, onCerrarSesion }) {
+function InventarioPage({ sesion, onCerrarSesion, almacen }) {
   const [pestanaActiva, setPestanaActiva] = useState("productos"); // "productos" | "movimientos" | "historial"
 
   const {
@@ -22,11 +23,14 @@ function InventarioPage({ sesion, onCerrarSesion }) {
     guardarProducto,
     eliminarProducto,
     busquedaProducto,
-    setBusquedaProducto,
+    cambiarBusquedaProducto,
     productosFiltrados,
+    setPaginaProductos,
+    paginacionProductos,
 
     // Movimientos
     bodegas,
+    bodegaActual,
     cargandoOpcionesMov,
     formularioMov,
     errorMov,
@@ -46,7 +50,9 @@ function InventarioPage({ sesion, onCerrarSesion }) {
     actualizarFiltro,
     limpiarFiltros,
     cargarHistorial,
-  } = useControladorInventario();
+    setPaginaHistorial,
+    paginacionHistorial,
+  } = useControladorInventario(sesion, almacen);
 
   return (
     <div className="layout-con-sidebar">
@@ -99,7 +105,7 @@ function InventarioPage({ sesion, onCerrarSesion }) {
                 type="text"
                 placeholder="Buscar por código, código de importación o descripción..."
                 value={busquedaProducto}
-                onChange={(e) => setBusquedaProducto(e.target.value)}
+                onChange={(e) => cambiarBusquedaProducto(e.target.value)}
               />
             </div>
           )}
@@ -182,6 +188,7 @@ function InventarioPage({ sesion, onCerrarSesion }) {
             cargandoProductos ? (
               <p className="inventario-cargando">Cargando productos...</p>
             ) : (
+              <>
               <div className="inventario-tabla-contenedor">
                 <table className="inventario-tabla">
                   <thead>
@@ -228,6 +235,12 @@ function InventarioPage({ sesion, onCerrarSesion }) {
                   </tbody>
                 </table>
               </div>
+              <Paginacion
+                paginacion={paginacionProductos}
+                alCambiarPagina={setPaginaProductos}
+                etiqueta="productos"
+              />
+              </>
             )
           )}
         </div>
@@ -299,17 +312,7 @@ function InventarioPage({ sesion, onCerrarSesion }) {
                 {(formularioMov.tipo === "salida" || formularioMov.tipo === "traslado") && (
                   <div>
                     <label>Bodega de origen</label>
-                    <select
-                      value={formularioMov.bodegaOrigenId}
-                      onChange={(e) => actualizarCampoMov("bodegaOrigenId", e.target.value)}
-                    >
-                      <option value="">Selecciona una bodega</option>
-                      {bodegas.map((b) => (
-                        <option key={b.id} value={b.id}>
-                          {b.nombre}
-                        </option>
-                      ))}
-                    </select>
+                    <input value={bodegaActual?.nombre || ""} disabled readOnly />
                   </div>
                 )}
 
@@ -365,7 +368,7 @@ function InventarioPage({ sesion, onCerrarSesion }) {
       {pestanaActiva === "historial" && (
         <div>
           <h1 className="inventario-titulo" style={{ marginBottom: "1.5rem" }}>
-            Historial de movimientos
+            Historial de movimientos — {sesion?.bodegaNombre || "mi bodega"}
           </h1>
 
           <div className="inventario-form inventario-filtros">
@@ -377,21 +380,6 @@ function InventarioPage({ sesion, onCerrarSesion }) {
                   onChange={(e) => actualizarFiltro("codigoProducto", e.target.value)}
                   placeholder="Ej: PRD-001"
                 />
-              </div>
-
-              <div>
-                <label>Bodega</label>
-                <select
-                  value={filtros.bodegaId}
-                  onChange={(e) => actualizarFiltro("bodegaId", e.target.value)}
-                >
-                  <option value="">Todas</option>
-                  {bodegas.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.nombre}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div>
@@ -428,6 +416,7 @@ function InventarioPage({ sesion, onCerrarSesion }) {
           {cargandoHistorial ? (
             <p className="inventario-cargando">Cargando historial...</p>
           ) : (
+            <>
             <div className="inventario-tabla-contenedor">
               <table className="inventario-tabla">
                 <thead>
@@ -454,7 +443,7 @@ function InventarioPage({ sesion, onCerrarSesion }) {
                   ) : (
                     historial.map((m) => (
                       <tr key={m.id}>
-                        <td>{m.numeroCotizacion || "—"}</td>
+                        <td>{m.cotizacion || "—"}</td>
                         <td>{new Date(m.fecha).toLocaleString("es-CO")}</td>
                         <td style={{ textTransform: "capitalize" }}>{m.tipo}</td>
                         <td style={{ textTransform: "capitalize" }}>
@@ -463,8 +452,8 @@ function InventarioPage({ sesion, onCerrarSesion }) {
                         <td>
                           {m.productoCodigo} — {m.productoDescripcion}
                         </td>
-                        <td>{m.bodegaOrigen || "—"}</td>
-                        <td>{m.bodegaDestino || "—"}</td>
+                        <td>{bodegas.find((b) => b.id === m.bodegaOrigenId)?.nombre || "—"}</td>
+                        <td>{bodegas.find((b) => b.id === m.bodegaDestinoId)?.nombre || "—"}</td>
                         <td>{m.cantidad}</td>
                         <td>{m.usuario}</td>
                         <td>{m.observaciones || "—"}</td>
@@ -474,6 +463,12 @@ function InventarioPage({ sesion, onCerrarSesion }) {
                 </tbody>
               </table>
             </div>
+            <Paginacion
+              paginacion={paginacionHistorial}
+              alCambiarPagina={setPaginaHistorial}
+              etiqueta="movimientos"
+            />
+            </>
           )}
         </div>
       )}

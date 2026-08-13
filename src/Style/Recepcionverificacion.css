@@ -1,30 +1,30 @@
-/* ─── Arqui Tejas — Recepción y Verificación ─────────────────────────────── */
+/* ─── Asia Business (Tejas) — Recepción y Verificación ───────────────────── */
 
 :root {
-  --at-bg:           #F4EBD9;
-  --at-surface:      #FDF8F2;
-  --at-surface-2:    #F0E6D6;
-  --at-surface-3:    #E5D8C4;
+  --at-bg:           #F8FAFC;
+  --at-surface:      #FFFFFF;
+  --at-surface-2:    #F1F5F9;
+  --at-surface-3:    #E2E8F0;
 
-  --at-border:       rgba(150, 85, 35, 0.2);
-  --at-border-soft:  rgba(150, 85, 35, 0.11);
+  --at-border:       #CBD5E1;
+  --at-border-soft:  #E2E8F0;
 
-  --at-terra:        #B5501F;
-  --at-terra-light:  #C96228;
-  --at-terra-dim:    rgba(181, 80, 31, 0.12);
-  --at-amber:        #B8720A;
-  --at-green:        #2E8A52;
-  --at-red:          #C0392B;
+  --at-terra:        #E64A19;
+  --at-terra-light:  #FF5722;
+  --at-terra-dim:    rgba(230, 74, 25, 0.10);
+  --at-amber:        #D97706;
+  --at-green:        #059669;
+  --at-red:          #DC2626;
 
-  --at-text:         #1C1208;
-  --at-text-2:       #3D2B18;
-  --at-muted:        #7A6045;
-  --at-caption:      #A8906E;
+  --at-text:         #0F172A;
+  --at-text-2:       #334155;
+  --at-muted:        #64748B;
+  --at-caption:      #94A3B8;
 
-  --at-r-sm:  7px;
-  --at-r-md:  11px;
+  --at-r-sm:  8px;
+  --at-r-md:  12px;
   --at-r-lg:  16px;
-  --at-ease:  140ms cubic-bezier(0.4, 0, 0.2, 1);
+  --at-ease:  180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .recepcion-page {
@@ -32,7 +32,7 @@
   padding: 2.25rem 2.75rem;
   background: var(--at-bg);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(181,80,31,0.06) 0%, transparent 70%);
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(230,74,25,0.06) 0%, transparent 70%);
   font-family: "Inter", system-ui, sans-serif;
   color: var(--at-text);
   -webkit-font-smoothing: antialiased;
@@ -45,12 +45,12 @@
   justify-content: space-between;
   margin-bottom: 1.75rem;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--at-border-soft);
+  border-bottom: 1px solid var(--at-border);
 }
 
 .recepcion-marca {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 800;
   margin: 0;
   color: var(--at-terra);
 }
@@ -70,7 +70,7 @@
 .recepcion-link {
   color: var(--at-terra);
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -79,14 +79,15 @@
 }
 
 .recepcion-boton-salir {
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.1rem;
   border: 1px solid var(--at-border);
   border-radius: var(--at-r-sm);
   background: var(--at-surface);
   color: var(--at-text-2);
   font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background var(--at-ease);
+  transition: all var(--at-ease);
 }
 
 .recepcion-boton-salir:hover {
@@ -95,8 +96,8 @@
 
 /* ── Encabezados ─────────────────────────────────────────────────────────── */
 .recepcion-titulo {
-  font-size: 1.45rem;
-  font-weight: 700;
+  font-size: 1.55rem;
+  font-weight: 800;
   margin: 0 0 0.4rem;
   letter-spacing: -0.03em;
 }
@@ -111,25 +112,26 @@
 /* ── Indicador de pasos ──────────────────────────────────────────────────── */
 .recepcion-pasos {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.6rem;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
 .recepcion-paso {
-  padding: 0.45rem 0.9rem;
+  padding: 0.5rem 1rem;
   border-radius: 999px;
   background: var(--at-surface-2);
-  border: 1px solid var(--at-border-soft);
+  border: 1px solid var(--at-border);
   color: var(--at-muted);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .recepcion-paso.activo {
-  background: var(--at-terra-dim);
+  background: var(--at-terra);
   border-color: var(--at-terra);
-  color: var(--at-terra);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(230, 74, 25, 0.3);
 }
 
 /* ── Tarjetas ─────────────────────────────────────────────────────────────── */
@@ -137,53 +139,58 @@
   background: var(--at-surface);
   border: 1px solid var(--at-border-soft);
   border-radius: var(--at-r-lg);
-  padding: 1.5rem 1.75rem;
-  margin-bottom: 1.25rem;
-  box-shadow: 0 8px 24px rgba(28, 18, 8, 0.04);
+  padding: 1.6rem 1.85rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05);
 }
 
 .recepcion-tarjeta h3 {
   margin: 0 0 0.6rem;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--at-text);
 }
 
 .recepcion-texto-ayuda {
   color: var(--at-muted);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   margin: 0 0 1.1rem;
 }
 
 /* ── Carga de archivo ─────────────────────────────────────────────────────── */
 .recepcion-boton-cargar {
   display: inline-block;
-  padding: 0.75rem 1.4rem;
+  padding: 0.75rem 1.5rem;
   border-radius: var(--at-r-sm);
   background: var(--at-terra);
-  color: #FDF8F2;
-  font-weight: 600;
+  color: #FFFFFF;
+  font-weight: 700;
   font-size: 0.92rem;
   cursor: pointer;
-  transition: opacity var(--at-ease);
+  transition: all var(--at-ease);
+  box-shadow: 0 2px 8px rgba(230, 74, 25, 0.3);
 }
 
 .recepcion-boton-cargar:hover {
-  opacity: 0.92;
+  background: var(--at-terra-light);
+  transform: translateY(-1px);
 }
 
 /* ── Mapeo de columnas ────────────────────────────────────────────────────── */
 .recepcion-mapeo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1.1rem;
+  margin-bottom: 1.35rem;
 }
 
 .recepcion-mapeo-campo label {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--at-muted);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
 }
 
 .recepcion-req {
@@ -193,12 +200,12 @@
 
 .recepcion-mapeo-campo select {
   width: 100%;
-  padding: 0.55rem 0.7rem;
+  padding: 0.65rem 0.85rem;
   border: 1px solid var(--at-border);
   border-radius: var(--at-r-sm);
-  background: var(--at-surface);
+  background: var(--at-surface-2);
   color: var(--at-text);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 /* ── Acciones ─────────────────────────────────────────────────────────────── */
@@ -206,43 +213,48 @@
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
-  margin: 1rem 0 1.5rem;
+  margin: 1.25rem 0 1.5rem;
 }
 
 .recepcion-boton-primario {
-  padding: 0.7rem 1.4rem;
+  padding: 0.72rem 1.5rem;
   border: none;
   border-radius: var(--at-r-sm);
   background: var(--at-terra);
-  color: #FDF8F2;
-  font-weight: 600;
+  color: #FFFFFF;
+  font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: opacity var(--at-ease);
+  transition: all var(--at-ease);
+  box-shadow: 0 2px 8px rgba(230, 74, 25, 0.3);
 }
 
 .recepcion-boton-primario:hover {
-  opacity: 0.92;
+  background: var(--at-terra-light);
+  transform: translateY(-1px);
 }
 
 .recepcion-boton-primario:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .recepcion-boton-secundario {
-  padding: 0.7rem 1.4rem;
+  padding: 0.72rem 1.5rem;
   border: 1px solid var(--at-border);
   border-radius: var(--at-r-sm);
-  background: var(--at-surface);
+  background: var(--at-surface-2);
   color: var(--at-text-2);
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
+  transition: all var(--at-ease);
 }
 
 .recepcion-boton-secundario:hover {
-  background: var(--at-surface-2);
+  background: var(--at-surface-3);
 }
 
 /* ── Resumen de verificación ──────────────────────────────────────────────── */
@@ -250,78 +262,82 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
 }
 
 .recepcion-estado-badge {
-  padding: 0.35rem 0.85rem;
+  padding: 0.38rem 0.9rem;
   border-radius: 999px;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 800;
   background: var(--at-surface-2);
   color: var(--at-muted);
 }
 
 .recepcion-estado-badge.estado-verificada_sin_diferencias,
 .recepcion-estado-badge.estado-registrada_en_inventario {
-  background: rgba(46, 138, 82, 0.14);
+  background: rgba(5, 150, 105, 0.15);
   color: var(--at-green);
 }
 
 .recepcion-estado-badge.estado-verificada_con_diferencias {
-  background: rgba(184, 114, 10, 0.15);
+  background: rgba(217, 119, 6, 0.15);
   color: var(--at-amber);
 }
 
 .recepcion-estado-badge.estado-pendiente_verificacion {
-  background: rgba(192, 57, 43, 0.13);
+  background: rgba(220, 38, 38, 0.15);
   color: var(--at-red);
 }
 
 .recepcion-tolerancia {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1.25rem;
+  gap: 0.65rem;
+  margin-bottom: 1.35rem;
 }
 
 .recepcion-tolerancia label {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 600;
   color: var(--at-muted);
 }
 
 .recepcion-tolerancia input {
-  width: 90px;
-  padding: 0.4rem 0.6rem;
+  width: 95px;
+  padding: 0.45rem 0.65rem;
   border: 1px solid var(--at-border);
   border-radius: var(--at-r-sm);
   background: var(--at-surface);
   color: var(--at-text);
+  font-weight: 700;
 }
 
 .recepcion-resumen-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.85rem;
 }
 
 .recepcion-resumen-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.9rem 0.5rem;
+  gap: 0.2rem;
+  padding: 1rem 0.6rem;
   border-radius: var(--at-r-md);
   background: var(--at-surface-2);
+  border: 1px solid var(--at-border-soft);
   font-size: 0.78rem;
   color: var(--at-muted);
+  font-weight: 600;
 }
 
 .recepcion-resumen-item .numero {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: var(--at-text);
-  font-family: "DM Mono", monospace;
+  font-family: "JetBrains Mono", monospace;
 }
 
 .recepcion-resumen-item.ok .numero { color: var(--at-green); }
@@ -337,72 +353,74 @@
 .recepcion-tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
 }
 
 .recepcion-tabla th {
   text-align: left;
-  padding: 0.6rem 0.7rem;
+  padding: 0.75rem 0.85rem;
   color: var(--at-muted);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-bottom: 1px solid var(--at-border-soft);
+  letter-spacing: 0.05em;
+  background: var(--at-surface-2);
+  border-bottom: 1px solid var(--at-border);
 }
 
 .recepcion-tabla td {
-  padding: 0.65rem 0.7rem;
+  padding: 0.75rem 0.85rem;
   border-bottom: 1px solid var(--at-border-soft);
-  font-family: "DM Mono", monospace;
-  font-size: 0.83rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.85rem;
 }
 
 .recepcion-tabla tr.fila-nueva {
-  background: rgba(184, 114, 10, 0.05);
+  background: rgba(217, 119, 6, 0.06);
 }
 
 .recepcion-tag-nuevo {
   display: inline-block;
-  margin-left: 0.4rem;
-  padding: 0.1rem 0.45rem;
+  margin-left: 0.45rem;
+  padding: 0.12rem 0.5rem;
   border-radius: 999px;
   background: var(--at-amber);
-  color: #FDF8F2;
-  font-size: 0.65rem;
-  font-weight: 700;
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 800;
   font-family: "Inter", sans-serif;
 }
 
 .recepcion-input-peso {
-  width: 90px;
-  padding: 0.3rem 0.5rem;
+  width: 95px;
+  padding: 0.35rem 0.55rem;
   border: 1px solid var(--at-terra);
   border-radius: var(--at-r-sm);
   background: var(--at-surface);
-  font-family: "DM Mono", monospace;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
 }
 
 .recepcion-resultado {
-  padding: 0.25rem 0.6rem;
+  padding: 0.28rem 0.7rem;
   border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   font-family: "Inter", sans-serif;
 }
 
 .recepcion-resultado.resultado-correcto {
-  background: rgba(46, 138, 82, 0.14);
+  background: rgba(5, 150, 105, 0.15);
   color: var(--at-green);
 }
 
 .recepcion-resultado.resultado-faltante {
-  background: rgba(192, 57, 43, 0.13);
+  background: rgba(220, 38, 38, 0.15);
   color: var(--at-red);
 }
 
 .recepcion-resultado.resultado-adicional {
-  background: rgba(184, 114, 10, 0.15);
+  background: rgba(217, 119, 6, 0.15);
   color: var(--at-amber);
 }
 
@@ -419,37 +437,39 @@
 }
 
 .recepcion-materiales-nuevos h4 {
-  margin: 0 0 0.3rem;
-  font-size: 0.95rem;
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .recepcion-checkbox {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
+  gap: 0.55rem;
+  font-size: 0.88rem;
   color: var(--at-text-2);
-  margin: 0.4rem 0;
+  margin: 0.45rem 0;
 }
 
 /* ── Mensajes ─────────────────────────────────────────────────────────────── */
 .recepcion-error {
   color: var(--at-red);
-  font-size: 0.85rem;
-  margin: 0.75rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 0.85rem 0 0;
 }
 
 .recepcion-exito {
   color: var(--at-green);
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 0.92rem;
 }
 
-/* ── Texto secundario en celdas (ej. color debajo del tipo) ──────────────── */
+/* ── Texto secundario en celdas ────────────────────────────────────────────── */
 .recepcion-texto-secundario {
   display: inline-block;
   margin-top: 0.15rem;
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   color: var(--at-caption);
   font-family: "Inter", sans-serif;
 }
@@ -458,125 +478,129 @@
 .recepcion-busqueda {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  margin-bottom: 1.25rem;
-  max-width: 360px;
+  gap: 0.4rem;
+  margin-bottom: 1.35rem;
+  max-width: 380px;
 }
 
 .recepcion-busqueda label {
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: var(--at-muted);
 }
 
 .recepcion-busqueda input {
-  padding: 0.55rem 0.7rem;
+  padding: 0.65rem 0.85rem;
   border: 1px solid var(--at-border);
   border-radius: var(--at-r-sm);
-  background: var(--at-surface);
+  background: var(--at-surface-2);
   color: var(--at-text);
-  font-size: 0.88rem;
-  transition: border-color var(--at-ease);
+  font-size: 0.9rem;
+  transition: all var(--at-ease);
 }
 
 .recepcion-busqueda input:focus {
   outline: none;
-  border-color: var(--at-terra);
+  border-color: var(--at-terra-light);
+  background: var(--at-surface);
+  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.15);
 }
 
-/* ── Aviso de equivalencias faltantes (tipo / color / espesor) ───────────── */
+/* ── Aviso de equivalencias faltantes ────────────────────────────────────── */
 .recepcion-aviso-equivalencias {
-  border-left: 3px solid var(--at-amber);
-  background: rgba(184, 114, 10, 0.06);
+  border-left: 4px solid var(--at-amber);
+  background: rgba(217, 119, 6, 0.08);
 }
 
 .recepcion-aviso-equivalencias h4 {
-  margin: 0 0 0.35rem;
-  font-size: 0.98rem;
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
   color: var(--at-amber);
+  font-weight: 800;
 }
 
 .recepcion-lista-faltantes {
   margin: 0.4rem 0 1rem;
-  padding-left: 1.2rem;
+  padding-left: 1.25rem;
 }
 
 .recepcion-lista-faltantes li {
-  margin-bottom: 0.3rem;
-  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
   color: var(--at-text-2);
 }
 
 /* ── Panel de administración de tablas de equivalencias ──────────────────── */
 .recepcion-admin-panel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.25rem;
-  margin-top: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.35rem;
+  margin-top: 1.35rem;
 }
 
 .recepcion-admin-columna {
   border: 1px solid var(--at-border-soft);
   border-radius: var(--at-r-md);
-  padding: 1rem;
+  padding: 1.1rem;
   background: var(--at-surface-2);
 }
 
 .recepcion-admin-columna h4 {
-  margin: 0 0 0.6rem;
-  font-size: 0.9rem;
+  margin: 0 0 0.65rem;
+  font-size: 0.92rem;
+  font-weight: 700;
   color: var(--at-text);
 }
 
 .recepcion-admin-tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8rem;
-  margin-bottom: 0.75rem;
+  font-size: 0.82rem;
+  margin-bottom: 0.85rem;
 }
 
 .recepcion-admin-tabla th,
 .recepcion-admin-tabla td {
-  padding: 0.35rem 0.4rem;
+  padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--at-border-soft);
   text-align: left;
-  font-family: "DM Mono", monospace;
+  font-family: "JetBrains Mono", monospace;
 }
 
 .recepcion-admin-tabla th {
   font-family: "Inter", sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--at-muted);
   text-transform: uppercase;
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
 }
 
 .recepcion-admin-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .recepcion-admin-form input {
   flex: 1 1 100px;
-  min-width: 90px;
-  padding: 0.45rem 0.6rem;
+  min-width: 95px;
+  padding: 0.5rem 0.65rem;
   border: 1px solid var(--at-border);
   border-radius: var(--at-r-sm);
   background: var(--at-surface);
   color: var(--at-text);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
 }
 
 .recepcion-admin-form input:focus {
   outline: none;
-  border-color: var(--at-terra);
+  border-color: var(--at-terra-light);
 }
 
 .recepcion-admin-form button {
   flex: 1 1 100%;
-  margin-top: 0.25rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.82rem;
+  margin-top: 0.3rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
 }

@@ -1,0 +1,133 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --at-bg: #f3f5f2;
+  --at-surface: #ffffff;
+  --at-surface-2: #f7f8f6;
+  --at-surface-3: #e9ede8;
+  --at-text: #17221d;
+  --at-text-2: #34443a;
+  --at-muted: #66756b;
+  --at-caption: #87938b;
+  --at-border: #d2d9d3;
+  --at-border-soft: #e5e9e5;
+  --at-terra: #c44d18;
+  --at-terra-light: #e26328;
+  --at-terra-dim: rgba(196, 77, 24, 0.12);
+  --at-red: #b34235;
+  --at-red-dim: rgba(179, 66, 53, 0.12);
+  --at-steel: #17211e;
+  --at-steel-2: #202c27;
+  --at-steel-3: #2c3933;
+  --at-steel-border: #3a4941;
+  --at-steel-text: #edf2ed;
+  --at-steel-muted: #a7b5aa;
+  --at-font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --at-font-mono: "DM Mono", "Cascadia Mono", Consolas, monospace;
+  --at-r-xs: 6px;
+  --at-r-sm: 9px;
+  --at-r-md: 12px;
+  --at-r-lg: 18px;
+  --at-ease: 160ms ease;
+  --at-shadow-xs: 0 1px 2px rgb(23 34 29 / 7%);
+  --at-shadow-sm: 0 3px 10px rgb(23 34 29 / 9%);
+  --at-shadow-md: 0 12px 28px -12px rgb(23 34 29 / 18%);
+  --at-shadow-lg: 0 24px 52px -20px rgb(23 34 29 / 30%);
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--at-bg); }
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background: var(--at-bg);
+  color: var(--at-text);
+  font-family: var(--at-font-sans);
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea { font: inherit; }
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--at-terra-dim);
+  outline-offset: 2px;
+}
+
+::selection { background: #f5c9b2; color: #381300; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #bdc8be; border: 3px solid var(--at-bg); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #92a297; }
+
+/* Mantiene una escala uniforme en todos los módulos del panel. */
+.inventario-page,
+.bodegas-page,
+.rollos-page,
+.produccion-page,
+.recepcion-page,
+.reportes-page,
+.hoja-vida-page,
+.ia-page {
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+}
+
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  color: var(--at-muted);
+  font-size: .875rem;
+}
+.paginacion-acciones { display: flex; gap: .5rem; }
+.paginacion button {
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-xs);
+  background: var(--at-surface);
+  color: var(--at-text-2);
+  cursor: pointer;
+  padding: .45rem .75rem;
+}
+.paginacion button:disabled { cursor: not-allowed; opacity: .5; }
+
+@media (max-width: 900px) {
+  .inventario-page,
+  .bodegas-page,
+  .rollos-page,
+  .produccion-page,
+  .recepcion-page,
+  .reportes-page,
+  .hoja-vida-page,
+  .ia-page { padding: 1.5rem !important; }
+}
+
+@media (max-width: 560px) {
+  .inventario-page,
+  .bodegas-page,
+  .rollos-page,
+  .produccion-page,
+  .recepcion-page,
+  .reportes-page,
+  .hoja-vida-page,
+  .ia-page { padding: 1rem !important; }
+
+  .inventario-header,
+  .bodegas-buscador-bodega { align-items: stretch; flex-direction: column; }
+
+  .inventario-pestanas { width: 100%; overflow-x: auto; }
+  .inventario-pestana-boton { flex: 1 0 auto; }
+  .paginacion { align-items: flex-start; flex-direction: column; }
+}

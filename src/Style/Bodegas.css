@@ -1,0 +1,485 @@
+/* ─── Asia Business (Tejas) — Bodegas (disponibilidad, solicitudes, notificaciones) ──
+   Requiere tokens.css. ──────────────────────────────────────────────────── */
+
+.bodegas-page {
+  min-height: 100vh;
+  padding: 2.25rem 2.75rem;
+  background: var(--at-bg, #EFF1EE);
+  font-family: var(--at-font-sans, "Inter", system-ui, sans-serif);
+  color: var(--at-text, #171A17);
+}
+
+.bodegas-titulo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.03em;
+  color: var(--at-text, #171A17);
+}
+
+.bodegas-subtitulo {
+  color: var(--at-muted, #6C756E);
+  font-size: 0.9rem;
+  margin: 0 0 1.75rem;
+  max-width: 680px;
+}
+
+.bodegas-tarjeta {
+  background: var(--at-surface, #FFFFFF);
+  border: 1px solid var(--at-border-soft, #E1E4DD);
+  border-radius: var(--at-r-lg, 14px);
+  padding: 1.55rem 1.8rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--at-shadow-md, 0 8px 24px -6px rgba(0,0,0,0.07));
+}
+
+.bodegas-tarjeta h2 {
+  margin: 0 0 1.1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--at-text, #171A17);
+}
+
+.bodegas-contador {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 23px;
+  height: 23px;
+  padding: 0 0.42rem;
+  border-radius: var(--at-r-xs, 5px);
+  background: var(--at-red, #B23A2E);
+  color: #FFFFFF;
+  font-family: var(--at-font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.bodegas-vacio {
+  color: var(--at-muted, #6C756E);
+  font-size: 0.87rem;
+}
+
+/* ── Buscador de bodegas ──────────────────────────────────────────────────── */
+.bodegas-buscador-bodega {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+
+.bodegas-buscador-bodega input {
+  flex: 1;
+  padding: 0.64rem 0.9rem;
+  border: 1px solid var(--at-border, #CBCFC7);
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-surface-2, #E8EAE5);
+  color: var(--at-text, #171A17);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: all var(--at-ease, 160ms);
+}
+
+.bodegas-buscador-bodega input:focus {
+  border-color: var(--at-terra-light, #E2600F);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px var(--at-terra-dim, rgba(193, 68, 14, 0.14));
+}
+
+.bodegas-boton-filtrar {
+  padding: 0.64rem 1.3rem;
+  border: none;
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-terra, #C1440E);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.87rem;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--at-ease, 160ms);
+  box-shadow: var(--at-shadow-sm, 0 2px 6px rgba(193,68,14,0.22));
+}
+
+.bodegas-boton-filtrar:hover {
+  background: var(--at-terra-light, #E2600F);
+  transform: translateY(-1px);
+}
+
+.bodegas-lista-nombres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 1.1rem;
+}
+
+.bodegas-chip-bodega {
+  padding: 0.5rem 1.05rem;
+  border: 1px solid var(--at-border, #CBCFC7);
+  border-radius: var(--at-r-pill, 999px);
+  background: var(--at-surface-2, #E8EAE5);
+  color: var(--at-text-2, #3B423C);
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--at-ease, 160ms);
+}
+
+.bodegas-chip-bodega:hover {
+  background: var(--at-terra-dim, rgba(193, 68, 14, 0.09));
+  color: var(--at-terra, #C1440E);
+  border-color: var(--at-terra-light, #E2600F);
+}
+
+.bodegas-chip-activo {
+  background: var(--at-terra, #C1440E);
+  border-color: var(--at-terra, #C1440E);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: var(--at-shadow-sm, 0 3px 10px rgba(193,68,14,0.28));
+}
+
+.bodegas-inventario-seleccionado {
+  margin-top: 1.35rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid var(--at-border-soft, #E1E4DD);
+}
+
+.bodegas-inventario-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.bodegas-inventario-header h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.bodegas-input-producto {
+  width: 100%;
+  padding: 0.64rem 0.9rem;
+  border: 1px solid var(--at-border, #CBCFC7);
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-surface-2, #E8EAE5);
+  color: var(--at-text, #171A17);
+  font-size: 0.9rem;
+  font-family: inherit;
+  margin-bottom: 1rem;
+  outline: none;
+  transition: all var(--at-ease, 160ms);
+}
+
+.bodegas-input-producto:focus {
+  border-color: var(--at-terra-light, #E2600F);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px var(--at-terra-dim, rgba(193, 68, 14, 0.14));
+}
+
+/* ── Notificaciones ──────────────────────────────────────────────────────── */
+.bodegas-notificaciones {
+  border-left: 3px solid var(--at-terra, #C1440E);
+}
+
+.bodegas-lista-notificaciones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.bodegas-notificacion {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1.1rem;
+  border-radius: var(--at-r-md, 10px);
+  background: var(--at-surface-2, #E8EAE5);
+  border: 1px solid var(--at-border-soft, #E1E4DD);
+  font-size: 0.88rem;
+}
+
+.bodegas-tag-tipo {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.14rem 0.55rem;
+  border-radius: var(--at-r-xs, 5px);
+  background: var(--at-terra-dim, rgba(193, 68, 14, 0.1));
+  color: var(--at-terra, #C1440E);
+  font-family: var(--at-font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bodegas-nota-solicitud {
+  margin: 0.4rem 0 0;
+  font-size: 0.83rem;
+  color: var(--at-muted, #6C756E);
+  font-style: italic;
+}
+
+.bodegas-acciones-notificacion {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.bodegas-boton-aceptar {
+  padding: 0.48rem 0.95rem;
+  border: none;
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-green, #2C7A52);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--at-ease, 160ms);
+}
+
+.bodegas-boton-aceptar:hover {
+  background: #35946A;
+  transform: translateY(-1px);
+}
+
+.bodegas-boton-rechazar {
+  padding: 0.48rem 0.95rem;
+  border: 1px solid var(--at-border, #CBCFC7);
+  border-radius: var(--at-r-sm, 7px);
+  background: #FFFFFF;
+  color: var(--at-red, #B23A2E);
+  font-weight: 700;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--at-ease, 160ms);
+}
+
+.bodegas-boton-rechazar:hover {
+  background: var(--at-red-dim, rgba(178, 58, 46, 0.08));
+  border-color: var(--at-red, #B23A2E);
+}
+
+/* ── Tabla ────────────────────────────────────────────────────────────────── */
+.bodegas-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87rem;
+}
+
+.bodegas-tabla th {
+  text-align: left;
+  padding: 0.72rem 0.9rem;
+  color: var(--at-muted, #6C756E);
+  font-weight: 700;
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--at-surface-2, #E8EAE5);
+  border-bottom: 1px solid var(--at-border, #CBCFC7);
+}
+
+.bodegas-tabla td {
+  padding: 0.78rem 0.9rem;
+  border-bottom: 1px solid var(--at-border-soft, #E1E4DD);
+  font-family: var(--at-font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.bodegas-tabla tbody tr:hover td {
+  background: var(--at-terra-dim, rgba(193, 68, 14, 0.05));
+}
+
+.bodegas-boton-solicitar {
+  padding: 0.48rem 0.95rem;
+  border: none;
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-terra, #C1440E);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.8rem;
+  font-family: var(--at-font-sans, sans-serif);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--at-ease, 160ms);
+}
+
+.bodegas-boton-solicitar:hover {
+  background: var(--at-terra-light, #E2600F);
+  transform: translateY(-1px);
+}
+
+.bodegas-boton-solicitar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.bodegas-estado-badge {
+  padding: 0.28rem 0.65rem;
+  border-radius: var(--at-r-xs, 5px);
+  font-family: var(--at-font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.bodegas-estado-badge.estado-pendiente {
+  background: var(--at-amber-dim, rgba(169, 103, 11, 0.14));
+  color: var(--at-amber, #A9670B);
+}
+
+.bodegas-estado-badge.estado-aceptada {
+  background: var(--at-green-dim, rgba(44, 122, 82, 0.14));
+  color: var(--at-green, #2C7A52);
+}
+
+.bodegas-estado-badge.estado-rechazada {
+  background: var(--at-red-dim, rgba(178, 58, 46, 0.14));
+  color: var(--at-red, #B23A2E);
+}
+
+/* ── Modal de solicitud ───────────────────────────────────────────────────── */
+.bodegas-modal-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 24, 26, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.bodegas-modal {
+  width: 100%;
+  max-width: 440px;
+  padding: 1.9rem;
+  background: #FFFFFF;
+  border-radius: var(--at-r-lg, 14px);
+  box-shadow: var(--at-shadow-lg, 0 25px 50px -12px rgba(0,0,0,0.3));
+}
+
+.bodegas-modal h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--at-text, #171A17);
+}
+
+.bodegas-texto-ayuda {
+  color: var(--at-muted, #6C756E);
+  font-size: 0.87rem;
+  margin: 0 0 1.25rem;
+}
+
+.bodegas-modal label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--at-muted, #6C756E);
+  margin: 0.85rem 0 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bodegas-modal select,
+.bodegas-modal input,
+.bodegas-modal textarea {
+  width: 100%;
+  padding: 0.64rem 0.85rem;
+  border: 1px solid var(--at-border, #CBCFC7);
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-surface-2, #E8EAE5);
+  color: var(--at-text, #171A17);
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: all var(--at-ease, 160ms);
+}
+
+.bodegas-modal select:focus,
+.bodegas-modal input:focus,
+.bodegas-modal textarea:focus {
+  border-color: var(--at-terra-light, #E2600F);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px var(--at-terra-dim, rgba(193, 68, 14, 0.14));
+}
+
+.bodegas-modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  margin-top: 1.5rem;
+}
+
+.bodegas-boton-primario {
+  padding: 0.66rem 1.3rem;
+  border: none;
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-terra, #C1440E);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.87rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--at-ease, 160ms);
+  box-shadow: var(--at-shadow-sm, 0 2px 8px rgba(193,68,14,0.22));
+}
+
+.bodegas-boton-primario:hover {
+  background: var(--at-terra-light, #E2600F);
+  transform: translateY(-1px);
+}
+
+.bodegas-boton-primario:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.bodegas-boton-secundario {
+  padding: 0.66rem 1.3rem;
+  border: 1px solid var(--at-border, #CBCFC7);
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-surface-2, #E8EAE5);
+  color: var(--at-text-2, #3B423C);
+  font-weight: 600;
+  font-size: 0.87rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--at-ease, 160ms);
+}
+
+.bodegas-boton-secundario:hover {
+  background: var(--at-surface-3, #DBDED7);
+}
+
+/* ── Mensajes ─────────────────────────────────────────────────────────────── */
+.bodegas-error {
+  color: var(--at-red, #B23A2E);
+  font-size: 0.84rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0;
+}
+
+.bodegas-exito {
+  color: var(--at-green, #2C7A52);
+  font-weight: 700;
+  font-size: 0.87rem;
+  margin-top: 0.85rem;
+}

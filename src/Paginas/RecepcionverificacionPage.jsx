@@ -22,8 +22,14 @@ const ETIQUETAS_ESTADO = {
 
 // Pantalla del módulo de Recepción: dibuja los 3 pasos (cargar, mapear,
 // verificar/clasificar/confirmar) usando la lógica de useControladorRecepcion.
-function RecepcionVerificacionPage({ sesion, onCerrarSesion }) {
-  const c = useControladorRecepcion(sesion);
+function RecepcionVerificacionPage({ sesion, onCerrarSesion, almacen }) {
+  const c = useControladorRecepcion(sesion, almacen);
+
+  // Contador de solicitudes de otras bodegas pendientes por responder, para
+  // el badge de la barra lateral (mismo criterio que en Inventario y Bodegas).
+  const notificaciones = (almacen?.solicitudes || []).filter(
+    (s) => s.bodegaPropietariaId === sesion?.bodegaId && s.estado === "pendiente"
+  ).length;
 
   // Estado puramente visual: mostrar/ocultar el panel de administración de
   // tablas de equivalencias (puntos 5 y 6 del requerimiento). No necesita
@@ -64,7 +70,7 @@ function RecepcionVerificacionPage({ sesion, onCerrarSesion }) {
 
   return (
     <div className="layout-con-sidebar">
-      <BarraLateral sesion={sesion} onCerrarSesion={onCerrarSesion} />
+      <BarraLateral sesion={sesion} onCerrarSesion={onCerrarSesion} notificaciones={notificaciones} />
 
       <div className="layout-contenido">
         <div className="recepcion-page">

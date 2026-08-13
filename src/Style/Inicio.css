@@ -1,41 +1,57 @@
+/* ─── Asia Business (Tejas) — Inicio de Sesión ───────────────────────────
+   Mismo lenguaje del panel lateral: acero oscuro, acento clay sólido,
+   sin degradados decorativos. Requiere tokens.css. ──────────────────────── */
+
 .inicio-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #14171c;
-  font-family: "Inter", system-ui, sans-serif;
-  color: #e9e7e2;
+  background: var(--at-steel, #14181A);
+  background-image:
+    linear-gradient(var(--at-steel-border, #2B3437) 1px, transparent 1px),
+    linear-gradient(90deg, var(--at-steel-border, #2B3437) 1px, transparent 1px);
+  background-size: 42px 42px;
+  background-position: center;
+  font-family: var(--at-font-sans, "Inter", system-ui, sans-serif);
+  color: var(--at-steel-text, #ECEFEC);
+  padding: 1.5rem;
 }
 
 .inicio-panel {
   width: 100%;
-  max-width: 380px;
-  padding: 2.5rem 2rem;
-  background: #1b1f26;
-  border: 1px solid #2a2f38;
-  border-radius: 14px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  max-width: 400px;
+  padding: 2.6rem 2.2rem;
+  background: var(--at-steel-2, #1D2326);
+  border: 1px solid var(--at-steel-border, #2B3437);
+  border-top: 3px solid var(--at-terra, #C1440E);
+  border-radius: var(--at-r-lg, 14px);
+  box-shadow: var(--at-shadow-lg, 0 20px 48px -14px rgba(0,0,0,0.5));
 }
 
 .inicio-marca {
   display: inline-block;
-  font-size: 1.4rem;
-  color: #e2a13d;
+  font-family: var(--at-font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--at-terra-light, #E2600F);
   margin-bottom: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .inicio-titulo {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 800;
   margin: 0 0 0.35rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  color: #FFFFFF;
 }
 
 .inicio-subtitulo {
   font-size: 0.9rem;
-  color: #9aa1ac;
-  margin: 0 0 1.75rem;
+  color: var(--at-steel-muted, #93A19B);
+  margin: 0 0 2rem;
 }
 
 .inicio-form {
@@ -44,50 +60,74 @@
 }
 
 .inicio-label {
-  font-size: 0.8rem;
-  color: #9aa1ac;
-  margin: 0.75rem 0 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #B7C0BB;
+  margin: 0.9rem 0 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
 
 .inicio-input {
-  background: #11141a;
-  border: 1px solid #2a2f38;
-  border-radius: 8px;
-  padding: 0.7rem 0.85rem;
-  color: #e9e7e2;
-  font-size: 0.95rem;
+  background: var(--at-steel, #14181A);
+  border: 1px solid var(--at-steel-border, #2B3437);
+  border-radius: var(--at-r-sm, 7px);
+  padding: 0.72rem 0.95rem;
+  color: #FFFFFF;
+  font-size: 0.94rem;
+  font-family: inherit;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--at-ease, 160ms), box-shadow var(--at-ease, 160ms);
+}
+
+.inicio-input::placeholder {
+  color: #5B6864;
 }
 
 .inicio-input:focus {
-  border-color: #e2a13d;
+  border-color: var(--at-terra-light, #E2600F);
+  box-shadow: 0 0 0 3px var(--at-terra-dim, rgba(193, 68, 14, 0.22));
 }
 
 .inicio-error {
-  color: #f28b82;
-  font-size: 0.82rem;
-  margin: 0.75rem 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #F1B3AB;
+  font-size: 0.84rem;
+  font-weight: 600;
+  margin: 0.9rem 0 0;
+  padding: 0.65rem 0.85rem;
+  background: rgba(178, 58, 46, 0.15);
+  border: 1px solid rgba(178, 58, 46, 0.35);
+  border-radius: var(--at-r-sm, 7px);
 }
 
 .inicio-boton {
-  margin-top: 1.5rem;
-  padding: 0.75rem;
+  margin-top: 1.75rem;
+  padding: 0.82rem;
   border: none;
-  border-radius: 8px;
-  background: #e2a13d;
-  color: #14171c;
-  font-weight: 600;
-  font-size: 0.95rem;
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-terra, #C1440E);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.98rem;
+  font-family: inherit;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition: background var(--at-ease, 160ms), transform var(--at-ease, 160ms);
 }
 
 .inicio-boton:hover {
-  opacity: 0.9;
+  background: var(--at-terra-light, #E2600F);
+  transform: translateY(-1px);
+}
+
+.inicio-boton:active {
+  transform: translateY(0);
 }
 
 .inicio-boton:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }

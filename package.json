@@ -7,7 +7,17 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
+    "test:e2e": "node scripts/run-e2e.mjs",
+    "test:sistema": "node scripts/prueba-sistema.mjs",
+    "test:integracion": "node --test tests/api.integration.test.mjs",
+    "test:unit": "node --test tests/color-rollo.unit.test.mjs",
+    "test:aceptacion": "node scripts/run-e2e.mjs",
+    "test:regresion": "npm.cmd run test:integracion && npm.cmd run test:e2e",
+    "test:carga": "node scripts/prueba-carga.mjs",
+    "test:estres": "node scripts/prueba-estres.mjs",
+    "seed": "cd backend && .\\.venv\\Scripts\\python.exe -m scripts.seed"
   },
   "dependencies": {
     "react": "^19.2.7",
@@ -16,10 +26,13 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.2.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "oxlint": "^1.71.0",
+    "typescript": "^7.0.2",
     "vite": "^8.1.1"
   }
 }

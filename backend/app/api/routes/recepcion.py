@@ -1,0 +1,382 @@
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from sqlalchemy.orm import Session
+
+from app.api.deps import get_db, usuario_actual
+from app.models.equivalencias import (
+    TablaColorEquivalencia,
+    TablaEspesorEquivalencia,
+    TablaTipoMaterialEquivalencia,
+)
+from app.models.movimiento import Movimiento, TipoMovimiento
+from app.models.recepcion import Recepcion
+from app.models.rollo import Rollo
+from app.models.usuario import Usuario
+from app.schemas.recepcion import (
+    ConfirmarRecepcionRequest,
+    EquivalenciaColorInput,
+    EquivalenciaColorResponse,
+    EquivalenciaEspesorInput,
+    EquivalenciaEspesorResponse,
+    EquivalenciaTipoInput,
+    EquivalenciaTipoResponse,
+    PrevisualizacionRecepcionResponse,
+    ProcesarRecepcionRequest,
+    RecepcionResponse,
+    TablasEquivalenciaResponse,
+    VerificacionRecepcionResponse,
+)
+from app.services import clasificacion as srv
+from app.services import archivos_recepcion
+
+router = APIRouter(prefix="/recepcion", tags=["Recepción y Verificación"])
+
+# Cache en memoria del último archivo procesado por sesión de usuario, para
+# no tener que volver a subirlo entre "previsualizar" y "confirmar".
+# TODO producción: mover a Redis o similar si hay más de un worker.
+
+
+def _tablas_equivalencia_desde_bd(db: Session) -> srv.TablasEquivalencia:
+    tablas = srv.TablasEquivalencia()
+    for color in db.query(TablaColorEquivalencia).all():
+        tablas.colores[srv.normalizar_texto(color.ral)] = {
+            "nombre": color.nombre,
+            "codigo_interno": color.codigo_interno,
+        }
+        tablas.colores[srv.normalizar_texto(color.nombre)] = {
+            "nombre": color.nombre,
+            "codigo_interno": color.codigo_interno,
+        }
+    for tipo in db.query(TablaTipoMaterialEquivalencia).all():
+        tablas.tipos[srv.normalizar_texto(tipo.nombre)] = {"codigo_interno": tipo.codigo_interno}
+    for esp in db.query(TablaEspesorEquivalencia).all():
+        # MySQL FLOAT puede devolver 0.200000002..., mientras que el Excel
+        # entrega 0.2. La misma clave normalizada evita fallos al clasificar.
+        tablas.espesores[round(float(esp.espesor), 4)] = {
+            "mt_por_ton": esp.mt_por_ton,
+            "peso_por_metro": esp.peso_por_metro,
+        }
+    return tablas
+
+
+@router.post("/previsualizar", response_model=PrevisualizacionRecepcionResponse)
+async def previsualizar_archivo(
+    archivo: UploadFile,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_actual),
+) -> PrevisualizacionRecepcionResponse:
+    """Paso 1-2: lee el Excel, detecta encabezados, sugiere el mapeo de
+    columnas, e importa automáticamente las hojas de equivalencias que
+    traiga el archivo (si las trae)."""
+    contenido = await archivo.read()
+    try:
+        hojas = srv.leer_hojas_excel(contenido)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail="No se pudo leer el archivo Excel.") from exc
+
+    nombres_hojas = list(hojas.keys())
+    hoja_espesor, hoja_color = srv.detectar_hojas_equivalencias(nombres_hojas)
+    hoja_principal = next((h for h in nombres_hojas if h not in (hoja_espesor, hoja_color)), nombres_hojas[0])
+
+    df = hojas[hoja_principal]
+    encabezados = list(df.columns)
+    mapeo_sugerido = srv.auto_detectar_mapeo(encabezados)
+
+    importadas_espesor = importadas_color = 0
+
+    if hoja_espesor:
+        filas_espesor, filas_tipo = srv.leer_hoja_equivalencia_espesor(hojas[hoja_espesor])
+        espesores_existentes = {
+            round(float(fila.espesor), 4): fila
+            for fila in db.query(TablaEspesorEquivalencia).all()
+        }
+        for f in filas_espesor:
+            clave_espesor = round(float(f["espesor"]), 4)
+            fila_db = espesores_existentes.get(clave_espesor)
+            if fila_db:
+                fila_db.mt_por_ton = f["mt_por_ton"]
+                fila_db.peso_por_metro = f["peso_por_metro"]
+            else:
+                fila_db = TablaEspesorEquivalencia(**f)
+                db.add(fila_db)
+                # flush defensivo: evita que dos entradas con la misma clave
+                # dentro del mismo archivo terminen mandando dos INSERT
+                # duplicados a la vez si por alguna razón no llegaran ya
+                # deduplicadas desde el servicio de lectura del Excel.
+                db.flush()
+                espesores_existentes[clave_espesor] = fila_db
+        for t in filas_tipo:
+            fila_db = db.query(TablaTipoMaterialEquivalencia).filter(TablaTipoMaterialEquivalencia.nombre == t["nombre"]).first()
+            if fila_db:
+                fila_db.codigo_interno = t["codigo_interno"]
+            else:
+                db.add(TablaTipoMaterialEquivalencia(**t))
+                db.flush()
+        importadas_espesor = len(filas_espesor)
+
+    if hoja_color:
+        filas_color = srv.leer_hoja_equivalencia_color(hojas[hoja_color])
+        for c in filas_color:
+            fila_db = db.query(TablaColorEquivalencia).filter(TablaColorEquivalencia.ral == c["ral"]).first()
+            if fila_db:
+                fila_db.nombre = c["nombre"]
+                fila_db.codigo_interno = c["codigo_interno"]
+            else:
+                db.add(TablaColorEquivalencia(**c))
+                db.flush()
+        importadas_color = len(filas_color)
+
+    nota = ""
+    if importadas_espesor or importadas_color:
+        db.commit()
+        partes = []
+        if importadas_espesor:
+            partes.append(f"{importadas_espesor} de espesor")
+        if importadas_color:
+            partes.append(f"{importadas_color} de color")
+        nota = f"Se importaron equivalencias del archivo: {' y '.join(partes)}."
+
+    archivos_recepcion.guardar(usuario.id, {
+        "nombre_archivo": archivo.filename,
+        "hojas": hojas,
+        "hoja_principal": hoja_principal,
+    })
+
+    return PrevisualizacionRecepcionResponse(
+        nombre_archivo=archivo.filename or "archivo.xlsx",
+        encabezados=encabezados,
+        mapeo_sugerido=mapeo_sugerido,
+        filas_totales=len(df),
+        nota_importacion_equivalencias=nota,
+    )
+
+
+@router.post("/verificar", response_model=VerificacionRecepcionResponse)
+def verificar(
+    datos: ProcesarRecepcionRequest,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_actual),
+) -> VerificacionRecepcionResponse:
+    """Paso 3: aplica el mapeo confirmado por el usuario, clasifica cada
+    rollo y compara metros calculados vs. reportados."""
+    en_proceso = archivos_recepcion.obtener(usuario.id)
+    if not en_proceso:
+        raise HTTPException(status_code=400, detail="Primero sube un archivo con /recepcion/previsualizar.")
+
+    faltantes = srv.campos_requeridos_faltantes(datos.mapeo)
+    if faltantes:
+        raise HTTPException(status_code=400, detail=f"Faltan columnas obligatorias: {', '.join(faltantes)}")
+
+    df = en_proceso["hojas"][en_proceso["hoja_principal"]]
+    tablas = _tablas_equivalencia_desde_bd(db)
+    rollos = srv.clasificar_y_verificar_filas(df, datos.mapeo, tablas, datos.tolerancia_porcentaje)
+
+    en_proceso["rollos_verificados"] = rollos
+    en_proceso["tolerancia_porcentaje"] = datos.tolerancia_porcentaje
+    archivos_recepcion.guardar(usuario.id, en_proceso)
+
+    return VerificacionRecepcionResponse(
+        rollos=[_rollo_a_schema(r) for r in rollos],
+        resumen=srv.resumen_verificacion(rollos),
+        estado_recepcion=srv.estado_general_recepcion(rollos),
+    )
+
+
+def _rollo_a_schema(r: srv.RolloClasificado) -> dict:
+    return {
+        "fila": r.fila,
+        "rollo": r.rollo,
+        "codigo_proveedor": r.codigo_proveedor,
+        "espesor": r.espesor,
+        "ancho": r.ancho,
+        "net_weight": r.net_weight,
+        "gross_weight": r.gross_weight,
+        "coil_meters": r.coil_meters,
+        "color_top": r.color_top,
+        "color_back": r.color_back,
+        "tipo_material": r.tipo_material,
+        "proveedor": r.proveedor,
+        "lote": r.lote,
+        "clasificado": r.clasificado,
+        "codigo_clasificacion": r.codigo_clasificacion,
+        "color_nombre": r.color_nombre,
+        "tipo_nombre": r.tipo_nombre,
+        "metros_calculados": r.metros_calculados,
+        "diferencia_porcentaje": r.diferencia_porcentaje,
+        "resultado": r.resultado,
+    }
+
+
+@router.post("/confirmar", response_model=RecepcionResponse, status_code=status.HTTP_201_CREATED)
+def confirmar(
+    datos: ConfirmarRecepcionRequest,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_actual),
+) -> Recepcion:
+    """Paso 4: registra cada rollo verificado como un elemento INDEPENDIENTE
+    en `rollos` — nunca se unen ni se suman sus metros."""
+    en_proceso = archivos_recepcion.obtener(usuario.id)
+    rollos_verificados: list[srv.RolloClasificado] | None = (
+        en_proceso.get("rollos_verificados") if en_proceso else None
+    )
+    if not rollos_verificados:
+        raise HTTPException(status_code=400, detail="Primero verifica el archivo con /recepcion/verificar.")
+
+    ahora = datetime.now(timezone.utc)
+
+    recepcion = Recepcion(
+        fecha=ahora,
+        bodega_id=usuario.bodega_id,
+        encargado=usuario.correo,
+        proveedor=datos.proveedor_principal or (rollos_verificados[0].proveedor or "No especificado"),
+        archivo_origen=en_proceso["nombre_archivo"],
+        tolerancia_porcentaje=datos.tolerancia_porcentaje,
+        estado="registrada_en_inventario",
+    )
+    db.add(recepcion)
+    db.flush()
+
+    for r in rollos_verificados:
+        codigo_interno = r.codigo_clasificacion or f"SC-{r.tipo_material or '?'}-{r.color_top or '?'}-{r.espesor or '?'}"
+        descripcion = (
+            f"{r.tipo_nombre or r.tipo_material} {r.color_nombre or r.color_top}"
+            f"{' / ' + r.color_back if r.color_back else ''} {r.espesor}"
+            if r.clasificado
+            else f"Sin clasificar ({r.tipo_material or 'tipo'} / {r.color_top or 'color'})"
+        )
+        metros = round(r.metros_calculados if r.metros_calculados is not None else (r.coil_meters or 0), 2)
+
+        rollo = Rollo(
+            bodega_id=usuario.bodega_id,
+            recepcion_id=recepcion.id,
+            codigo_interno=codigo_interno,
+            identificador_rollo=r.rollo,
+            codigo_proveedor=r.codigo_proveedor,
+            descripcion=descripcion,
+            familia="Rollos de acero",
+            color_material=r.color_nombre or r.color_top or "",
+            calibre=r.espesor or 0,
+            peso_neto=r.net_weight,
+            metros_proveedor=r.coil_meters or 0,
+            metros_calculados=r.metros_calculados or 0,
+            metros_disponibles=metros,
+            metros_consumidos=0,
+            fecha_ingreso=ahora,
+            estado="cerrado",
+            proveedor=r.proveedor,
+            lote=r.lote,
+        )
+        db.add(rollo)
+        db.flush()
+
+        db.add(
+            Movimiento(
+                fecha=ahora,
+                tipo=TipoMovimiento.ENTRADA,
+                motivo="recepcion_proveedor",
+                producto_codigo=codigo_interno,
+                producto_descripcion=f"{descripcion} (rollo {r.rollo})",
+                bodega_origen_id=None,
+                bodega_destino_id=usuario.bodega_id,
+                cantidad=metros,
+                usuario=usuario.correo,
+                observaciones=f'Recepción Excel "{en_proceso["nombre_archivo"]}" — proveedor: {r.proveedor or "no especificado"}.',
+            )
+        )
+
+    db.commit()
+    db.refresh(recepcion)
+    archivos_recepcion.eliminar(usuario.id)
+    return recepcion
+
+
+@router.get("/historial", response_model=list[RecepcionResponse])
+def historial_recepciones(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_actual),
+) -> list[Recepcion]:
+    return (
+        db.query(Recepcion)
+        .filter(Recepcion.bodega_id == usuario.bodega_id)
+        .order_by(Recepcion.fecha.desc())
+        .all()
+    )
+
+
+@router.get("/equivalencias", response_model=TablasEquivalenciaResponse)
+def obtener_equivalencias(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_actual),
+) -> TablasEquivalenciaResponse:
+    return TablasEquivalenciaResponse(
+        colores=db.query(TablaColorEquivalencia).order_by(TablaColorEquivalencia.nombre).all(),
+        tipos=db.query(TablaTipoMaterialEquivalencia).order_by(TablaTipoMaterialEquivalencia.nombre).all(),
+        espesores=db.query(TablaEspesorEquivalencia).order_by(TablaEspesorEquivalencia.espesor).all(),
+    )
+
+
+@router.post("/equivalencias/colores", response_model=EquivalenciaColorResponse, status_code=status.HTTP_201_CREATED)
+def guardar_equivalencia_color(
+    datos: EquivalenciaColorInput,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_actual),
+) -> TablaColorEquivalencia:
+    fila = db.query(TablaColorEquivalencia).filter(TablaColorEquivalencia.ral == datos.ral).first()
+    if fila:
+        fila.nombre = datos.nombre
+        fila.codigo_interno = datos.codigo_interno
+    else:
+        fila = TablaColorEquivalencia(**datos.model_dump())
+        db.add(fila)
+    db.commit()
+    db.refresh(fila)
+    return fila
+
+
+@router.post("/equivalencias/tipos", response_model=EquivalenciaTipoResponse, status_code=status.HTTP_201_CREATED)
+def guardar_equivalencia_tipo(
+    datos: EquivalenciaTipoInput,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_actual),
+) -> TablaTipoMaterialEquivalencia:
+    fila = db.query(TablaTipoMaterialEquivalencia).filter(TablaTipoMaterialEquivalencia.nombre == datos.nombre).first()
+    if fila:
+        fila.codigo_interno = datos.codigo_interno
+    else:
+        fila = TablaTipoMaterialEquivalencia(**datos.model_dump())
+        db.add(fila)
+    db.commit()
+    db.refresh(fila)
+    return fila
+
+
+@router.post("/equivalencias/espesor", response_model=EquivalenciaEspesorResponse, status_code=status.HTTP_201_CREATED)
+def guardar_equivalencia_espesor(
+    datos: EquivalenciaEspesorInput,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_actual),
+) -> TablaEspesorEquivalencia:
+    # MySQL puede guardar FLOAT como 0.27000001, mientras que el formulario
+    # envía 0.27. Comparar los flotantes directamente intentaba insertar una
+    # fila duplicada y terminaba en un error 500.
+    espesor_normalizado = round(float(datos.espesor), 4)
+    fila = next(
+        (
+            existente
+            for existente in db.query(TablaEspesorEquivalencia).all()
+            if round(float(existente.espesor), 4) == espesor_normalizado
+        ),
+        None,
+    )
+
+    if fila:
+        fila.mt_por_ton = datos.mt_por_ton
+        fila.peso_por_metro = datos.peso_por_metro
+    else:
+        fila = TablaEspesorEquivalencia(**datos.model_dump())
+        db.add(fila)
+
+    db.commit()
+    db.refresh(fila)
+    return fila

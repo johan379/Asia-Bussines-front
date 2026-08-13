@@ -10,6 +10,16 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+__pycache__/
+*.py[cod]
+backend/.venv/
+backend/.venv*/
+playwright-report*/
+test-results*/
+.npm-cache/
+.env
+backend/.env
+backend/.recepciones-temporales/
 *.local
 
 # Editor directories and files
