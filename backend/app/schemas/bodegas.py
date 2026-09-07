@@ -2,12 +2,18 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.fechas import ModeloConFechasUtc
+
 from app.models.solicitud import EstadoSolicitud, TipoOperacionSolicitud
 
 
 class BodegaResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
+    nombre: str
+
+
+class BodegaCrear(BaseModel):
     nombre: str
 
 
@@ -19,7 +25,7 @@ class SolicitudCrear(BaseModel):
     observaciones: str = ""
 
 
-class SolicitudResponse(BaseModel):
+class SolicitudResponse(ModeloConFechasUtc):
     model_config = ConfigDict(from_attributes=True)
     id: int
     fecha: datetime

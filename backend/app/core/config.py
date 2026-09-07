@@ -27,9 +27,21 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
 
-    ORIGENES_PERMITIDOS: str = "http://localhost:5173"
+    ORIGENES_PERMITIDOS: str = "http://localhost:5173,http://127.0.0.1:4173"
     RECEPCIONES_TEMPORALES_DIR: str = "./.recepciones-temporales"
     RECEPCIONES_TEMPORALES_MINUTOS: int = 60
+    MAX_ARCHIVO_RECEPCION_BYTES: int = 15 * 1024 * 1024
+    # Si se configura, permite compartir recepciones entre varios workers.
+    REDIS_URL: str | None = None
+    # DSN opcional de Sentry para reportar errores no controlados en producción.
+    SENTRY_DSN: str | None = None
+
+    # Asistente de IA — Groq (inferencia alojada, muy rápida, no depende de
+    # que el servidor tenga GPU ni de un proceso corriendo aparte). Si falta
+    # la API key o Groq no responde, el chat avisa el error en vez de fallar
+    # silenciosamente con una respuesta falsa.
+    GROQ_API_KEY: str | None = None
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
 
     @property
     def lista_origenes_permitidos(self) -> list[str]:

@@ -1,11 +1,13 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.schemas.fechas import ModeloConFechasUtc
 
 from app.models.rollo import EstadoRollo
 
 
-class HistorialConsumoResponse(BaseModel):
+class HistorialConsumoResponse(ModeloConFechasUtc):
     model_config = ConfigDict(from_attributes=True)
     fecha: datetime
     cantidad: float
@@ -13,10 +15,10 @@ class HistorialConsumoResponse(BaseModel):
     observaciones: str
 
 
-class RolloResponse(BaseModel):
+class RolloResponse(ModeloConFechasUtc):
     model_config = ConfigDict(from_attributes=True)
     id: int
-    bodega_id: int
+    bodega_id: int | None
     codigo_interno: str
     identificador_rollo: str
     codigo_proveedor: str
@@ -24,6 +26,7 @@ class RolloResponse(BaseModel):
     familia: str
     color_material: str
     calibre: float
+    ancho_material: float = 122
     peso_neto: float | None
     metros_proveedor: float
     metros_calculados: float
@@ -45,6 +48,43 @@ class PaginaRollos(BaseModel):
     total_paginas: int
 
 
+class ClasificacionSugeridaResponse(BaseModel):
+    """Color y descripción sugeridos a partir de rollos ya registrados con el
+    mismo prefijo de código (todo antes de la coma del calibre — ej. "LA5017"
+    en "LA50170,20"). No usa una tabla fija: se deriva de lo que esta bodega
+    ya cargó, así se ajusta sola a cualquier color o material que usen."""
+    encontrado: bool
+    descripcion: str = ""
+    color_material: str = ""
+
+
+class SugerenciaReferenciaResponse(BaseModel):
+    """Próxima referencia sugerida (ej. "LA50170,20-03"). El número final es
+    único para toda la bodega, sin importar la clasificación (color/calibre)
+    de otros rollos — usada para autocompletar el ingreso manual."""
+    identificador_rollo: str
+
+
+class RolloCrear(BaseModel):
+    """Ingreso manual de UN rollo físico existente en bodega (a diferencia de
+    la carga masiva por Excel en `/rollos/carga/*`, pensada para varios a la
+    vez). Mismos campos y mismo criterio de "código interno" libre que ese
+    flujo — no se deriva de una tabla de clasificación."""
+    codigo_interno: str = Field(min_length=1, max_length=60)
+    identificador_rollo: str = Field(min_length=1, max_length=60)
+    codigo_proveedor: str = ""
+    descripcion: str = ""
+    color_material: str = ""
+    calibre: float = 0
+    peso_neto: float | None = None
+    metros_proveedor: float = Field(ge=0, default=0)
+    metros_disponibles: float = Field(ge=0)
+    metros_consumidos: float = Field(ge=0, default=0)
+    proveedor: str = ""
+    lote: str = ""
+    observaciones: str = ""
+
+
 class ConsumoRolloCrear(BaseModel):
     cantidad: float
     observaciones: str = ""
@@ -52,6 +92,51 @@ class ConsumoRolloCrear(BaseModel):
 
 class ActualizarObservacionesRollo(BaseModel):
     observaciones: str
+
+
+class ActualizarFamiliaRollo(BaseModel):
+    """Recepción registra todo bajo "Rollos de acero"; aquí la encargada de
+    inventario reclasifica el rollo a la familia real (ej. "Teja Colonial")
+    para que el módulo Inventario lo agrupe correctamente."""
+    familia: str = Field(min_length=1, default="Rollos de acero")
+
+
+class ActualizarAnchoRollo(BaseModel):
+    """La mayoría de rollos miden 122 m de ancho (el valor por defecto); si
+    uno específico es distinto, se corrige aquí — Producción de Caballetes
+    lo usa para calcular el ancho de cada sección (ancho ÷ 3)."""
+    ancho_material: float = Field(gt=0, default=122)
+
+
+class PrevisualizacionCargaRollosResponse(BaseModel):
+    nombre_archivo: str
+    hoja_actual: str
+    hojas_disponibles: list[str]
+    encabezados: list[str]
+    mapeo_sugerido: dict[str, str]
+    filas_totales: int
+
+
+class SeleccionarHojaCargaRollosRequest(BaseModel):
+    hoja: str
+
+
+class ConfirmarCargaRollosRequest(BaseModel):
+    mapeo: dict[str, str]
+
+
+class FilaCargaRolloOmitida(BaseModel):
+    fila: int
+    identificador_rollo: str
+    motivo: str
+
+
+class ResultadoCargaRollosResponse(BaseModel):
+    filas_totales: int
+    creados: int
+    actualizados: int
+    omitidas: int
+    detalle_omitidas: list[FilaCargaRolloOmitida]
 
 
 class FiltrosRollos(BaseModel):

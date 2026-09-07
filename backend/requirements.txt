@@ -1,24 +1,30 @@
-﻿# --- Framework y servidor ---
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
+# --- Framework y servidor ---
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
 
 # --- Base de datos ---
-SQLAlchemy==2.0.35
-alembic==1.13.2
-PyMySQL==1.1.1
+SQLAlchemy==2.0.52
+alembic==1.19.1
+PyMySQL==1.2.0
+psycopg2-binary==2.9.12
 
 # --- Configuracion ---
-pydantic==2.9.2
-pydantic-settings==2.5.2
-python-dotenv==1.0.1
+pydantic==2.13.4
+pydantic-settings==2.15.0
+python-dotenv==1.2.3
 
 # --- Autenticacion ---
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.5.0
 passlib==1.7.4
 bcrypt==4.0.1
-python-multipart==0.0.9
+python-multipart==0.0.32
+redis==8.1.0
+sentry-sdk[fastapi]==2.68.1
 
 # --- Recepcion y Verificacion ---
 openpyxl==3.1.5
-pandas>=2.2
-email-validator==2.2.0
+pandas==3.0.5
+email-validator==2.3.0
+
+# --- Asistente de IA (Groq, inferencia alojada) ---
+httpx==0.28.1

@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.deps import coincide_bodega
 from app.models.movimiento import Movimiento, TipoMovimiento
 from app.models.rollo import HistorialConsumoRollo, Rollo
 from app.models.usuario import Usuario
@@ -16,7 +17,7 @@ def registrar_consumo_rollo(
     """Bloquea, valida y descuenta un rollo sin confirmar la transacción."""
     rollo = (
         db.query(Rollo)
-        .filter(Rollo.id == rollo_id, Rollo.bodega_id == usuario.bodega_id)
+        .filter(Rollo.id == rollo_id, coincide_bodega(Rollo.bodega_id, usuario.bodega_id))
         .with_for_update()
         .first()
     )
@@ -34,6 +35,7 @@ def registrar_consumo_rollo(
     db.add(Movimiento(
         fecha=ahora, tipo=TipoMovimiento.SALIDA, motivo="produccion", producto_codigo=rollo.codigo_interno,
         producto_descripcion=f"{rollo.descripcion} (rollo {rollo.identificador_rollo})",
+        rollo_id=rollo.id, identificador_rollo=rollo.identificador_rollo,
         bodega_origen_id=usuario.bodega_id, bodega_destino_id=None, cantidad=cantidad, usuario=usuario.correo,
         observaciones=observaciones or "Consumo en producción.",
     ))

@@ -1,0 +1,102 @@
+from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy.orm import Session, joinedload
+
+from app.api.deps import get_db, requiere_rol, usuario_actual
+from app.models.apartado import Apartado, EstadoApartado
+from app.models.usuario import RolUsuario, Usuario
+from app.schemas.apartados import (
+    ApartadoCrear, ApartadoResponse, DisponibilidadCodigoResponse, DisponibilidadProductoResponse, ReservaCodigoResponse,
+)
+from app.services import apartados as srv
+
+router = APIRouter(prefix="/apartados", tags=["Apartados"])
+
+
+@router.get("/disponibilidad", response_model=DisponibilidadCodigoResponse)
+def consultar_disponibilidad(
+    codigo_interno: str = Query(..., min_length=1),
+    db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual),
+) -> dict:
+    """Cuánto material hay de un código de clasificación (color + calibre) antes
+    de apartarlo: rollos, metros disponibles, reservados y consumidos."""
+    return srv.disponibilidad_por_codigo(db, bodega_id=usuario.bodega_id, codigo_interno=codigo_interno)
+
+
+@router.get("/disponibilidad-producto", response_model=DisponibilidadProductoResponse)
+def consultar_disponibilidad_producto(
+    producto_id: int = Query(..., gt=0),
+    db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual),
+) -> dict:
+    """Cuánto stock hay de un `Producto` concreto antes de apartarlo (POR_STOCK):
+    stock físico, cantidad ya reservada por apartados activos, y disponible."""
+    return srv.disponibilidad_producto(db, bodega_id=usuario.bodega_id, producto_id=producto_id)
+
+
+@router.get("/reservas", response_model=list[ReservaCodigoResponse])
+def listar_reservas_por_codigo(
+    db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual),
+) -> list[dict]:
+    """Metros reservados por código para toda la bodega, en un solo llamado —
+    usado en "Rollos almacenados" para mostrar el stock físico ya descontado
+    por apartados activos, sin esperar a que producción los consuma."""
+    return srv.metros_reservados_por_bodega(db, bodega_id=usuario.bodega_id)
+
+
+@router.post("", response_model=ApartadoResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO))])
+def crear_apartado(datos: ApartadoCrear, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)) -> Apartado:
+    apartado = srv.crear_apartado(db, datos, usuario)
+    db.commit(); db.refresh(apartado)
+    return apartado
+
+
+@router.get("", response_model=list[ApartadoResponse])
+def listar_apartados(
+    estado: EstadoApartado | None = None, numero_cotizacion: str = "",
+    db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual),
+) -> list[Apartado]:
+    consulta = (
+        db.query(Apartado)
+        .options(joinedload(Apartado.items))
+        .filter(Apartado.bodega_id == usuario.bodega_id)
+    )
+    if estado: consulta = consulta.filter(Apartado.estado == estado)
+    if numero_cotizacion: consulta = consulta.filter(Apartado.numero_cotizacion.ilike(f"%{numero_cotizacion}%"))
+    return consulta.order_by(Apartado.fecha_creacion.desc()).all()
+
+
+@router.get("/{apartado_id}", response_model=ApartadoResponse)
+def obtener_apartado(apartado_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)) -> Apartado:
+    return srv.apartado_de_mi_bodega(db, apartado_id, usuario)
+
+
+@router.patch("/{apartado_id}/cancelar", response_model=ApartadoResponse,
+              dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO))])
+def cancelar_apartado(apartado_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)) -> Apartado:
+    apartado = srv.cancelar_apartado(db, apartado_id, usuario)
+    db.commit(); db.refresh(apartado)
+    return apartado
+
+
+@router.patch("/{apartado_id}/enviar-a-produccion", response_model=ApartadoResponse,
+              dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO))])
+def enviar_a_produccion(apartado_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)) -> Apartado:
+    apartado = srv.enviar_a_produccion(db, apartado_id, usuario)
+    db.commit(); db.refresh(apartado)
+    return apartado
+
+
+@router.patch("/{apartado_id}/marcar-terminado", response_model=ApartadoResponse,
+              dependencies=[Depends(requiere_rol(RolUsuario.JEFE_PLANTA))])
+def marcar_produccion_terminada(apartado_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)) -> Apartado:
+    apartado = srv.marcar_produccion_terminada(db, apartado_id, usuario)
+    db.commit(); db.refresh(apartado)
+    return apartado
+
+
+@router.patch("/{apartado_id}/marcar-entregado", response_model=ApartadoResponse,
+              dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO))])
+def marcar_entregado(apartado_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)) -> Apartado:
+    apartado = srv.marcar_entregado(db, apartado_id, usuario)
+    db.commit(); db.refresh(apartado)
+    return apartado

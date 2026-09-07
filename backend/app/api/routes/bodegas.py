@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, usuario_actual
+from app.api.deps import get_db, requiere_rol, usuario_actual
 from app.models.bodega import Bodega
 from app.models.producto import Producto
 from app.models.rollo import Rollo
 from app.models.solicitud import EstadoSolicitud, Solicitud
-from app.models.usuario import Usuario
-from app.schemas.bodegas import BodegaResponse, SolicitudCrear, SolicitudResponse
+from app.models.usuario import RolUsuario, Usuario
+from app.schemas.bodegas import BodegaCrear, BodegaResponse, SolicitudCrear, SolicitudResponse
 from app.schemas.inventario import ProductoResponse
+from app.services import bodegas as srv_bodegas
 from app.services.transferencias import (
     aceptar_solicitud_transferencia,
     crear_solicitud_transferencia,
@@ -18,11 +19,24 @@ from app.services.transferencias import (
 router = APIRouter(prefix="/bodegas", tags=["Bodegas"])
 
 
+@router.post("", response_model=BodegaResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(requiere_rol(RolUsuario.SUPERADMIN))])
+def crear_bodega(datos: BodegaCrear, db: Session = Depends(get_db)) -> Bodega:
+    bodega = srv_bodegas.crear_bodega(db, nombre=datos.nombre)
+    db.commit()
+    db.refresh(bodega)
+    return bodega
+
+
 @router.get("", response_model=list[BodegaResponse])
 def listar_bodegas(
     nombre: str = "", db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)
 ) -> list[Bodega]:
-    consulta = db.query(Bodega).filter(Bodega.id != usuario.bodega_id)
+    consulta = db.query(Bodega)
+    # Admin Inventario (bodega_id None) no tiene "su propia bodega" que
+    # excluir — ve todas, las necesita para elegir destino de un envío.
+    if usuario.bodega_id is not None:
+        consulta = consulta.filter(Bodega.id != usuario.bodega_id)
     if nombre:
         consulta = consulta.filter(Bodega.nombre.ilike(f"%{nombre}%"))
     return consulta.all()
@@ -57,7 +71,8 @@ def inventario_de_bodega(
     return [*productos, *filas_rollos]
 
 
-@router.post("/solicitudes", response_model=SolicitudResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/solicitudes", response_model=SolicitudResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO))])
 def enviar_solicitud(
     datos: SolicitudCrear, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)
 ) -> Solicitud:
@@ -87,7 +102,8 @@ def mis_solicitudes_enviadas(
     ).order_by(Solicitud.fecha.desc()).all()
 
 
-@router.patch("/solicitudes/{solicitud_id}/aceptar", response_model=SolicitudResponse)
+@router.patch("/solicitudes/{solicitud_id}/aceptar", response_model=SolicitudResponse,
+              dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO))])
 def aceptar_solicitud(
     solicitud_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)
 ) -> Solicitud:
@@ -97,7 +113,8 @@ def aceptar_solicitud(
     return solicitud
 
 
-@router.patch("/solicitudes/{solicitud_id}/rechazar", response_model=SolicitudResponse)
+@router.patch("/solicitudes/{solicitud_id}/rechazar", response_model=SolicitudResponse,
+              dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO))])
 def rechazar_solicitud(
     solicitud_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)
 ) -> Solicitud:

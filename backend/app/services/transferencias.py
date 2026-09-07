@@ -20,6 +20,14 @@ def crear_solicitud_transferencia(
     db: Session, datos: SolicitudCrear, usuario: Usuario
 ) -> Solicitud:
     """Crea una solicitud, aplicando bloqueos y validaciones reutilizables."""
+    if usuario.bodega_id is None:
+        # Admin Inventario no participa del sistema de Solicitudes entre
+        # sedes (además, Solicitud.bodega_solicitante_id es NOT NULL — sin
+        # este guard, intentarlo terminaría en un error de integridad).
+        raise HTTPException(
+            status_code=400,
+            detail="Admin Inventario no usa Solicitudes entre sedes; usa /envios para repartir material.",
+        )
     if datos.rollo_id is not None:
         rollo = db.query(Rollo).filter(Rollo.id == datos.rollo_id).with_for_update().first()
         if rollo is None:
@@ -100,6 +108,7 @@ def aceptar_solicitud_transferencia(
             fecha=datetime.now(timezone.utc), tipo=TipoMovimiento.TRANSFERENCIA,
             motivo=solicitud.tipo_operacion.value, producto_codigo=rollo.codigo_interno,
             producto_descripcion=f"{rollo.descripcion} (rollo {rollo.identificador_rollo})",
+            rollo_id=rollo.id, identificador_rollo=rollo.identificador_rollo,
             bodega_origen_id=solicitud.bodega_propietaria_id,
             bodega_destino_id=solicitud.bodega_solicitante_id,
             cantidad=rollo.metros_disponibles, usuario=usuario.correo,
@@ -131,9 +140,10 @@ def aceptar_solicitud_transferencia(
         db.add(Producto(
             bodega_id=solicitud.bodega_solicitante_id,
             codigo_importacion=producto_origen.codigo_importacion, codigo=producto_origen.codigo,
+            referencia=producto_origen.referencia,
             descripcion=producto_origen.descripcion, familia=producto_origen.familia,
-            calibre=producto_origen.calibre, entrada=solicitud.cantidad,
-            stock=solicitud.cantidad,
+            calibre=producto_origen.calibre, stock_minimo=producto_origen.stock_minimo,
+            entrada=solicitud.cantidad, stock=solicitud.cantidad,
         ))
     db.add(Movimiento(
         fecha=datetime.now(timezone.utc), tipo=TipoMovimiento.TRANSFERENCIA,
@@ -145,6 +155,4 @@ def aceptar_solicitud_transferencia(
         observaciones=f"Transferencia aceptada ({solicitud.tipo_operacion.value}).",
     ))
     solicitud.estado = EstadoSolicitud.ACEPTADA
-    if producto_origen.stock <= 0:
-        db.delete(producto_origen)
     return solicitud

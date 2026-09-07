@@ -15,13 +15,15 @@ from app.models.equivalencias import (
 )
 from app.models.usuario import RolUsuario, Usuario
 
-BODEGAS = ["Bodega Ricaurte", "Bodega Santander"]
+BODEGAS = ["Ricaurte", "Santander"]
 
 USUARIOS_DEMO = [
-    ("ricaurteplanta@gmail.com", "Bodega Ricaurte", RolUsuario.JEFE_PLANTA),
-    ("ricaurte@gmail.com", "Bodega Ricaurte", RolUsuario.ADMINISTRATIVO),
-    ("santanderplanta@gmail.com", "Bodega Santander", RolUsuario.JEFE_PLANTA),
-    ("santander@gmail.com", "Bodega Santander", RolUsuario.ADMINISTRATIVO),
+    ("ricaurteplanta@gmail.com", "Ricaurte", RolUsuario.JEFE_PLANTA),
+    ("ricaurte@gmail.com", "Ricaurte", RolUsuario.ADMINISTRATIVO),
+    ("santanderplanta@gmail.com", "Santander", RolUsuario.JEFE_PLANTA),
+    ("santander@gmail.com", "Santander", RolUsuario.ADMINISTRATIVO),
+    # Sin bodega fija a propósito: ve y reparte material entre todas las sedes.
+    ("admininventario@gmail.com", None, RolUsuario.ADMIN_INVENTARIO),
 ]
 
 COLORES = [
@@ -53,18 +55,19 @@ def ejecutar() -> None:
             bodegas_por_nombre[nombre] = bodega
 
         for correo, nombre_bodega, rol in USUARIOS_DEMO:
+            bodega_id = bodegas_por_nombre[nombre_bodega].id if nombre_bodega else None
             usuario_existente = db.query(Usuario).filter_by(correo=correo).first()
             if usuario_existente:
                 usuario_existente.contrasena_hash = hashear_contrasena(CONTRASENA_DEMO)
                 usuario_existente.rol = rol
-                usuario_existente.bodega_id = bodegas_por_nombre[nombre_bodega].id
+                usuario_existente.bodega_id = bodega_id
             else:
                 db.add(
                     Usuario(
                         correo=correo,
                         contrasena_hash=hashear_contrasena(CONTRASENA_DEMO),
                         rol=rol,
-                        bodega_id=bodegas_por_nombre[nombre_bodega].id,
+                        bodega_id=bodega_id,
                     )
                 )
 

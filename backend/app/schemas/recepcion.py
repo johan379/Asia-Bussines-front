@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.fechas import ModeloConFechasUtc
+
 
 class MapeoColumnas(BaseModel):
     """Relación campo_interno -> nombre de columna del Excel, ej.
@@ -66,11 +68,11 @@ class ConfirmarRecepcionRequest(BaseModel):
     proveedor_principal: str = ""
 
 
-class RecepcionResponse(BaseModel):
+class RecepcionResponse(ModeloConFechasUtc):
     model_config = ConfigDict(from_attributes=True)
     id: int
     fecha: datetime
-    bodega_id: int
+    bodega_id: int | None
     encargado: str
     proveedor: str
     archivo_origen: str

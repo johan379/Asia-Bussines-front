@@ -57,6 +57,7 @@ class PrediccionStockResponse(BaseModel):
     dias_estimados_agotamiento: Optional[float] = None
     cantidad_sugerida_reabastecer: Optional[float] = None
     confianza: Optional[float] = None
+    nota: str = ""
 
 
 class PrediccionNegocioResponse(BaseModel):

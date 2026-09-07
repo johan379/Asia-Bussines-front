@@ -50,32 +50,72 @@ def normalizar_texto(texto: str | None) -> str:
     return sin_tildes.lower().strip()
 
 
+FILAS_A_REVISAR_ENCABEZADO = 20
+
+
+def _detectar_fila_encabezado(hoja_cruda: pd.DataFrame) -> int:
+    """Encuentra en qué fila (0-index) están los encabezados reales.
+
+    Muchos reportes exportados (ej. "INVENTARIO MAXITEJAS") traen primero un
+    título y filas en blanco antes de la fila con los nombres de columna. Sin
+    esto, pandas asume que los encabezados están siempre en la fila 0: esa
+    fila casi vacía se vuelve el encabezado, y las columnas de verdad quedan
+    como "Unnamed: 1", "Unnamed: 2"... — el mapeo automático no reconoce nada
+    y el selector manual de columnas en el frontend no tiene nombres reales
+    para mostrar. Se asume como encabezado la fila con más celdas no vacías
+    entre las primeras `FILAS_A_REVISAR_ENCABEZADO`: una fila de título tiene
+    una sola celda con texto, mientras que la fila de encabezados nombra casi
+    todas las columnas. Si los encabezados ya están en la fila 0 (caso normal
+    hasta ahora), esa sigue siendo la de mayor densidad y el resultado no cambia."""
+    mejor_fila = 0
+    mejor_cantidad = -1
+    limite = min(FILAS_A_REVISAR_ENCABEZADO, len(hoja_cruda))
+    for i in range(limite):
+        cantidad = int(hoja_cruda.iloc[i].notna().sum())
+        if cantidad > mejor_cantidad:
+            mejor_cantidad = cantidad
+            mejor_fila = i
+    return mejor_fila
+
+
 def leer_hojas_excel(contenido: bytes) -> dict[str, pd.DataFrame]:
-    """Devuelve {nombre_hoja: DataFrame} de todas las hojas del archivo."""
+    """Devuelve {nombre_hoja: DataFrame} de todas las hojas del archivo,
+    detectando automáticamente en qué fila de cada hoja están los encabezados
+    (ver `_detectar_fila_encabezado`)."""
     libro = pd.ExcelFile(BytesIO(contenido))
-    return {
-        hoja: libro.parse(hoja, dtype=str)
-        for hoja in libro.sheet_names
-    }
+    hojas: dict[str, pd.DataFrame] = {}
+    for hoja in libro.sheet_names:
+        cruda = libro.parse(hoja, dtype=str, header=None)
+        fila_encabezado = _detectar_fila_encabezado(cruda)
+        hojas[hoja] = libro.parse(hoja, dtype=str, header=fila_encabezado)
+    return hojas
 
 
-def auto_detectar_mapeo(encabezados: list[str]) -> dict[str, str]:
-    """Adivina, para cada campo interno, qué columna del Excel le corresponde."""
+def auto_detectar_mapeo(
+    encabezados: list[str], alias_campos: dict[str, list[str]] = ALIAS_CAMPOS
+) -> dict[str, str]:
+    """Adivina, para cada campo interno, qué columna del Excel le corresponde.
+
+    Genérica para cualquier flujo de carga por Excel (recepción, carga de
+    productos, carga de rollos) — cada uno pasa su propio `alias_campos`;
+    si no se pasa ninguno, usa el de recepción (comportamiento histórico)."""
     mapeo: dict[str, str] = {}
     normalizados = {normalizar_texto(e): e for e in encabezados}
-    for campo, alias in ALIAS_CAMPOS.items():
+    for campo, alias in alias_campos.items():
         columna = next((normalizados[a] for a in alias if a in normalizados), "")
         mapeo[campo] = columna
     return mapeo
 
 
-def campos_requeridos_faltantes(mapeo: dict[str, str]) -> list[str]:
-    return [c for c in CAMPOS_REQUERIDOS if not mapeo.get(c)]
+def campos_requeridos_faltantes(
+    mapeo: dict[str, str], campos_requeridos: list[str] = CAMPOS_REQUERIDOS
+) -> list[str]:
+    return [c for c in campos_requeridos if not mapeo.get(c)]
 
 
 @dataclass
 class TablasEquivalencia:
-    colores: dict[str, dict] = field(default_factory=dict)       # ral -> {nombre, codigo_interno}
+    colores: dict[str, dict] = field(default_factory=dict)       # ral/nombre -> {ral, nombre, codigo_interno}
     tipos: dict[str, dict] = field(default_factory=dict)         # nombre -> {codigo_interno}
     espesores: dict[float, dict] = field(default_factory=dict)   # espesor -> {mt_por_ton, peso_por_metro}
 
@@ -152,9 +192,8 @@ def clasificar_y_verificar_filas(
         tipo_nombre = tipo_material if info_tipo else None
 
         if clasificado:
-            codigo_clasificacion = (
-                f"{info_tipo['codigo_interno']}{info_espesor['mt_por_ton']:.0f}"
-                f"{info_color['codigo_interno']}{espesor}"
+            codigo_clasificacion = _crear_codigo_interno(
+                info_tipo["codigo_interno"], info_color, espesor
             )
 
         # --- cálculo de metros y comparación contra lo reportado ---
@@ -204,7 +243,30 @@ def clasificar_y_verificar_filas(
 
 
 def _buscar_color_por_ral(tablas: TablasEquivalencia, valor: str) -> dict | None:
-    return tablas.colores.get(normalizar_texto(valor))
+    color = tablas.colores.get(normalizar_texto(valor))
+    if color:
+        return color
+
+    # Acepta indistintamente RAL3005 y 3005 cuando exista la equivalencia.
+    ral_consultado = normalizar_texto(valor).removeprefix("ral")
+    for clave, info in tablas.colores.items():
+        if clave.removeprefix("ral") == ral_consultado:
+            return info
+    return None
+
+
+def _crear_codigo_interno(codigo_tipo: str, color: dict, espesor: float) -> str:
+    """Forma el código: tipo + inicial del color + RAL + espesor.
+
+    Ejemplo: Lámina roja RAL3005 de 0.32 mm -> LR30050,32.
+    """
+    nombre_color = str(color.get("nombre", "")).strip()
+    inicial_color = normalizar_texto(nombre_color)[:1].upper()
+    ral = str(color.get("ral", "")).strip().upper().replace(" ", "")
+    ral_sin_prefijo = ral.removeprefix("RAL")
+    espesor_texto = f"{espesor:g}".replace(".", ",")
+
+    return f"{codigo_tipo}{inicial_color}{ral_sin_prefijo}{espesor_texto}"
 
 
 def resumen_verificacion(rollos: list[RolloClasificado]) -> dict:

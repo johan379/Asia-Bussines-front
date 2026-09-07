@@ -10,7 +10,7 @@ class LoginRequest(BaseModel):
 
 class SesionResponse(BaseModel):
     correo: str
-    bodega_id: int
+    bodega_id: int | None
     bodega_nombre: str
     rol: RolUsuario
 

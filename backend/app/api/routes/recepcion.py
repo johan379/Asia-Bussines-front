@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, usuario_actual
+from app.api.deps import coincide_bodega, get_db, requiere_rol, usuario_actual
 from app.models.equivalencias import (
     TablaColorEquivalencia,
     TablaEspesorEquivalencia,
@@ -12,7 +12,7 @@ from app.models.equivalencias import (
 from app.models.movimiento import Movimiento, TipoMovimiento
 from app.models.recepcion import Recepcion
 from app.models.rollo import Rollo
-from app.models.usuario import Usuario
+from app.models.usuario import RolUsuario, Usuario
 from app.schemas.recepcion import (
     ConfirmarRecepcionRequest,
     EquivalenciaColorInput,
@@ -29,6 +29,7 @@ from app.schemas.recepcion import (
 )
 from app.services import clasificacion as srv
 from app.services import archivos_recepcion
+from app.core.config import settings
 
 router = APIRouter(prefix="/recepcion", tags=["Recepción y Verificación"])
 
@@ -41,10 +42,12 @@ def _tablas_equivalencia_desde_bd(db: Session) -> srv.TablasEquivalencia:
     tablas = srv.TablasEquivalencia()
     for color in db.query(TablaColorEquivalencia).all():
         tablas.colores[srv.normalizar_texto(color.ral)] = {
+            "ral": color.ral,
             "nombre": color.nombre,
             "codigo_interno": color.codigo_interno,
         }
         tablas.colores[srv.normalizar_texto(color.nombre)] = {
+            "ral": color.ral,
             "nombre": color.nombre,
             "codigo_interno": color.codigo_interno,
         }
@@ -60,7 +63,8 @@ def _tablas_equivalencia_desde_bd(db: Session) -> srv.TablasEquivalencia:
     return tablas
 
 
-@router.post("/previsualizar", response_model=PrevisualizacionRecepcionResponse)
+@router.post("/previsualizar", response_model=PrevisualizacionRecepcionResponse,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO, RolUsuario.ADMIN_INVENTARIO))])
 async def previsualizar_archivo(
     archivo: UploadFile,
     db: Session = Depends(get_db),
@@ -69,7 +73,18 @@ async def previsualizar_archivo(
     """Paso 1-2: lee el Excel, detecta encabezados, sugiere el mapeo de
     columnas, e importa automáticamente las hojas de equivalencias que
     traiga el archivo (si las trae)."""
-    contenido = await archivo.read()
+    nombre_archivo = archivo.filename or ""
+    if not nombre_archivo.lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(status_code=415, detail="Solo se aceptan archivos Excel (.xlsx o .xls).")
+
+    # Se lee como máximo un byte por encima del límite para rechazar archivos
+    # grandes sin cargar por completo una entrada no confiable en memoria.
+    contenido = await archivo.read(settings.MAX_ARCHIVO_RECEPCION_BYTES + 1)
+    if len(contenido) > settings.MAX_ARCHIVO_RECEPCION_BYTES:
+        limite_mb = settings.MAX_ARCHIVO_RECEPCION_BYTES // (1024 * 1024)
+        raise HTTPException(status_code=413, detail=f"El archivo supera el límite de {limite_mb} MB.")
+    if not contenido:
+        raise HTTPException(status_code=400, detail="El archivo está vacío.")
     try:
         hojas = srv.leer_hojas_excel(contenido)
     except Exception as exc:  # noqa: BLE001
@@ -152,7 +167,8 @@ async def previsualizar_archivo(
     )
 
 
-@router.post("/verificar", response_model=VerificacionRecepcionResponse)
+@router.post("/verificar", response_model=VerificacionRecepcionResponse,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO, RolUsuario.ADMIN_INVENTARIO))])
 def verificar(
     datos: ProcesarRecepcionRequest,
     db: Session = Depends(get_db),
@@ -208,7 +224,8 @@ def _rollo_a_schema(r: srv.RolloClasificado) -> dict:
     }
 
 
-@router.post("/confirmar", response_model=RecepcionResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/confirmar", response_model=RecepcionResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO, RolUsuario.ADMIN_INVENTARIO))])
 def confirmar(
     datos: ConfirmarRecepcionRequest,
     db: Session = Depends(get_db),
@@ -277,6 +294,8 @@ def confirmar(
                 motivo="recepcion_proveedor",
                 producto_codigo=codigo_interno,
                 producto_descripcion=f"{descripcion} (rollo {r.rollo})",
+                rollo_id=rollo.id,
+                identificador_rollo=rollo.identificador_rollo,
                 bodega_origen_id=None,
                 bodega_destino_id=usuario.bodega_id,
                 cantidad=metros,
@@ -298,7 +317,7 @@ def historial_recepciones(
 ) -> list[Recepcion]:
     return (
         db.query(Recepcion)
-        .filter(Recepcion.bodega_id == usuario.bodega_id)
+        .filter(coincide_bodega(Recepcion.bodega_id, usuario.bodega_id))
         .order_by(Recepcion.fecha.desc())
         .all()
     )
@@ -316,7 +335,8 @@ def obtener_equivalencias(
     )
 
 
-@router.post("/equivalencias/colores", response_model=EquivalenciaColorResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/equivalencias/colores", response_model=EquivalenciaColorResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO, RolUsuario.ADMIN_INVENTARIO))])
 def guardar_equivalencia_color(
     datos: EquivalenciaColorInput,
     db: Session = Depends(get_db),
@@ -334,7 +354,8 @@ def guardar_equivalencia_color(
     return fila
 
 
-@router.post("/equivalencias/tipos", response_model=EquivalenciaTipoResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/equivalencias/tipos", response_model=EquivalenciaTipoResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO, RolUsuario.ADMIN_INVENTARIO))])
 def guardar_equivalencia_tipo(
     datos: EquivalenciaTipoInput,
     db: Session = Depends(get_db),
@@ -351,7 +372,8 @@ def guardar_equivalencia_tipo(
     return fila
 
 
-@router.post("/equivalencias/espesor", response_model=EquivalenciaEspesorResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/equivalencias/espesor", response_model=EquivalenciaEspesorResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO, RolUsuario.ADMIN_INVENTARIO))])
 def guardar_equivalencia_espesor(
     datos: EquivalenciaEspesorInput,
     db: Session = Depends(get_db),

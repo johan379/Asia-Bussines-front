@@ -6,6 +6,14 @@ $ErrorActionPreference = "Stop"
 $raizBackend = Split-Path -Parent $PSScriptRoot
 Set-Location $raizBackend
 
+if ($env:VIRTUAL_ENV) {
+    $entornoActivo = [System.IO.Path]::GetFullPath($env:VIRTUAL_ENV)
+    $raizNormalizada = [System.IO.Path]::GetFullPath($raizBackend)
+    if ($entornoActivo.StartsWith($raizNormalizada, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "No ejecutes este script con un entorno virtual del backend activo. Ejecuta 'deactivate' y vuelve a correr .\\scripts\\recrear_entorno.ps1."
+    }
+}
+
 $pythonSistema = Get-Command python -ErrorAction SilentlyContinue
 if (-not $pythonSistema) {
     throw "No se encontró Python. Instala Python 3.12 o 3.13 y marca 'Add Python to PATH'; luego vuelve a ejecutar este script."
