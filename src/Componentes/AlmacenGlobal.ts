@@ -4,6 +4,11 @@ import { envioDesdeApi, solicitudDesdeApi } from "./Mapeo";
 import { useUnidadesFamilia } from "../Hooks/useUnidadesFamilia";
 import type { Bodega, Envio, EnvioApi, Sesion, Solicitud, SolicitudApi } from "../types/dominio";
 
+// Notificaciones de solicitudes/envíos entre bodegas: no hay push del
+// servidor, así que se refrescan solas cada cierto tiempo mientras haya
+// sesión, para que el badge de BarraLateral se entere sin recargar.
+const INTERVALO_POLLING_NOTIFICACIONES_MS = 20_000;
+
 export function useAlmacenGlobal(sesion: Sesion | null | undefined) {
   const [bodegas, setBodegas] = useState<Bodega[]>([]);
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -89,6 +94,28 @@ export function useAlmacenGlobal(sesion: Sesion | null | undefined) {
     refrescarEnviosPendientes();
     if (sesion?.correo) cargarUnidadesFamilia();
   }, [cargarBodegas, refrescarSolicitudesPendientes, refrescarEnviosPendientes, cargarUnidadesFamilia, sesion?.correo]);
+
+  useEffect(() => {
+    if (!sesion?.correo) return;
+
+    const intervalo = setInterval(() => {
+      refrescarSolicitudesPendientes();
+      refrescarEnviosPendientes();
+    }, INTERVALO_POLLING_NOTIFICACIONES_MS);
+
+    function alVolverVisible() {
+      if (document.visibilityState === "visible") {
+        refrescarSolicitudesPendientes();
+        refrescarEnviosPendientes();
+      }
+    }
+    document.addEventListener("visibilitychange", alVolverVisible);
+
+    return () => {
+      clearInterval(intervalo);
+      document.removeEventListener("visibilitychange", alVolverVisible);
+    };
+  }, [sesion?.correo, refrescarSolicitudesPendientes, refrescarEnviosPendientes]);
 
   return {
     bodegas, solicitudes, envios, cargarBodegas, refrescarSolicitudesPendientes, refrescarEnviosPendientes,
