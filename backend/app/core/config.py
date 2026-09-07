@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
 
     ORIGENES_PERMITIDOS: str = "http://localhost:5173,http://127.0.0.1:4173"
+    # URL pública real del backend (sin / al final). Se declara como "servers"
+    # en el esquema OpenAPI para que "Try it out" en /docs siempre apunte al
+    # host correcto en vez de depender del origen relativo del navegador.
+    URL_BACKEND: str = "http://localhost:8000"
     RECEPCIONES_TEMPORALES_DIR: str = "./.recepciones-temporales"
     RECEPCIONES_TEMPORALES_MINUTOS: int = 60
     MAX_ARCHIVO_RECEPCION_BYTES: int = 15 * 1024 * 1024

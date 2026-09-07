@@ -32,6 +32,10 @@ app = FastAPI(
     title="Arquitejas — API de Inventario",
     version="1.0.0",
     description="API del sistema de inventario multi-bodega de Arquitejas.",
+    # Sin esto, Swagger UI adivina la URL base para "Try it out" a partir del
+    # origen del navegador -- declararla explícitamente evita que apunte a
+    # localhost cuando /docs se abre contra el backend desplegado.
+    servers=[{"url": settings.URL_BACKEND, "description": settings.ENTORNO}],
 )
 
 app.add_middleware(
