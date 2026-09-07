@@ -5,7 +5,7 @@ import { formatearFechaColombia } from "../Utils/fechas";
 import { useControladorRecepcion } from "../Componentes/Recepcionverificacion";
 import { contarNotificaciones } from "../Utils/notificaciones";
 import PanelAdminEquivalencias from "../Componentes/PanelAdminEquivalencias";
-import "../Style/RecepcionVerificacion.css";
+import "../Style/Recepcionverificacion.css";
 
 const ETIQUETAS_RESULTADO = {
   correcto: "Correcto",
