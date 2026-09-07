@@ -19,7 +19,11 @@ test-results*/
 .npm-cache/
 .env
 backend/.env
+
+# Skills/config locales de Claude Code -- no es parte del proyecto.
+.claude/
 backend/.recepciones-temporales/
+backend/backups/
 *.local
 
 # Editor directories and files
