@@ -91,6 +91,35 @@ def leer_hojas_excel(contenido: bytes) -> dict[str, pd.DataFrame]:
     return hojas
 
 
+def _hoja_parece_tabla(df: pd.DataFrame) -> bool:
+    """Una hoja "parece" una tabla de datos si la mayoría de sus columnas son
+    texto real -- no números crudos ni "Unnamed: N", que aparecen cuando la
+    hoja es de cálculos/referencia y no una tabla (ej. una hoja "CAL" cuyos
+    "encabezados" resultan ser 127.8, 4138, etc. porque ahí no hay ninguna
+    fila real de títulos de columna)."""
+    columnas = list(df.columns)
+    if not columnas:
+        return False
+    validas = sum(
+        1 for c in columnas
+        if isinstance(c, str) and c.strip() and not c.lower().startswith("unnamed:")
+    )
+    return validas / len(columnas) >= 0.5
+
+
+def elegir_hoja_principal(hojas: dict[str, pd.DataFrame], excluir: tuple[str, ...] = ()) -> str:
+    """Elige la primera hoja (en el orden del archivo) que parezca una tabla
+    real, saltándose las de `excluir` (ej. las hojas de equivalencias que ya
+    detecta Recepción por nombre). Si ninguna califica, cae al comportamiento
+    anterior (la primera disponible) -- el usuario siempre puede corregirlo a
+    mano con el selector de hoja que ya existe en Rollos/Inventario/Recepción."""
+    candidatas = [h for h in hojas if h not in excluir]
+    for nombre in candidatas:
+        if _hoja_parece_tabla(hojas[nombre]):
+            return nombre
+    return candidatas[0]
+
+
 def auto_detectar_mapeo(
     encabezados: list[str], alias_campos: dict[str, list[str]] = ALIAS_CAMPOS
 ) -> dict[str, str]:

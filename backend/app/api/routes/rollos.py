@@ -327,25 +327,32 @@ async def previsualizar_carga_rollos(
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=400, detail="No se pudo leer el archivo Excel.") from exc
 
-    hoja_principal = next(iter(hojas))
-    df = hojas[hoja_principal]
-    encabezados = list(df.columns)
-    mapeo_sugerido = srv_carga.auto_detectar_mapeo(encabezados)
+    hoja_principal = srv_excel.elegir_hoja_principal(hojas)
+    try:
+        df = hojas[hoja_principal]
+        encabezados = [str(c) for c in df.columns]
+        mapeo_sugerido = srv_carga.auto_detectar_mapeo(encabezados)
 
-    archivos_carga_rollos.guardar(usuario.id, {
-        "nombre_archivo": archivo.filename,
-        "hoja_principal": hoja_principal,
-        "hojas": hojas,
-    })
+        archivos_carga_rollos.guardar(usuario.id, {
+            "nombre_archivo": archivo.filename,
+            "hoja_principal": hoja_principal,
+            "hojas": hojas,
+        })
 
-    return PrevisualizacionCargaRollosResponse(
-        nombre_archivo=archivo.filename or "archivo.xlsx",
-        hoja_actual=hoja_principal,
-        hojas_disponibles=list(hojas.keys()),
-        encabezados=encabezados,
-        mapeo_sugerido=mapeo_sugerido,
-        filas_totales=len(df),
-    )
+        return PrevisualizacionCargaRollosResponse(
+            nombre_archivo=archivo.filename or "archivo.xlsx",
+            hoja_actual=hoja_principal,
+            hojas_disponibles=list(hojas.keys()),
+            encabezados=encabezados,
+            mapeo_sugerido=mapeo_sugerido,
+            filas_totales=len(df),
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=400,
+            detail=f"No se pudo generar la vista previa de la hoja '{hoja_principal}'. "
+            "Puede que esa hoja no tenga una fila de encabezados válida -- elige otra hoja del selector e intenta de nuevo.",
+        ) from exc
 
 
 @router.post("/carga/hoja", response_model=PrevisualizacionCargaRollosResponse,
@@ -363,16 +370,23 @@ def cambiar_hoja_carga_rollos(
     en_proceso["hoja_principal"] = datos.hoja
     archivos_carga_rollos.guardar(usuario.id, en_proceso)
 
-    df = en_proceso["hojas"][datos.hoja]
-    encabezados = list(df.columns)
-    return PrevisualizacionCargaRollosResponse(
-        nombre_archivo=en_proceso["nombre_archivo"] or "archivo.xlsx",
-        hoja_actual=datos.hoja,
-        hojas_disponibles=list(en_proceso["hojas"].keys()),
-        encabezados=encabezados,
-        mapeo_sugerido=srv_carga.auto_detectar_mapeo(encabezados),
-        filas_totales=len(df),
-    )
+    try:
+        df = en_proceso["hojas"][datos.hoja]
+        encabezados = [str(c) for c in df.columns]
+        return PrevisualizacionCargaRollosResponse(
+            nombre_archivo=en_proceso["nombre_archivo"] or "archivo.xlsx",
+            hoja_actual=datos.hoja,
+            hojas_disponibles=list(en_proceso["hojas"].keys()),
+            encabezados=encabezados,
+            mapeo_sugerido=srv_carga.auto_detectar_mapeo(encabezados),
+            filas_totales=len(df),
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=400,
+            detail=f"No se pudo generar la vista previa de la hoja '{datos.hoja}'. "
+            "Puede que esa hoja no tenga una fila de encabezados válida -- elige otra hoja del selector e intenta de nuevo.",
+        ) from exc
 
 
 @router.post("/carga/confirmar", response_model=ResultadoCargaRollosResponse,

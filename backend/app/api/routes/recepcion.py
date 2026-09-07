@@ -93,10 +93,10 @@ async def previsualizar_archivo(
 
     nombres_hojas = list(hojas.keys())
     hoja_espesor, hoja_color = srv.detectar_hojas_equivalencias(nombres_hojas)
-    hoja_principal = next((h for h in nombres_hojas if h not in (hoja_espesor, hoja_color)), nombres_hojas[0])
+    hoja_principal = srv.elegir_hoja_principal(hojas, excluir=(hoja_espesor, hoja_color))
 
     df = hojas[hoja_principal]
-    encabezados = list(df.columns)
+    encabezados = [str(c) for c in df.columns]
     mapeo_sugerido = srv.auto_detectar_mapeo(encabezados)
 
     importadas_espesor = importadas_color = 0
@@ -153,21 +153,28 @@ async def previsualizar_archivo(
             partes.append(f"{importadas_color} de color")
         nota = f"Se importaron equivalencias del archivo: {' y '.join(partes)}."
 
-    archivos_recepcion.guardar(usuario.id, {
-        "nombre_archivo": archivo.filename,
-        "hojas": hojas,
-        "hoja_principal": hoja_principal,
-    })
+    try:
+        archivos_recepcion.guardar(usuario.id, {
+            "nombre_archivo": archivo.filename,
+            "hojas": hojas,
+            "hoja_principal": hoja_principal,
+        })
 
-    return PrevisualizacionRecepcionResponse(
-        nombre_archivo=archivo.filename or "archivo.xlsx",
-        hoja_actual=hoja_principal,
-        hojas_disponibles=nombres_hojas,
-        encabezados=encabezados,
-        mapeo_sugerido=mapeo_sugerido,
-        filas_totales=len(df),
-        nota_importacion_equivalencias=nota,
-    )
+        return PrevisualizacionRecepcionResponse(
+            nombre_archivo=archivo.filename or "archivo.xlsx",
+            hoja_actual=hoja_principal,
+            hojas_disponibles=nombres_hojas,
+            encabezados=encabezados,
+            mapeo_sugerido=mapeo_sugerido,
+            filas_totales=len(df),
+            nota_importacion_equivalencias=nota,
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=400,
+            detail=f"No se pudo generar la vista previa de la hoja '{hoja_principal}'. "
+            "Puede que esa hoja no tenga una fila de encabezados válida -- elige otra hoja del selector e intenta de nuevo.",
+        ) from exc
 
 
 @router.post("/hoja", response_model=PrevisualizacionRecepcionResponse,
@@ -185,16 +192,23 @@ def cambiar_hoja_recepcion(
     en_proceso["hoja_principal"] = datos.hoja
     archivos_recepcion.guardar(usuario.id, en_proceso)
 
-    df = en_proceso["hojas"][datos.hoja]
-    encabezados = list(df.columns)
-    return PrevisualizacionRecepcionResponse(
-        nombre_archivo=en_proceso["nombre_archivo"] or "archivo.xlsx",
-        hoja_actual=datos.hoja,
-        hojas_disponibles=list(en_proceso["hojas"].keys()),
-        encabezados=encabezados,
-        mapeo_sugerido=srv.auto_detectar_mapeo(encabezados),
-        filas_totales=len(df),
-    )
+    try:
+        df = en_proceso["hojas"][datos.hoja]
+        encabezados = [str(c) for c in df.columns]
+        return PrevisualizacionRecepcionResponse(
+            nombre_archivo=en_proceso["nombre_archivo"] or "archivo.xlsx",
+            hoja_actual=datos.hoja,
+            hojas_disponibles=list(en_proceso["hojas"].keys()),
+            encabezados=encabezados,
+            mapeo_sugerido=srv.auto_detectar_mapeo(encabezados),
+            filas_totales=len(df),
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=400,
+            detail=f"No se pudo generar la vista previa de la hoja '{datos.hoja}'. "
+            "Puede que esa hoja no tenga una fila de encabezados válida -- elige otra hoja del selector e intenta de nuevo.",
+        ) from exc
 
 
 @router.post("/verificar", response_model=VerificacionRecepcionResponse,
