@@ -1,0 +1,97 @@
+// @ts-nocheck -- contrato de controlador pendiente de centralizar.
+import { NOMBRE_POR_TIPO_PRODUCTO, SECCIONES_POR_TIPO_PRODUCTO } from "../Utils/produccion";
+
+// Sección "2. Stock adicional" de Producción. Extraído de ProduccionPage.tsx
+// sin cambiar props ni comportamiento -- no usa estado local propio, todo
+// viene del controlador (useControladorProduccion) vía props.
+function PanelStockAdicionalProduccion({
+  tipoProducto,
+  stockAdicional,
+  metrosPorUnidad,
+  setMetrosPorUnidad,
+  actualizarLineaStock,
+  quitarLineaStock,
+  agregarLineaStock,
+}) {
+  return (
+    <section className="produccion-tarjeta">
+      <h2>2. Stock adicional (unidades que quedaron disponibles)</h2>
+      <p className="produccion-texto-ayuda">
+        {SECCIONES_POR_TIPO_PRODUCTO[tipoProducto]
+          ? `Ningún ${NOMBRE_POR_TIPO_PRODUCTO[tipoProducto]} cortado se pierde: el sobrante del corte tiene que quedar declarado aquí, clasificado como Primera o Segunda.`
+          : "Si en esta producción salieron más unidades de las que necesitaba el apartado (o simplemente quieres dejar unidades en inventario), regístralas aquí. No es obligatorio."}
+      </p>
+
+      {!SECCIONES_POR_TIPO_PRODUCTO[tipoProducto] && stockAdicional.length > 0 && (
+        <div>
+          <label className="produccion-label" htmlFor="prod-metros-unidad">Metros por unidad</label>
+          <input
+            id="prod-metros-unidad"
+            type="number"
+            min="0"
+            step="any"
+            className="produccion-input"
+            style={{ maxWidth: 200 }}
+            placeholder="Ej. 6"
+            value={metrosPorUnidad}
+            onChange={(e) => setMetrosPorUnidad(e.target.value)}
+          />
+        </div>
+      )}
+
+      {stockAdicional.map((linea, indice) => (
+        <div key={indice} className="produccion-form-grid" style={{ marginTop: "0.85rem", alignItems: "end" }}>
+          <div>
+            <label className="produccion-label">Cantidad</label>
+            <input
+              type="number"
+              min="1"
+              className="produccion-input"
+              value={linea.cantidad}
+              onChange={(e) => actualizarLineaStock(indice, "cantidad", e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="produccion-label">Calidad</label>
+            <select
+              className="produccion-input"
+              value={linea.calidad}
+              onChange={(e) => actualizarLineaStock(indice, "calidad", e.target.value)}
+            >
+              <option value="primera">Primera</option>
+              <option value="segunda">Segunda</option>
+            </select>
+          </div>
+          {linea.calidad === "segunda" && (
+            <div>
+              <label className="produccion-label">Motivo / descripción del defecto</label>
+              <input
+                type="text"
+                className="produccion-input"
+                placeholder='Ej. "Tiene un rayón en la superficie."'
+                value={linea.motivoSegunda}
+                onChange={(e) => actualizarLineaStock(indice, "motivoSegunda", e.target.value)}
+              />
+            </div>
+          )}
+          <div>
+            <button type="button" className="produccion-boton-secundario" onClick={() => quitarLineaStock(indice)}>
+              Quitar
+            </button>
+          </div>
+        </div>
+      ))}
+
+      <button
+        type="button"
+        className="produccion-boton-secundario"
+        style={{ marginTop: "0.85rem" }}
+        onClick={agregarLineaStock}
+      >
+        + Agregar línea de stock
+      </button>
+    </section>
+  );
+}
+
+export default PanelStockAdicionalProduccion;

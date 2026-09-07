@@ -3,9 +3,9 @@
 .produccion-page {
   min-height: 100vh;
   padding: 2.25rem 2.75rem;
-  background: var(--at-bg, #F4EBD9);
-  font-family: "Inter", system-ui, sans-serif;
-  color: var(--at-text, #1C1208);
+  background: var(--at-bg, #F7F2EA);
+  font-family: var(--at-font-sans, "Inter", system-ui, sans-serif);
+  color: var(--at-text, #251C14);
 }
 
 .produccion-titulo {
@@ -16,19 +16,55 @@
 }
 
 .produccion-subtitulo {
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   font-size: 0.92rem;
   margin: 0 0 1.5rem;
   max-width: 680px;
 }
 
 .produccion-tarjeta {
-  background: var(--at-surface, #FDF8F2);
-  border: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
+  background: var(--at-surface, #FFFFFF);
+  border: 1px solid var(--at-border-soft, #EBE2D2);
   border-radius: var(--at-r-lg, 16px);
   padding: 1.5rem 1.75rem;
   margin-bottom: 1.1rem;
-  box-shadow: 0 8px 24px rgba(28, 18, 8, 0.04);
+  box-shadow: var(--at-shadow-md, 0 12px 28px -10px rgba(37,28,20,0.16));
+}
+
+/* ── Selector Teja / Caballete ───────────────────────────────────────────── */
+.produccion-tipos {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.produccion-tipo-boton {
+  flex: 1;
+  min-width: 95px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--at-border, #E1D5C0);
+  border-radius: var(--at-r-sm, 8px);
+  background: var(--at-surface, #FFFFFF);
+  color: var(--at-muted, #7C6A56);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: center;
+}
+
+.produccion-tipo-boton:hover {
+  color: var(--at-terra, #B7451F);
+  border-color: var(--at-terra-light, #D9642F);
+  background: var(--at-terra-dim, rgba(183, 69, 31, 0.12));
+}
+
+.produccion-tipo-activo {
+  background: var(--at-terra, #B7451F) !important;
+  color: #FFFFFF !important;
+  border-color: var(--at-terra, #B7451F) !important;
+  font-weight: 700 !important;
+  box-shadow: var(--at-shadow-sm, 0 3px 10px rgba(37,28,20,0.08));
 }
 
 .produccion-tarjeta h2 {
@@ -39,7 +75,7 @@
 .produccion-label {
   display: block;
   font-size: 0.8rem;
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   margin: 0.9rem 0 0.35rem;
 }
 
@@ -60,17 +96,17 @@
 .produccion-input {
   width: 100%;
   padding: 0.6rem 0.85rem;
-  border: 1px solid var(--at-border, rgba(150, 85, 35, 0.2));
-  border-radius: var(--at-r-sm, 7px);
-  background: var(--at-surface, #FDF8F2);
-  color: var(--at-text, #1C1208);
+  border: 1px solid var(--at-border, #E1D5C0);
+  border-radius: var(--at-r-sm, 8px);
+  background: var(--at-surface, #FFFFFF);
+  color: var(--at-text, #251C14);
   font-size: 0.9rem;
   font-family: inherit;
   resize: vertical;
 }
 
 .produccion-vacio {
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   font-size: 0.86rem;
   margin: 0.9rem 0 0;
 }
@@ -86,29 +122,48 @@
 .produccion-tabla th {
   text-align: left;
   padding: 0.55rem 0.7rem;
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   font-weight: 600;
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
+  border-bottom: 1px solid var(--at-border-soft, #EBE2D2);
 }
 
 .produccion-tabla td {
   padding: 0.6rem 0.7rem;
-  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
+  border-bottom: 1px solid var(--at-border-soft, #EBE2D2);
 }
 
 .produccion-tabla tr.fila-agotada {
   opacity: 0.5;
 }
 
+/* Fila de stock adicional generado por una producción: mismo código de
+   producción que la fila de arriba, pero con Cotización = "STOCK" — ese
+   excedente no salió con el cliente, se quedó disponible en inventario. */
+.produccion-tabla tr.produccion-fila-stock {
+  background: rgba(183, 69, 31, 0.05);
+}
+
+.produccion-tabla tr.produccion-fila-stock:hover {
+  background: rgba(183, 69, 31, 0.09);
+}
+
+.produccion-tabla td.produccion-cotizacion-stock {
+  font-weight: 700;
+  color: #B7451F;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
 .produccion-input-metros {
   width: 90px;
   padding: 0.35rem 0.55rem;
-  border: 1px solid var(--at-terra, #B5501F);
-  border-radius: var(--at-r-sm, 7px);
-  font-family: "DM Mono", monospace;
+  border: 1px solid var(--at-terra, #B7451F);
+  border-radius: var(--at-r-sm, 8px);
+  font-family: var(--at-font-mono, "DM Mono", monospace);
 }
 
 .produccion-estado-badge {
@@ -119,18 +174,18 @@
 }
 
 .produccion-estado-badge.estado-cerrado {
-  background: var(--at-surface-3, #E5D8C4);
-  color: var(--at-muted, #7A6045);
+  background: var(--at-surface-3, #E8DCC8);
+  color: var(--at-muted, #7C6A56);
 }
 
 .produccion-estado-badge.estado-abierto {
-  background: rgba(184, 114, 10, 0.15);
+  background: var(--at-amber-dim, rgba(184, 114, 10, 0.12));
   color: var(--at-amber, #B8720A);
 }
 
 .produccion-estado-badge.estado-agotado {
-  background: rgba(192, 57, 43, 0.13);
-  color: var(--at-red, #C0392B);
+  background: var(--at-red-dim, rgba(194, 59, 44, 0.12));
+  color: var(--at-red, #C23B2C);
 }
 
 /* ── Resumen ──────────────────────────────────────────────────────────────── */
@@ -150,16 +205,18 @@
 .produccion-boton-primario {
   padding: 0.7rem 1.4rem;
   border: none;
-  border-radius: var(--at-r-sm, 7px);
-  background: var(--at-terra, #B5501F);
-  color: #000000;
+  border-radius: var(--at-r-sm, 8px);
+  background: var(--at-terra, #B7451F);
+  color: #FFFFFF;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
+  transition: background var(--at-ease), transform var(--at-ease);
 }
 
 .produccion-boton-primario:hover {
-  opacity: 0.92;
+  background: var(--at-terra-light, #D9642F);
+  transform: translateY(-1px);
 }
 
 .produccion-boton-primario:disabled {
@@ -169,38 +226,38 @@
 
 .produccion-boton-secundario {
   padding: 0.7rem 1.4rem;
-  border: 1px solid var(--at-border, rgba(150, 85, 35, 0.2));
-  border-radius: var(--at-r-sm, 7px);
+  border: 1px solid var(--at-border, #E1D5C0);
+  border-radius: var(--at-r-sm, 8px);
   background: transparent;
-  color: var(--at-text-2, #3D2B18);
+  color: var(--at-text-2, #4A392C);
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .produccion-boton-secundario:hover {
-  background: var(--at-surface-2, #F0E6D6);
+  background: var(--at-surface-2, #F1E9DC);
 }
 
 /* ── Confirmación ─────────────────────────────────────────────────────────── */
 .produccion-confirmacion {
-  border-color: var(--at-green, #2E8A52);
+  border-color: var(--at-green, #2E7D4F);
 }
 
 .produccion-confirmacion h2 {
-  color: var(--at-green, #2E8A52);
+  color: var(--at-green, #2E7D4F);
 }
 
 .produccion-detalle-lista {
   margin: 0.5rem 0 1.25rem;
   padding-left: 1.2rem;
   font-size: 0.87rem;
-  color: var(--at-text-2, #3D2B18);
+  color: var(--at-text-2, #4A392C);
 }
 
 /* ── Mensajes ─────────────────────────────────────────────────────────────── */
 .produccion-error {
-  color: var(--at-red, #C0392B);
+  color: var(--at-red, #C23B2C);
   font-size: 0.85rem;
   margin: 0.6rem 0 0;
 }

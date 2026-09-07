@@ -30,8 +30,8 @@ function archivoRecepcionPrueba(codigo) {
   const libro = XLSX.utils.book_new();
   const hoja = XLSX.utils.aoa_to_sheet([
     ["Rollo", "Espesor", "Net Weight", "Coil Meters", "Color TOP", "Tipo Material", "Proveedor", "Lote"],
-    [`${codigo}-01`, 0.27, 1.2, 1200, "AZUL-E2E", "LaminaE2E", "Proveedor E2E", "LOTE-E2E"],
-    [`${codigo}-02`, 0.27, 0.8, 800, "AZUL-E2E", "LaminaE2E", "Proveedor E2E", "LOTE-E2E"],
+    [`${codigo}-01`, 0.27, 1.2, 1200, "RAL3005", "LaminaE2E", "Proveedor E2E", "LOTE-E2E"],
+    [`${codigo}-02`, 0.27, 0.8, 800, "RAL3005", "LaminaE2E", "Proveedor E2E", "LOTE-E2E"],
   ]);
   XLSX.utils.book_append_sheet(libro, hoja, "Rollos");
   return XLSX.write(libro, { bookType: "xlsx", type: "buffer" });
@@ -48,7 +48,7 @@ async function iniciarSesionApi(request, cuenta) {
 
 async function guardarEquivalenciasPrueba(request, headers) {
   for (const [ruta, datos] of [
-    ["/recepcion/equivalencias/colores", { ral: "AZUL-E2E", nombre: "Azul E2E", codigo_interno: "AZ" }],
+    ["/recepcion/equivalencias/colores", { ral: "RAL3005", nombre: "Rojo E2E", codigo_interno: "R" }],
     ["/recepcion/equivalencias/tipos", { nombre: "LaminaE2E", codigo_interno: "L" }],
     ["/recepcion/equivalencias/espesor", { espesor: 0.27, mt_por_ton: 1000, peso_por_metro: 1 }],
   ]) {
@@ -151,7 +151,7 @@ test.describe("Interfaz, accesibilidad y compatibilidad", () => {
 test.describe("Inventario y reportes", () => {
   test("muestra productos individuales, busca y limpia historial", async ({ page }) => {
     await iniciarSesion(page, cuentas.ricaurteAdmin);
-    const buscador = page.getByPlaceholder("Buscar por código, código de importación o descripción...");
+    const buscador = page.getByPlaceholder("Buscar por código o descripción...");
     await expect(buscador).toBeVisible();
     await Promise.all([
       page.waitForResponse((respuesta) =>
@@ -168,6 +168,72 @@ test.describe("Inventario y reportes", () => {
     await expect(page.getByText("No hay movimientos que coincidan con los filtros.")).toBeVisible();
     await page.getByRole("button", { name: "Limpiar filtros" }).click();
     await expect(page.getByPlaceholder("Ej: PRD-001")).toHaveValue("");
+  });
+
+  test("el campo m² por caja solo aparece para Porcelanato, al crear y al editar, y reacciona a cambios de familia", async ({ page, request }) => {
+    const headers = await iniciarSesionApi(request, cuentas.ricaurteAdmin);
+    const codigoPorcelanato = `E2E-PORC-${Date.now()}`;
+    const codigoNormal = `E2E-NORMAL-${Date.now()}`;
+
+    const creadoPorcelanato = await request.post(`${apiUrl}/inventario/productos`, {
+      headers,
+      data: {
+        codigo: codigoPorcelanato, descripcion: "Porcelanato E2E", familia: "Porcelanato",
+        calibre: "60x60", entrada: 10, stock: 10, metros_por_unidad: 1.44,
+      },
+    });
+    expect(creadoPorcelanato.ok(), await creadoPorcelanato.text()).toBeTruthy();
+
+    const creadoNormal = await request.post(`${apiUrl}/inventario/productos`, {
+      headers,
+      data: {
+        codigo: codigoNormal, descripcion: "Producto por unidades E2E", familia: "Tornillos",
+        calibre: "1/2", entrada: 10, stock: 10,
+      },
+    });
+    expect(creadoNormal.ok(), await creadoNormal.text()).toBeTruthy();
+
+    await iniciarSesion(page, cuentas.ricaurteAdmin);
+    const buscador = page.getByPlaceholder("Buscar por código o descripción...");
+
+    const campoM2 = () => page.locator(".inventario-form-grid > div", { has: page.locator("label", { hasText: "m² por caja" }) });
+    const campoFamilia = page.locator(".inventario-form-grid > div", { has: page.locator("label", { hasText: "Familia" }) }).locator("input");
+
+    // --- Nuevo producto: oculto por defecto, aparece solo con familia Porcelanato, se oculta al cambiarla ---
+    await page.getByRole("button", { name: "+ Agregar producto" }).click();
+    await expect(page.getByRole("heading", { name: "Nuevo producto" })).toBeVisible();
+    await expect(campoM2()).toHaveCount(0);
+
+    await campoFamilia.fill("Tornillos");
+    await expect(campoM2()).toHaveCount(0);
+
+    await campoFamilia.fill("Porcelanato");
+    await expect(campoM2()).toBeVisible();
+
+    await campoFamilia.fill("Tornillos");
+    await expect(campoM2()).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Cancelar" }).click();
+
+    // --- Editar un producto que NO es Porcelanato: el campo permanece oculto ---
+    await Promise.all([
+      page.waitForResponse((r) => r.url().includes("/inventario/productos?") && r.url().includes(codigoNormal)),
+      buscador.fill(codigoNormal),
+    ]);
+    await page.locator("tr", { hasText: codigoNormal }).getByRole("button", { name: "Editar" }).click();
+    await expect(page.getByRole("heading", { name: "Editar producto" })).toBeVisible();
+    await expect(campoM2()).toHaveCount(0);
+    await page.getByRole("button", { name: "Cancelar" }).click();
+
+    // --- Editar un producto Porcelanato: el campo aparece con su valor ya cargado ---
+    await Promise.all([
+      page.waitForResponse((r) => r.url().includes("/inventario/productos?") && r.url().includes(codigoPorcelanato)),
+      buscador.fill(codigoPorcelanato),
+    ]);
+    await page.locator("tr", { hasText: codigoPorcelanato }).getByRole("button", { name: "Editar" }).click();
+    await expect(page.getByRole("heading", { name: "Editar producto" })).toBeVisible();
+    await expect(campoM2()).toBeVisible();
+    await expect(campoM2().locator("input")).toHaveValue("1.44");
   });
 
   test("filtra movimientos y ofrece exportación", async ({ page }) => {
@@ -206,7 +272,7 @@ test.describe("Recepción y rollos", () => {
     await expect(page.getByText("No hay rollos que coincidan con la búsqueda.")).toBeVisible();
     await page.getByRole("button", { name: "Limpiar filtros" }).click();
     await expect(codigo).toHaveValue("");
-    await codigo.fill("L1000AZ0.27");
+    await codigo.fill("LR30050,27");
     const grupo = page.locator(".rollos-grupo-header").first();
     await expect(grupo).toBeVisible();
     await grupo.click();
@@ -217,7 +283,7 @@ test.describe("Recepción y rollos", () => {
   test("validaciones de consumo no guardan cambios", async ({ page }) => {
     await iniciarSesion(page, cuentas.ricaurteAdmin);
     await abrirModulo(page, "Rollos almacenados", "/rollos");
-    await page.getByLabel("Código interno").fill("L1000AZ0.27");
+    await page.getByLabel("Código interno").fill("LR30050,27");
     await page.getByLabel("Estado").selectOption("cerrado");
     const grupo = page.locator(".rollos-grupo-header").first();
     await expect(grupo).toBeVisible();
@@ -237,7 +303,7 @@ test.describe("Bodegas e intercambio", () => {
     const buscador = page.getByPlaceholder("Buscar bodega por nombre...");
     await buscador.fill("Santander");
     await page.getByRole("button", { name: "Filtrar" }).click();
-    const bodega = page.getByRole("button", { name: /Santander/ });
+    const bodega = page.getByRole("button", { name: "Santander", exact: true });
     await expect(bodega).toBeVisible();
     await bodega.click();
     await expect(page.getByRole("heading", { name: /Inventario de/ })).toBeVisible();
@@ -251,7 +317,7 @@ test.describe("Bodegas e intercambio", () => {
     await abrirModulo(page, "Bodegas", "/bodegas");
     await page.getByPlaceholder("Buscar bodega por nombre...").fill("Santander");
     await page.getByRole("button", { name: "Filtrar" }).click();
-    const bodega = page.getByRole("button", { name: /Santander/ });
+    const bodega = page.getByRole("button", { name: "Santander", exact: true });
     await expect(bodega).toBeVisible();
     await bodega.click();
     await page.getByPlaceholder("Buscar producto por nombre o código...").fill(codigoSolicitud);
@@ -293,7 +359,7 @@ test.describe("Flujos con escritura en la base de pruebas", () => {
     const codigo = `E2E-CONS-${Date.now()}`;
     const headers = await iniciarSesionApi(request, cuentas.ricaurteAdmin);
     await crearRolloDePrueba(request, headers, codigo);
-    const lista = await request.get(`${apiUrl}/rollos?codigo_interno=L1000AZ0.27`, { headers });
+    const lista = await request.get(`${apiUrl}/rollos?codigo_interno=LR30050,27`, { headers });
     expect(lista.ok(), await lista.text()).toBeTruthy();
     const rollo = (await lista.json()).find((item) => item.identificador_rollo.startsWith(codigo));
     expect(rollo).toBeTruthy();
@@ -303,8 +369,11 @@ test.describe("Flujos con escritura en la base de pruebas", () => {
     });
     const respuestas = await Promise.all([consumo(), consumo()]);
     expect(respuestas.map((respuesta) => respuesta.status()).sort()).toEqual([200, 400]);
-    const actualizado = await request.get(`${apiUrl}/rollos?codigo_interno=L1000AZ0.27`, { headers });
+    // Al llegar a 0 metros disponibles el rollo pasa a "agotado" y ya no
+    // aparece en el listado activo por defecto -- hay que pedirlo explícito.
+    const actualizado = await request.get(`${apiUrl}/rollos?codigo_interno=LR30050,27&estado=agotado`, { headers });
     const rolloFinal = (await actualizado.json()).find((item) => item.id === rollo.id);
+    expect(rolloFinal).toBeTruthy();
     expect(Number(rolloFinal.metros_disponibles)).toBe(0);
     expect(Number(rolloFinal.metros_consumidos)).toBe(Number(rollo.metros_disponibles));
   });
@@ -319,7 +388,7 @@ test.describe("Flujos con escritura en la base de pruebas", () => {
     const headers = { Authorization: `Bearer ${tokenRicaurte}` };
 
     for (const [ruta, datos] of [
-      ["/recepcion/equivalencias/colores", { ral: "AZUL-E2E", nombre: "Azul E2E", codigo_interno: "AZ" }],
+      ["/recepcion/equivalencias/colores", { ral: "RAL3005", nombre: "Rojo E2E", codigo_interno: "R" }],
       ["/recepcion/equivalencias/tipos", { nombre: "LaminaE2E", codigo_interno: "L" }],
       ["/recepcion/equivalencias/espesor", { espesor: 0.27, mt_por_ton: 1000, peso_por_metro: 1 }],
     ]) {
@@ -341,7 +410,7 @@ test.describe("Flujos con escritura en la base de pruebas", () => {
     await page.getByRole("button", { name: "Confirmar recepción" }).click();
     await expect(page.getByText(/Recepción confirmada/i)).toBeVisible();
 
-    const rollos = await request.get(`${apiUrl}/rollos?codigo_interno=L1000AZ0.27`, { headers });
+    const rollos = await request.get(`${apiUrl}/rollos?codigo_interno=LR30050,27`, { headers });
     expect(rollos.ok()).toBeTruthy();
     const datosRollos = await rollos.json();
     const recibidos = datosRollos.filter((rollo) => rollo.identificador_rollo.startsWith(codigo));
@@ -378,7 +447,7 @@ test.describe("Flujos con escritura en la base de pruebas", () => {
     await abrirModulo(solicitante, "Bodegas", "/bodegas");
     await solicitante.getByPlaceholder("Buscar bodega por nombre...").fill("Santander");
     await solicitante.getByRole("button", { name: "Filtrar" }).click();
-    await solicitante.getByRole("button", { name: /Santander/ }).click();
+    await solicitante.getByRole("button", { name: "Santander", exact: true }).click();
     await solicitante.getByPlaceholder("Buscar producto por nombre o código...").fill(codigo);
     const filaProducto = solicitante.locator(".bodegas-tabla tbody tr", { hasText: codigo });
     await expect(filaProducto).toBeVisible();
@@ -409,7 +478,7 @@ test.describe("Flujos con escritura en la base de pruebas", () => {
     await propietaria.close();
   });
 
-  test("un traslado completo retira el producto del inventario activo de origen", async ({ request }) => {
+  test("un traslado completo deja el producto de origen en stock 0 sin eliminarlo", async ({ request }) => {
     const codigo = `E2E-AGOTADO-${Date.now()}`;
     const headersRicaurte = await iniciarSesionApi(request, cuentas.ricaurteAdmin);
     const headersSantander = await iniciarSesionApi(request, cuentas.santanderAdmin);
@@ -442,7 +511,9 @@ test.describe("Flujos con escritura en la base de pruebas", () => {
       headers: headersSantander,
     });
     expect(origen.ok()).toBeTruthy();
-    expect((await origen.json())).toHaveLength(0);
+    const productosOrigen = await origen.json();
+    expect(productosOrigen).toHaveLength(1);
+    expect(Number(productosOrigen[0]?.stock)).toBe(0);
     const destino = await request.get(`${apiUrl}/inventario/productos?busqueda=${codigo}`, {
       headers: headersRicaurte,
     });

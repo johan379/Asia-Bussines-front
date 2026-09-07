@@ -5,39 +5,108 @@
 .inicio-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--at-steel, #14181A);
+  background: var(--at-steel, #1D1913);
   background-image:
-    linear-gradient(var(--at-steel-border, #2B3437) 1px, transparent 1px),
-    linear-gradient(90deg, var(--at-steel-border, #2B3437) 1px, transparent 1px);
+    linear-gradient(var(--at-steel-border, #423826) 1px, transparent 1px),
+    linear-gradient(90deg, var(--at-steel-border, #423826) 1px, transparent 1px);
   background-size: 42px 42px;
   background-position: center;
   font-family: var(--at-font-sans, "Inter", system-ui, sans-serif);
-  color: var(--at-steel-text, #ECEFEC);
+  color: var(--at-steel-text, #F4EEE3);
   padding: 1.5rem;
+}
+
+/* ─── Escena de techo en construcción ──────────────────────────────────── */
+
+.techo-escena {
+  width: 200px;
+  max-width: 55vw;
+  height: auto;
+  margin-bottom: 1.6rem;
+  overflow: visible;
+}
+
+.techo-armazon line {
+  stroke: var(--at-steel-border, #423826);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.techo-armazon line:nth-child(n + 3) {
+  stroke-width: 1.5;
+  opacity: 0.55;
+}
+
+.techo-tejas-fijas rect {
+  fill: var(--at-terra, #B7451F);
+  opacity: 0.9;
+}
+
+.techo-teja-animada {
+  fill: var(--at-terra-light, #D9642F);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: techo-teja-caer 5.5s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+
+@keyframes techo-teja-caer {
+  0% {
+    transform: translate(6px, -50px) rotate(-10deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  58% {
+    transform: translate(0, -3px) rotate(0deg);
+  }
+  66%,
+  85% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .techo-teja-animada {
+    animation: none;
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 .inicio-panel {
   width: 100%;
   max-width: 400px;
   padding: 2.6rem 2.2rem;
-  background: var(--at-steel-2, #1D2326);
-  border: 1px solid var(--at-steel-border, #2B3437);
-  border-top: 3px solid var(--at-terra, #C1440E);
-  border-radius: var(--at-r-lg, 14px);
-  box-shadow: var(--at-shadow-lg, 0 20px 48px -14px rgba(0,0,0,0.5));
+  background: var(--at-steel-2, #27221A);
+  border: 1px solid var(--at-steel-border, #423826);
+  border-top: 3px solid var(--at-terra, #B7451F);
+  border-radius: var(--at-r-xl, 22px);
+  box-shadow: var(--at-shadow-lg, 0 26px 54px -18px rgba(0,0,0,0.45));
 }
 
-.inicio-marca {
-  display: inline-block;
-  font-family: var(--at-font-mono, monospace);
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--at-terra-light, #E2600F);
-  margin-bottom: 1rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.inicio-logo {
+  display: block;
+  width: 168px;
+  max-width: 60%;
+  height: auto;
+  margin: 0 0 1.4rem;
+  padding: 0.6rem 0.85rem;
+  background: #FFFFFF;
+  border-radius: var(--at-r-md, 12px);
+  box-shadow: var(--at-shadow-sm, 0 3px 10px rgba(37,28,20,0.08));
 }
 
 .inicio-titulo {
@@ -50,7 +119,7 @@
 
 .inicio-subtitulo {
   font-size: 0.9rem;
-  color: var(--at-steel-muted, #93A19B);
+  color: var(--at-steel-muted, #B0A18C);
   margin: 0 0 2rem;
 }
 
@@ -62,15 +131,15 @@
 .inicio-label {
   font-size: 0.74rem;
   font-weight: 700;
-  color: #B7C0BB;
+  color: #C7B99E;
   margin: 0.9rem 0 0.4rem;
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
 
 .inicio-input {
-  background: var(--at-steel, #14181A);
-  border: 1px solid var(--at-steel-border, #2B3437);
+  background: var(--at-steel, #1D1913);
+  border: 1px solid var(--at-steel-border, #423826);
   border-radius: var(--at-r-sm, 7px);
   padding: 0.72rem 0.95rem;
   color: #FFFFFF;
@@ -81,12 +150,12 @@
 }
 
 .inicio-input::placeholder {
-  color: #5B6864;
+  color: #6B6250;
 }
 
 .inicio-input:focus {
-  border-color: var(--at-terra-light, #E2600F);
-  box-shadow: 0 0 0 3px var(--at-terra-dim, rgba(193, 68, 14, 0.22));
+  border-color: var(--at-terra-light, #D9642F);
+  box-shadow: 0 0 0 3px var(--at-terra-dim, rgba(183, 69, 31, 0.22));
 }
 
 .inicio-error {
@@ -98,8 +167,8 @@
   font-weight: 600;
   margin: 0.9rem 0 0;
   padding: 0.65rem 0.85rem;
-  background: rgba(178, 58, 46, 0.15);
-  border: 1px solid rgba(178, 58, 46, 0.35);
+  background: var(--at-red-dim, rgba(194, 59, 44, 0.18));
+  border: 1px solid rgba(194, 59, 44, 0.4);
   border-radius: var(--at-r-sm, 7px);
 }
 
@@ -108,7 +177,7 @@
   padding: 0.82rem;
   border: none;
   border-radius: var(--at-r-sm, 7px);
-  background: var(--at-terra, #C1440E);
+  background: var(--at-terra, #B7451F);
   color: #FFFFFF;
   font-weight: 700;
   font-size: 0.98rem;
@@ -118,7 +187,7 @@
 }
 
 .inicio-boton:hover {
-  background: var(--at-terra-light, #E2600F);
+  background: var(--at-terra-light, #D9642F);
   transform: translateY(-1px);
 }
 

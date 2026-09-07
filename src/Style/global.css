@@ -1,38 +1,64 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --at-bg: #f3f5f2;
+  /* Neutros cálidos — arena/crema para fondos y contenedores, carbón para texto */
+  --at-bg: #f7f2ea;
   --at-surface: #ffffff;
-  --at-surface-2: #f7f8f6;
-  --at-surface-3: #e9ede8;
-  --at-text: #17221d;
-  --at-text-2: #34443a;
-  --at-muted: #66756b;
-  --at-caption: #87938b;
-  --at-border: #d2d9d3;
-  --at-border-soft: #e5e9e5;
-  --at-terra: #c44d18;
-  --at-terra-light: #e26328;
-  --at-terra-dim: rgba(196, 77, 24, 0.12);
-  --at-red: #b34235;
-  --at-red-dim: rgba(179, 66, 53, 0.12);
-  --at-steel: #17211e;
-  --at-steel-2: #202c27;
-  --at-steel-3: #2c3933;
-  --at-steel-border: #3a4941;
-  --at-steel-text: #edf2ed;
-  --at-steel-muted: #a7b5aa;
+  --at-surface-2: #f1e9dc;
+  --at-surface-3: #e8dcc8;
+  --at-text: #251c14;
+  --at-text-2: #4a392c;
+  --at-muted: #7c6a56;
+  --at-caption: #9c8a74;
+  --at-border: #e1d5c0;
+  --at-border-soft: #ebe2d2;
+
+  /* Acento — terracota/arcilla: color principal y de acento, nunca fondo dominante */
+  --at-terra: #b7451f;
+  --at-terra-light: #d9642f;
+  --at-terra-dim: rgba(183, 69, 31, 0.12);
+
+  /* Semánticos */
+  --at-red: #c23b2c;
+  --at-red-dim: rgba(194, 59, 44, 0.12);
+  --at-green: #2e7d4f;
+  --at-green-dim: rgba(46, 125, 79, 0.12);
+  --at-amber: #b8720a;
+  --at-amber-dim: rgba(184, 114, 10, 0.12);
+
+  /* Carbón — sidebar y login (gris carbón cálido, no acero verdoso) */
+  --at-steel: #1d1913;
+  --at-steel-2: #27221a;
+  --at-steel-3: #342c22;
+  --at-steel-border: #423826;
+  --at-steel-text: #f4eee3;
+  --at-steel-muted: #b0a18c;
+
   --at-font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --at-font-mono: "DM Mono", "Cascadia Mono", Consolas, monospace;
+
   --at-r-xs: 6px;
-  --at-r-sm: 9px;
+  --at-r-sm: 8px;
   --at-r-md: 12px;
   --at-r-lg: 18px;
-  --at-ease: 160ms ease;
-  --at-shadow-xs: 0 1px 2px rgb(23 34 29 / 7%);
-  --at-shadow-sm: 0 3px 10px rgb(23 34 29 / 9%);
-  --at-shadow-md: 0 12px 28px -12px rgb(23 34 29 / 18%);
-  --at-shadow-lg: 0 24px 52px -20px rgb(23 34 29 / 30%);
+  --at-r-xl: 22px;
+  --at-r-pill: 999px;
+
+  --at-ease: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --at-shadow-xs: 0 1px 2px rgba(37, 28, 20, 0.06);
+  --at-shadow-sm: 0 3px 10px rgba(37, 28, 20, 0.08);
+  --at-shadow-md: 0 12px 28px -10px rgba(37, 28, 20, 0.16);
+  --at-shadow-lg: 0 26px 54px -18px rgba(37, 28, 20, 0.26);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -66,8 +92,8 @@ textarea:focus-visible {
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #bdc8be; border: 3px solid var(--at-bg); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: #92a297; }
+::-webkit-scrollbar-thumb { background: #cbbea6; border: 3px solid var(--at-bg); border-radius: var(--at-r-pill); }
+::-webkit-scrollbar-thumb:hover { background: #ab9a7c; }
 
 /* Mantiene una escala uniforme en todos los módulos del panel. */
 .inventario-page,
@@ -76,7 +102,7 @@ textarea:focus-visible {
 .produccion-page,
 .recepcion-page,
 .reportes-page,
-.hoja-vida-page,
+.hv-page,
 .ia-page {
   width: 100%;
   max-width: 1680px;
@@ -103,25 +129,25 @@ textarea:focus-visible {
 }
 .paginacion button:disabled { cursor: not-allowed; opacity: .5; }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .inventario-page,
   .bodegas-page,
   .rollos-page,
   .produccion-page,
   .recepcion-page,
   .reportes-page,
-  .hoja-vida-page,
+  .hv-page,
   .ia-page { padding: 1.5rem !important; }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 480px) {
   .inventario-page,
   .bodegas-page,
   .rollos-page,
   .produccion-page,
   .recepcion-page,
   .reportes-page,
-  .hoja-vida-page,
+  .hv-page,
   .ia-page { padding: 1rem !important; }
 
   .inventario-header,

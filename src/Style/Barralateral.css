@@ -6,7 +6,7 @@
 .layout-con-sidebar {
   display: flex;
   min-height: 100vh;
-  background: var(--at-bg, #EFF1EE);
+  background: var(--at-bg, #F7F2EA);
 }
 
 .layout-contenido {
@@ -20,9 +20,9 @@
   display: flex;
   flex-direction: column;
   padding: 1.75rem 1.15rem;
-  background: var(--at-steel, #14181A);
-  border-right: 1px solid var(--at-steel-border, #2B3437);
-  color: var(--at-steel-text, #ECEFEC);
+  background: var(--at-steel, #1D1913);
+  border-right: 1px solid var(--at-steel-border, #423826);
+  color: var(--at-steel-text, #F4EEE3);
   font-family: var(--at-font-sans, "Inter", system-ui, sans-serif);
 
   position: sticky;
@@ -44,19 +44,19 @@
 }
 
 .barra-marca-icono {
-  color: var(--at-terra-light, #E2600F);
+  color: var(--at-terra-light, #D9642F);
 }
 
 .barra-bodega {
   font-size: 0.78rem;
-  color: var(--at-steel-muted, #93A19B);
+  color: var(--at-steel-muted, #B0A18C);
   margin: 0 0 1.85rem;
   font-weight: 600;
   font-family: var(--at-font-mono, monospace);
   letter-spacing: -0.01em;
   flex-shrink: 0;
   padding-bottom: 1.1rem;
-  border-bottom: 1px solid var(--at-steel-border, #2B3437);
+  border-bottom: 1px solid var(--at-steel-border, #423826);
 }
 
 .barra-nav {
@@ -70,7 +70,7 @@
   padding-right: 0.25rem;
 
   scrollbar-width: thin;
-  scrollbar-color: var(--at-steel-3, #262E31) transparent;
+  scrollbar-color: var(--at-steel-3, #342C22) transparent;
 }
 
 .barra-nav::-webkit-scrollbar {
@@ -78,12 +78,12 @@
 }
 
 .barra-nav::-webkit-scrollbar-thumb {
-  background: var(--at-steel-3, #262E31);
+  background: var(--at-steel-3, #342C22);
   border-radius: 999px;
 }
 
 .barra-nav::-webkit-scrollbar-thumb:hover {
-  background: var(--at-steel-border, #2B3437);
+  background: var(--at-steel-border, #423826);
 }
 
 .barra-item-grupo {
@@ -97,9 +97,9 @@
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.68rem 0.8rem;
-  border-radius: var(--at-r-sm, 7px);
+  border-radius: var(--at-r-sm, 8px);
   border-left: 2px solid transparent;
-  color: #B7C0BB;
+  color: #C7B99E;
   font-size: 0.87rem;
   font-weight: 600;
   text-decoration: none;
@@ -115,7 +115,7 @@
   height: 21px;
   padding: 0 0.4rem;
   border-radius: 999px;
-  background: var(--at-red, #B23A2E);
+  background: var(--at-red, #C23B2C);
   color: #FFFFFF;
   font-family: var(--at-font-mono, monospace);
   font-size: 0.7rem;
@@ -123,21 +123,21 @@
 }
 
 .barra-item:hover {
-  background: var(--at-steel-2, #1D2326);
+  background: var(--at-steel-2, #27221A);
   color: #FFFFFF;
-  border-left-color: var(--at-steel-border, #2B3437);
+  border-left-color: var(--at-steel-border, #423826);
 }
 
 .barra-item-activo {
-  background: var(--at-steel-2, #1D2326);
-  border-left-color: var(--at-terra-light, #E2600F);
+  background: var(--at-steel-2, #27221A);
+  border-left-color: var(--at-terra-light, #D9642F);
   color: #FFFFFF !important;
 }
 
 .barra-item-nota {
   margin: 0.1rem 0 0.5rem 0.8rem;
   font-size: 0.72rem;
-  color: var(--at-steel-muted, #93A19B);
+  color: var(--at-steel-muted, #B0A18C);
   opacity: 0.75;
 }
 
@@ -148,7 +148,7 @@
   gap: 0.5rem;
   padding: 0.68rem 0.8rem;
   border-left: 2px solid transparent;
-  color: #556259;
+  color: #5C5240;
   font-size: 0.87rem;
   font-weight: 600;
   cursor: not-allowed;
@@ -157,8 +157,8 @@
 .barra-badge {
   padding: 0.16rem 0.48rem;
   border-radius: var(--at-r-xs, 5px);
-  background: var(--at-steel-3, #262E31);
-  color: var(--at-steel-muted, #93A19B);
+  background: var(--at-steel-3, #342C22);
+  color: var(--at-steel-muted, #B0A18C);
   font-family: var(--at-font-mono, monospace);
   font-size: 0.63rem;
   font-weight: 700;
@@ -170,10 +170,10 @@
 .barra-boton-salir {
   margin-top: 1.1rem;
   padding: 0.65rem;
-  border: 1px solid var(--at-steel-border, #2B3437);
-  border-radius: var(--at-r-sm, 7px);
+  border: 1px solid var(--at-steel-border, #423826);
+  border-radius: var(--at-r-sm, 8px);
   background: transparent;
-  color: #B7C0BB;
+  color: #C7B99E;
   font-size: 0.84rem;
   font-weight: 600;
   font-family: inherit;
@@ -183,13 +183,13 @@
 }
 
 .barra-boton-salir:hover {
-  background: var(--at-red-dim, rgba(178, 58, 46, 0.14));
-  border-color: var(--at-red, #B23A2E);
+  background: var(--at-red-dim, rgba(194, 59, 44, 0.12));
+  border-color: var(--at-red, #C23B2C);
   color: #F1B3AB;
 }
 
 /* Adaptación responsive */
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .layout-con-sidebar {
     flex-direction: column;
   }
@@ -202,7 +202,7 @@
     gap: 0.75rem;
     padding: 1rem 1.25rem;
     border-right: none;
-    border-bottom: 1px solid var(--at-steel-border, #2B3437);
+    border-bottom: 1px solid var(--at-steel-border, #423826);
 
     position: static;
     height: auto;
@@ -228,7 +228,7 @@
 
   .barra-item-activo {
     border-left: none;
-    border-bottom-color: var(--at-terra-light, #E2600F);
+    border-bottom-color: var(--at-terra-light, #D9642F);
   }
 
   .barra-item-nota {

@@ -1,0 +1,99 @@
+/* ─── Campana de alertas de stock bajo ────────────────────────────────────
+   Requiere tokens.css (define :root, tipografía y variables compartidas). ── */
+
+.campana-alertas {
+  position: relative;
+}
+
+.campana-alertas-boton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--at-border, #E1D5C0);
+  border-radius: var(--at-r-sm, 8px);
+  background: var(--at-surface, #FFFFFF);
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: all var(--at-ease, 160ms);
+}
+
+.campana-alertas-boton:hover {
+  background: var(--at-surface-2, #F1E9DC);
+  border-color: var(--at-terra-light, #D9642F);
+}
+
+.campana-alertas-badge {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--at-red, #C23B2C);
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.campana-alertas-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 320px;
+  max-height: 380px;
+  overflow-y: auto;
+  background: var(--at-surface, #FFFFFF);
+  border: 1px solid var(--at-border-soft, #EBE2D2);
+  border-radius: var(--at-r-md, 12px);
+  box-shadow: var(--at-shadow-md, 0 12px 28px -10px rgba(37,28,20,0.16));
+  padding: 1rem;
+  z-index: 20;
+}
+
+.campana-alertas-panel h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--at-text, #251C14);
+}
+
+.campana-alertas-vacio {
+  color: var(--at-muted, #7C6A56);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.campana-alertas-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.campana-alertas-lista li {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--at-border-soft, #EBE2D2);
+  font-size: 0.83rem;
+  color: var(--at-text, #251C14);
+}
+
+.campana-alertas-lista li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.campana-alertas-detalle {
+  color: var(--at-red, #C23B2C);
+  font-size: 0.78rem;
+  font-weight: 600;
+}

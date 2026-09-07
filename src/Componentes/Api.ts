@@ -1,4 +1,4 @@
-import { obtenerToken } from "../Utils/auth.js";
+import { obtenerToken } from "../Utils/auth";
 
 const URL_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 

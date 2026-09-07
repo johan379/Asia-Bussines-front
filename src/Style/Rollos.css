@@ -3,9 +3,9 @@
 .rollos-page {
   min-height: 100vh;
   padding: 2.25rem 2.75rem;
-  background: var(--at-bg, #F3F5F2);
+  background: var(--at-bg, #F7F2EA);
   font-family: var(--at-font-sans, "Inter", system-ui, sans-serif);
-  color: var(--at-text, #17221D);
+  color: var(--at-text, #251C14);
 }
 
 .rollos-titulo {
@@ -16,7 +16,7 @@
 }
 
 .rollos-subtitulo {
-  color: var(--at-muted, #66756B);
+  color: var(--at-muted, #7C6A56);
   font-size: 0.92rem;
   margin: 0 0 1.5rem;
   max-width: 700px;
@@ -24,11 +24,11 @@
 
 .rollos-tarjeta {
   background: var(--at-surface, #FFFFFF);
-  border: 1px solid var(--at-border-soft, #E5E9E5);
+  border: 1px solid var(--at-border-soft, #EBE2D2);
   border-radius: var(--at-r-lg, 18px);
   padding: 1.5rem 1.75rem;
   margin-bottom: 1.1rem;
-  box-shadow: var(--at-shadow-md, 0 12px 28px -12px rgba(23,34,29,0.18));
+  box-shadow: var(--at-shadow-md, 0 12px 28px -10px rgba(37,28,20,0.16));
 }
 
 .rollos-tarjeta h2 {
@@ -37,7 +37,7 @@
 }
 
 .rollos-vacio {
-  color: var(--at-muted, #66756B);
+  color: var(--at-muted, #7C6A56);
   font-size: 0.88rem;
   margin: 0;
 }
@@ -53,7 +53,7 @@
 .rollos-filtros-grid label {
   display: block;
   font-size: 0.75rem;
-  color: var(--at-muted, #66756B);
+  color: var(--at-muted, #7C6A56);
   margin-bottom: 0.3rem;
 }
 
@@ -61,26 +61,31 @@
 .rollos-filtros-grid select {
   width: 100%;
   padding: 0.5rem 0.6rem;
-  border: 1px solid var(--at-border, #D2D9D3);
+  border: 1px solid var(--at-border, #E1D5C0);
   border-radius: var(--at-r-sm, 7px);
-  background: var(--at-surface-2, #F7F8F6);
-  color: var(--at-text, #17221D);
+  background: var(--at-surface-2, #F1E9DC);
+  color: var(--at-text, #251C14);
   font-size: 0.85rem;
 }
 
 .rollos-boton-secundario {
   padding: 0.55rem 1.1rem;
-  border: 1px solid var(--at-border, #D2D9D3);
+  border: 1px solid var(--at-border, #E1D5C0);
   border-radius: var(--at-r-sm, 7px);
   background: transparent;
-  color: var(--at-text-2, #34443A);
+  color: var(--at-text-2, #4A392C);
   font-weight: 600;
   font-size: 0.82rem;
   cursor: pointer;
 }
 
 .rollos-boton-secundario:hover {
-  background: var(--at-surface-3, #E9EDE8);
+  background: var(--at-surface-3, #E8DCC8);
+}
+
+.rollos-vista-toggle {
+  display: flex;
+  gap: 0.6rem;
 }
 
 /* ── Grupo por código interno ─────────────────────────────────────────────── */
@@ -101,6 +106,15 @@
 .rollos-color-natural { --rollo-color: #b7824b; }
 .rollos-color-otro { --rollo-color: var(--at-terra); }
 
+/* ── Fila de tabla teñida por color de material (ej. resumen comparativo) ─── */
+.rollos-fila-color td {
+  background: color-mix(in srgb, var(--rollo-color, transparent) 10%, transparent);
+}
+
+.rollos-fila-color td:first-child {
+  border-left: 4px solid var(--rollo-color, var(--at-border));
+}
+
 .rollos-grupo-header {
   width: 100%;
   display: flex;
@@ -115,7 +129,7 @@
 }
 
 .rollos-grupo-header:hover {
-  background: var(--at-surface-2, #F7F8F6);
+  background: var(--at-surface-2, #F1E9DC);
 }
 
 .rollos-grupo-info {
@@ -128,12 +142,12 @@
 .rollos-grupo-codigo {
   font-weight: 700;
   font-size: 0.95rem;
-  font-family: "DM Mono", monospace;
+  font-family: var(--at-font-mono, "DM Mono", monospace);
 }
 
 .rollos-grupo-detalle {
   font-size: 0.8rem;
-  color: var(--at-muted, #66756B);
+  color: var(--at-muted, #7C6A56);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -147,7 +161,7 @@
   border: 1px solid color-mix(in srgb, var(--rollo-color) 36%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--rollo-color) 11%, white);
-  color: var(--at-text-2, #34443A);
+  color: var(--at-text-2, #4A392C);
   padding: 0.2rem 0.5rem;
   font-size: 0.7rem;
   font-weight: 700;
@@ -175,22 +189,22 @@
   align-items: center;
   padding: 0.4rem 0.9rem;
   border-radius: var(--at-r-md, 11px);
-  background: var(--at-terra-dim, rgba(181, 80, 31, 0.1));
+  background: var(--at-terra-dim, rgba(183, 69, 31, 0.1));
 }
 
 .rollos-grupo-cantidad .numero {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--at-terra, #B5501F);
+  color: var(--at-terra, #B7451F);
 }
 
 .rollos-grupo-cantidad span:last-child {
   font-size: 0.68rem;
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
 }
 
 .rollos-grupo-flecha {
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   font-size: 0.8rem;
 }
 
@@ -204,19 +218,19 @@
 .rollos-tabla th {
   text-align: left;
   padding: 0.55rem 1rem;
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   font-weight: 600;
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-top: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
-  background: var(--at-surface-2, #F0E6D6);
+  border-top: 1px solid var(--at-border-soft, #EBE2D2);
+  background: var(--at-surface-2, #F1E9DC);
 }
 
 .rollos-tabla td {
   padding: 0.6rem 1rem;
-  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
-  font-family: "DM Mono", monospace;
+  border-bottom: 1px solid var(--at-border-soft, #EBE2D2);
+  font-family: var(--at-font-mono, "DM Mono", monospace);
 }
 
 .rollos-estado-badge {
@@ -224,33 +238,33 @@
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
-  font-family: "Inter", sans-serif;
+  font-family: var(--at-font-sans, "Inter", sans-serif);
 }
 
 .rollos-estado-badge.estado-cerrado {
-  background: var(--at-surface-3, #E5D8C4);
-  color: var(--at-muted, #7A6045);
+  background: var(--at-surface-3, #E8DCC8);
+  color: var(--at-muted, #7C6A56);
 }
 
 .rollos-estado-badge.estado-abierto {
-  background: rgba(184, 114, 10, 0.15);
+  background: var(--at-amber-dim, rgba(184, 114, 10, 0.12));
   color: var(--at-amber, #B8720A);
 }
 
 .rollos-estado-badge.estado-agotado {
-  background: rgba(192, 57, 43, 0.13);
-  color: var(--at-red, #C0392B);
+  background: var(--at-red-dim, rgba(194, 59, 44, 0.12));
+  color: var(--at-red, #C23B2C);
 }
 
 .rollos-boton-consumo {
   padding: 0.4rem 0.8rem;
   border: none;
   border-radius: var(--at-r-sm, 7px);
-  background: var(--at-terra, #B5501F);
-  color: #FDF8F2;
+  background: var(--at-terra, #B7451F);
+  color: #FFFFFF;
   font-weight: 600;
   font-size: 0.78rem;
-  font-family: "Inter", sans-serif;
+  font-family: var(--at-font-sans, "Inter", sans-serif);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -268,7 +282,7 @@
 .rollos-modal-fondo {
   position: fixed;
   inset: 0;
-  background: rgba(28, 18, 8, 0.45);
+  background: rgba(29, 25, 19, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -279,28 +293,28 @@
   width: 100%;
   max-width: 420px;
   padding: 1.75rem;
-  background: var(--at-surface, #FDF8F2);
+  background: var(--at-surface, #FFFFFF);
   border-radius: var(--at-r-lg, 16px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--at-shadow-lg, 0 26px 54px -18px rgba(37,28,20,0.26));
 }
 
 .rollos-modal h3 {
   margin: 0 0 0.3rem;
   font-size: 1rem;
-  font-family: "DM Mono", monospace;
+  font-family: var(--at-font-mono, "DM Mono", monospace);
 }
 
 .rollos-texto-ayuda {
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   font-size: 0.85rem;
   margin: 0 0 1.1rem;
-  font-family: "Inter", sans-serif;
+  font-family: var(--at-font-sans, "Inter", sans-serif);
 }
 
 .rollos-modal label {
   display: block;
   font-size: 0.8rem;
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   margin: 0.75rem 0 0.35rem;
 }
 
@@ -308,12 +322,12 @@
 .rollos-modal textarea {
   width: 100%;
   padding: 0.55rem 0.7rem;
-  border: 1px solid var(--at-border, rgba(150, 85, 35, 0.2));
+  border: 1px solid var(--at-border, #E1D5C0);
   border-radius: var(--at-r-sm, 7px);
-  background: var(--at-surface, #FDF8F2);
-  color: var(--at-text, #1C1208);
+  background: var(--at-surface, #FFFFFF);
+  color: var(--at-text, #251C14);
   font-size: 0.88rem;
-  font-family: "Inter", sans-serif;
+  font-family: var(--at-font-sans, "Inter", sans-serif);
   resize: vertical;
 }
 
@@ -324,12 +338,54 @@
   margin-top: 1.25rem;
 }
 
+/* ── Modal ancho (formulario de ingreso manual de rollo) ──────────────────── */
+.rollos-modal--ancho {
+  max-width: 760px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.rollos-form-seccion {
+  margin-top: 1.5rem;
+  padding-top: 1.1rem;
+  border-top: 1px dashed var(--at-border, #E1D5C0);
+}
+
+.rollos-form-seccion:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.rollos-form-seccion h4 {
+  margin: 0 0 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--at-muted, #7C6A56);
+  font-family: var(--at-font-sans, "Inter", sans-serif);
+}
+
+.rollos-color-ayuda {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.rollos-color-ayuda .rollos-texto-ayuda {
+  margin: 0;
+  font-size: 0.76rem;
+}
+
 .rollos-boton-primario {
   padding: 0.6rem 1.2rem;
   border: none;
   border-radius: var(--at-r-sm, 7px);
-  background: var(--at-terra, #B5501F);
-  color: #FDF8F2;
+  background: var(--at-terra, #B7451F);
+  color: #FFFFFF;
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
@@ -341,10 +397,10 @@
 }
 
 .rollos-error {
-  color: var(--at-red, #C0392B);
+  color: var(--at-red, #C23B2C);
   font-size: 0.85rem;
   margin: 0.6rem 0 0;
-  font-family: "Inter", sans-serif;
+  font-family: var(--at-font-sans, "Inter", sans-serif);
 }
 .rollos-grupo {
   overflow-x: auto;
@@ -352,4 +408,73 @@
 
 .rollos-tabla {
   min-width: 900px;
+}
+
+.rollos-tabla-wrap {
+  overflow-x: auto;
+}
+
+/* ── Carga masiva de rollos existentes ───────────────────────────────────── */
+.rollos-mapeo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.1rem;
+  margin: 1rem 0;
+}
+
+.rollos-mapeo-campo label {
+  display: block;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: var(--at-muted, #7C6A56);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rollos-mapeo-campo select {
+  width: 100%;
+  background: var(--at-surface-2, #F1E9DC);
+  border: 1px solid var(--at-border, #E1D5C0);
+  border-radius: var(--at-r-sm, 8px);
+  padding: 0.64rem 0.85rem;
+  color: var(--at-text, #251C14);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--at-ease), box-shadow var(--at-ease);
+}
+
+.rollos-mapeo-campo select:focus {
+  border-color: var(--at-terra-light, #D9642F);
+  box-shadow: 0 0 0 3px var(--at-terra-dim, rgba(183, 69, 31, 0.14));
+}
+
+.rollos-carga-resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.9rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.rollos-carga-resumen > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 1rem 0.6rem;
+  border-radius: var(--at-r-md, 12px);
+  background: var(--at-surface-2, #F1E9DC);
+  border: 1px solid var(--at-border-soft, #EBE2D2);
+  font-size: 0.78rem;
+  color: var(--at-muted, #7C6A56);
+  font-weight: 600;
+}
+
+.rollos-carga-resumen .numero {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--at-terra, #B7451F);
+  font-family: var(--at-font-mono, "DM Mono", monospace);
 }

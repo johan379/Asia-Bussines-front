@@ -1,0 +1,67 @@
+// @ts-nocheck -- contrato de controlador pendiente de centralizar.
+
+// Sección "Solicitudes de producción pendientes" de Producción. Extraído de
+// ProduccionPage.tsx sin cambiar props ni comportamiento -- no usa estado
+// local propio, todo viene del controlador (useControladorProduccion) vía
+// props.
+function PanelSolicitudesPendientes({
+  solicitudesPendientes,
+  errorSolicitudPendiente,
+  apartadoItemId,
+  limpiarSolicitud,
+  seleccionarSolicitud,
+  marcarProduccionTerminada,
+}) {
+  return (
+    <section className="produccion-tarjeta">
+      <h2>Solicitudes de producción pendientes</h2>
+      <p className="produccion-vacio" style={{ marginBottom: "0.75rem" }}>
+        Vienen de apartados que la encargada de inventario ya envió a producción. Al elegir
+        "Iniciar producción" el sistema escoge automáticamente los rollos de ese código
+        (los más antiguos primero) hasta cubrir los metros pendientes; puedes ajustar la
+        selección abajo antes de registrar. La cotización y el cliente quedan asociados
+        automáticamente.
+      </p>
+      {errorSolicitudPendiente && <p className="produccion-error">{errorSolicitudPendiente}</p>}
+      <div className="produccion-tabla-wrap">
+        <table className="produccion-tabla produccion-tabla-resultados">
+          <thead>
+            <tr>
+              <th>Cotización</th>
+              <th>Cliente</th>
+              <th>Código de clasificación</th>
+              <th>Pendiente</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {solicitudesPendientes.map((s) => (
+              <tr key={s.itemId} style={apartadoItemId === s.itemId ? { fontWeight: 600 } : undefined}>
+                <td>{s.numeroCotizacion}</td>
+                <td>{s.cliente || "—"}</td>
+                <td>{s.codigoInterno}{s.descripcion ? ` — ${s.descripcion}` : ""}</td>
+                <td>{s.metrosPendientes} m ({s.cantidad} × {s.medida} m)</td>
+                <td>
+                  {apartadoItemId === s.itemId ? (
+                    <button type="button" className="produccion-boton-secundario" onClick={limpiarSolicitud}>
+                      Quitar vínculo
+                    </button>
+                  ) : (
+                    <button type="button" className="produccion-boton-primario" onClick={() => seleccionarSolicitud(s)}>
+                      Iniciar producción
+                    </button>
+                  )}
+                  <button type="button" className="produccion-boton-secundario" onClick={() => marcarProduccionTerminada(s.apartadoId)}>
+                    Marcar producción terminada
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+export default PanelSolicitudesPendientes;

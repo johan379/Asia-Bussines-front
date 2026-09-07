@@ -19,7 +19,7 @@
 .layout-con-sidebar {
   display: flex;
   min-height: 100vh;
-  background: var(--at-bg, #F4EBD9);
+  background: var(--at-bg, #F7F2EA);
 }
 
 .layout-contenido {
@@ -31,9 +31,9 @@
 .hv-page {
   min-height: 100vh;
   padding: 3rem 3.5rem 5rem;
-  background: var(--at-bg, #F4EBD9);
-  font-family: "Inter", system-ui, sans-serif;
-  color: var(--at-text, #1C1208);
+  background: var(--at-bg, #F7F2EA);
+  font-family: var(--at-font-sans, "Inter", system-ui, sans-serif);
+  color: var(--at-text, #251C14);
 }
 
 .hv-header {
@@ -44,7 +44,7 @@
   flex-wrap: wrap;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.15));
+  border-bottom: 1px solid var(--at-border-soft, #EBE2D2);
 }
 
 .hv-header-texto {
@@ -59,7 +59,7 @@
 }
 
 .hv-subtitulo {
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   font-size: 0.96rem;
   margin: 0;
   line-height: 1.55;
@@ -71,33 +71,33 @@
   align-items: baseline;
   gap: 0.4rem;
   padding: 0.55rem 1rem;
-  border-radius: var(--at-r-lg, 16px);
-  background: var(--at-surface, #FDF8F2);
-  border: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.15));
+  border-radius: var(--at-r-lg, 18px);
+  background: var(--at-surface, #FFFFFF);
+  border: 1px solid var(--at-border-soft, #EBE2D2);
   white-space: nowrap;
 }
 
 .hv-conteo strong {
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--at-terra, #B5501F);
+  color: var(--at-terra, #B7451F);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
 .hv-conteo span {
   font-size: 0.76rem;
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 /* ── Tarjeta contenedora ──────────────────────────────────────────────────── */
 .hv-card {
-  background: var(--at-surface, #FDF8F2);
-  border: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
-  border-radius: var(--at-r-lg, 16px);
-  box-shadow: 0 8px 24px rgba(28, 18, 8, 0.04);
+  background: var(--at-surface, #FFFFFF);
+  border: 1px solid var(--at-border-soft, #EBE2D2);
+  border-radius: var(--at-r-lg, 18px);
+  box-shadow: var(--at-shadow-md, 0 12px 28px -10px rgba(37,28,20,0.16));
   overflow: hidden;
 }
 
@@ -106,7 +106,7 @@
   padding: 1.4rem 1.75rem;
   font-size: 1.02rem;
   font-weight: 700;
-  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.11));
+  border-bottom: 1px solid var(--at-border-soft, #EBE2D2);
 }
 
 /* ── Tabla ────────────────────────────────────────────────────────────────── */
@@ -115,10 +115,10 @@
   -webkit-overflow-scrolling: touch;
   /* sombra tenue en el borde derecho como pista de que hay más contenido */
   background:
-    linear-gradient(to right, var(--at-surface, #FDF8F2) 30%, rgba(253, 248, 242, 0)),
-    linear-gradient(to right, rgba(28, 18, 8, 0.06), rgba(28, 18, 8, 0)) 100% 0,
-    linear-gradient(to left, var(--at-surface, #FDF8F2) 30%, rgba(253, 248, 242, 0)) 100% 0,
-    linear-gradient(to left, rgba(28, 18, 8, 0.06), rgba(28, 18, 8, 0));
+    linear-gradient(to right, var(--at-surface, #FFFFFF) 30%, rgba(255, 255, 255, 0)),
+    linear-gradient(to right, rgba(37, 28, 20, 0.06), rgba(37, 28, 20, 0)) 100% 0,
+    linear-gradient(to left, var(--at-surface, #FFFFFF) 30%, rgba(255, 255, 255, 0)) 100% 0,
+    linear-gradient(to left, rgba(37, 28, 20, 0.06), rgba(37, 28, 20, 0));
   background-repeat: no-repeat;
   background-size: 40px 100%, 12px 100%, 40px 100%, 12px 100%;
   background-attachment: local, scroll, local, scroll;
@@ -137,13 +137,13 @@
   z-index: 1;
   text-align: left;
   padding: 0.75rem 1rem;
-  background: var(--at-surface-2, #F0E6D6);
-  color: var(--at-muted, #7A6045);
+  background: var(--at-surface-2, #F1E9DC);
+  color: var(--at-muted, #7C6A56);
   font-weight: 600;
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.15));
+  border-bottom: 1px solid var(--at-border-soft, #EBE2D2);
   white-space: nowrap;
 }
 
@@ -154,7 +154,7 @@
 
 .hv-tabla tbody td {
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--at-border-soft, rgba(150, 85, 35, 0.09));
+  border-bottom: 1px solid var(--at-border-soft, #EBE2D2);
   vertical-align: middle;
   white-space: nowrap;
 }
@@ -162,7 +162,7 @@
 .hv-tabla tbody td.hv-observaciones {
   white-space: normal;
   min-width: 200px;
-  color: var(--at-text-2, #3D2B18);
+  color: var(--at-text-2, #4A392C);
 }
 
 .hv-tabla tbody tr {
@@ -170,51 +170,70 @@
 }
 
 .hv-tabla tbody tr:nth-child(even) {
-  background: rgba(150, 85, 35, 0.025);
+  background: rgba(183, 69, 31, 0.025);
 }
 
 .hv-tabla tbody tr:hover {
-  background: var(--at-surface-2, #F0E6D6);
+  background: var(--at-surface-2, #F1E9DC);
 }
 
 .hv-tabla tbody tr:last-child td {
   border-bottom: none;
 }
 
+/* Fila de stock adicional generado por una producción: mismo código de
+   producción que la fila de arriba, pero con Cotización = "STOCK" — ese
+   excedente no salió con el cliente, se quedó disponible en inventario. */
+.hv-tabla tbody tr.hv-fila-stock {
+  background: rgba(183, 69, 31, 0.05);
+}
+
+.hv-tabla tbody tr.hv-fila-stock:hover {
+  background: rgba(183, 69, 31, 0.09);
+}
+
+.hv-tabla tbody td.hv-cotizacion-stock {
+  font-weight: 700;
+  color: #B7451F;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
 /* Código de producción — identificador principal de la fila */
 .hv-codigo {
-  font-family: "DM Mono", monospace;
+  font-family: var(--at-font-mono, "DM Mono", monospace);
   font-weight: 700;
-  color: var(--at-terra, #B5501F);
+  color: var(--at-terra, #B7451F);
   letter-spacing: 0.01em;
 }
 
 /* Código de rollo — identificador secundario, estilo pill discreto */
 .hv-codigo-rollo {
   display: inline-block;
-  font-family: "DM Mono", monospace;
+  font-family: var(--at-font-mono, "DM Mono", monospace);
   font-size: 0.78rem;
   padding: 0.15rem 0.5rem;
-  background: var(--at-surface-3, #E5D8C4);
+  background: var(--at-surface-3, #E8DCC8);
   border-radius: 999px;
-  color: var(--at-text-2, #3D2B18);
+  color: var(--at-text-2, #4A392C);
 }
 
 /* Valores numéricos con unidad — números tabulares para que alineen en columna */
 .hv-metros {
   font-variant-numeric: tabular-nums;
-  font-family: "DM Mono", monospace;
+  font-family: var(--at-font-mono, "DM Mono", monospace);
 }
 
 .hv-saldo {
   font-variant-numeric: tabular-nums;
-  font-family: "DM Mono", monospace;
+  font-family: var(--at-font-mono, "DM Mono", monospace);
   font-weight: 700;
-  color: var(--at-green, #2E8A52);
+  color: var(--at-green, #2E7D4F);
 }
 
 .hv-fecha {
-  color: var(--at-muted, #7A6045);
+  color: var(--at-muted, #7C6A56);
   font-variant-numeric: tabular-nums;
 }
 
@@ -226,10 +245,10 @@
   gap: 0.6rem;
   padding: 3.5rem 2rem;
   text-align: center;
-  color: var(--at-muted, #7A6045);
-  background: var(--at-surface, #FDF8F2);
-  border: 1px dashed var(--at-border, rgba(150, 85, 35, 0.25));
-  border-radius: var(--at-r-lg, 16px);
+  color: var(--at-muted, #7C6A56);
+  background: var(--at-surface, #FFFFFF);
+  border: 1px dashed var(--at-border, #E1D5C0);
+  border-radius: var(--at-r-lg, 18px);
 }
 
 .hv-vacio-icono {
@@ -239,8 +258,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--at-surface-2, #F0E6D6);
-  color: var(--at-terra, #B5501F);
+  background: var(--at-surface-2, #F1E9DC);
+  color: var(--at-terra, #B7451F);
   font-size: 1.3rem;
 }
 
@@ -252,7 +271,7 @@
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .hv-page {
     padding: 1.5rem 1.15rem 3rem;
   }

@@ -1,0 +1,242 @@
+import { useCallback, useEffect, useState } from "react";
+import { api, ErrorApi } from "./Api";
+import { envioDesdeApi, rolloDesdeApi } from "./Mapeo";
+import type { AlmacenGlobal, Sesion } from "../types/dominio";
+
+type RolloResumen = {
+  codigo: string; descripcion: string; colorMaterial: string; calibre: string;
+  porBodega: Record<string, number>; total: number;
+  pesoPorBodega: Record<string, number>; pesoTotal: number;
+  cantidadPorBodega: Record<string, number>; cantidadTotal: number;
+};
+type ProductoResumen = {
+  codigo: string; descripcion: string; calibre: string; familia: string;
+  porBodega: Record<string, number>; total: number;
+};
+type Comparativo = {
+  bodegas: { id: number; nombre: string }[]; rollos: RolloResumen[]; productos: ProductoResumen[];
+  pesoTotalPorBodega: Record<string, number>; pesoTotalGeneral: number;
+};
+type ItemProducto = { codigo: string; cantidad: string };
+type FormularioEnvio = { bodegaDestinoId: string; rollosSeleccionados: number[]; itemsProducto: ItemProducto[]; observaciones: string };
+
+const COMPARATIVO_VACIO: Comparativo = { bodegas: [], rollos: [], productos: [], pesoTotalPorBodega: {}, pesoTotalGeneral: 0 };
+const TAMANO_PAGINA_RESUMEN = 10;
+
+function paginar<T>(items: T[], pagina: number) {
+  const total = items.length;
+  const totalPaginas = Math.max(1, Math.ceil(total / TAMANO_PAGINA_RESUMEN));
+  const paginaSegura = Math.min(Math.max(1, pagina), totalPaginas);
+  const inicio = (paginaSegura - 1) * TAMANO_PAGINA_RESUMEN;
+  return {
+    items: items.slice(inicio, inicio + TAMANO_PAGINA_RESUMEN),
+    paginacion: { total, pagina: paginaSegura, total_paginas: totalPaginas },
+  };
+}
+
+/** Controlador de la página "Inventario total" de Admin Inventario: resumen
+ * comparativo entre sedes (con detalle expandible por rollo individual) y
+ * despacho de material propio (envíos). */
+export function useControladorAdminInventario(sesion: Sesion, almacen: AlmacenGlobal) {
+  const bodegasPorId: Record<string, string> = (almacen?.bodegas || []).reduce((acc, b) => ({ ...acc, [b.id]: b.nombre }), {});
+
+  // ---------- Resumen comparativo entre sedes ----------
+  const [comparativo, setComparativo] = useState(COMPARATIVO_VACIO);
+  const [cargandoComparativo, setCargandoComparativo] = useState(true);
+
+  const cargarComparativo = useCallback(async () => {
+    setCargandoComparativo(true);
+    try {
+      const datos = await api.get<{
+        bodegas?: { id: number; nombre: string }[];
+        rollos?: Record<string, any>[]; productos?: Record<string, any>[];
+        peso_total_por_bodega?: Record<string, number>; peso_total_general?: number;
+      }>("/admin-inventario/comparativo");
+      if (!datos) throw new Error("Respuesta vacía del servidor.");
+      setComparativo({
+        bodegas: datos.bodegas || [],
+        rollos: (datos.rollos || []).map((f) => ({
+          codigo: f.codigo, descripcion: f.descripcion, colorMaterial: f.color_material, calibre: f.calibre,
+          porBodega: f.por_bodega, total: f.total,
+          pesoPorBodega: f.peso_por_bodega || {}, pesoTotal: f.peso_total || 0,
+          cantidadPorBodega: f.cantidad_por_bodega || {}, cantidadTotal: f.cantidad_total || 0,
+        })),
+        productos: (datos.productos || []).map((f) => ({
+          codigo: f.codigo, descripcion: f.descripcion, calibre: f.calibre, familia: f.familia || "",
+          porBodega: f.por_bodega, total: f.total,
+        })),
+        pesoTotalPorBodega: datos.peso_total_por_bodega || {},
+        pesoTotalGeneral: datos.peso_total_general || 0,
+      });
+      setPaginaRollos(1);
+      setPaginaProductos(1);
+    } catch {
+      setComparativo(COMPARATIVO_VACIO);
+    } finally {
+      setCargandoComparativo(false);
+    }
+  }, []);
+
+  useEffect(() => { cargarComparativo(); }, [cargarComparativo]);
+
+  // ---------- Paginación del resumen (10 por página, cada tabla aparte) ----------
+  const [paginaRollos, setPaginaRollos] = useState(1);
+  const [paginaProductos, setPaginaProductos] = useState(1);
+  const { items: rollosResumenPagina, paginacion: paginacionRollos } = paginar(comparativo.rollos, paginaRollos);
+  const { items: productosResumenPagina, paginacion: paginacionProductos } = paginar(comparativo.productos, paginaProductos);
+
+  // ---------- Expandir una fila del resumen: ver cada rollo individual (con su peso) ----------
+  const [codigoRolloExpandido, setCodigoRolloExpandido] = useState<string | null>(null);
+  const [rollosDelCodigoExpandido, setRollosDelCodigoExpandido] = useState<ReturnType<typeof rolloDesdeApi>[]>([]);
+  const [cargandoRollosExpandido, setCargandoRollosExpandido] = useState(false);
+
+  async function alternarExpandirCodigoRollo(codigo: string) {
+    if (codigoRolloExpandido === codigo) {
+      setCodigoRolloExpandido(null);
+      return;
+    }
+    setCodigoRolloExpandido(codigo);
+    setCargandoRollosExpandido(true);
+    try {
+      const datos = await api.get<Record<string, unknown>[]>(`/admin-inventario/rollos-por-codigo?codigo_interno=${encodeURIComponent(codigo)}`);
+      setRollosDelCodigoExpandido((datos || []).map(rolloDesdeApi));
+    } catch {
+      setRollosDelCodigoExpandido([]);
+    } finally {
+      setCargandoRollosExpandido(false);
+    }
+  }
+
+  // ---------- Inventario propio (sin asignar), para elegir qué despachar ----------
+  const [misRollos, setMisRollos] = useState<ReturnType<typeof rolloDesdeApi>[]>([]);
+  const [misProductos, setMisProductos] = useState<Record<string, unknown>[]>([]);
+  const [cargandoPropio, setCargandoPropio] = useState(true);
+
+  const cargarInventarioPropio = useCallback(async () => {
+    setCargandoPropio(true);
+    try {
+      const [rollos, productos] = await Promise.all([
+        api.get<Record<string, unknown>[]>("/rollos"),
+        api.get<Record<string, unknown>[]>("/inventario/productos"),
+      ]);
+      setMisRollos((rollos || []).map(rolloDesdeApi));
+      setMisProductos(productos || []);
+    } catch {
+      setMisRollos([]);
+      setMisProductos([]);
+    } finally {
+      setCargandoPropio(false);
+    }
+  }, []);
+
+  useEffect(() => { cargarInventarioPropio(); }, [cargarInventarioPropio]);
+
+  // ---------- Formulario de nuevo envío ----------
+  const FORMULARIO_VACIO: FormularioEnvio = { bodegaDestinoId: "", rollosSeleccionados: [], itemsProducto: [], observaciones: "" };
+  const [mostrarFormularioEnvio, setMostrarFormularioEnvio] = useState(false);
+  const [formularioEnvio, setFormularioEnvio] = useState<FormularioEnvio>(FORMULARIO_VACIO);
+  const [guardandoEnvio, setGuardandoEnvio] = useState(false);
+  const [errorFormularioEnvio, setErrorFormularioEnvio] = useState("");
+
+  function abrirFormularioEnvio() {
+    setFormularioEnvio(FORMULARIO_VACIO);
+    setErrorFormularioEnvio("");
+    setMostrarFormularioEnvio(true);
+  }
+
+  function cerrarFormularioEnvio() {
+    setMostrarFormularioEnvio(false);
+    setErrorFormularioEnvio("");
+  }
+
+  function actualizarCampoEnvio(campo: keyof FormularioEnvio, valor: string) {
+    setFormularioEnvio((actual) => ({ ...actual, [campo]: valor }));
+  }
+
+  function alternarRolloEnvio(rolloId: number) {
+    setFormularioEnvio((actual) => ({
+      ...actual,
+      rollosSeleccionados: actual.rollosSeleccionados.includes(rolloId)
+        ? actual.rollosSeleccionados.filter((id) => id !== rolloId)
+        : [...actual.rollosSeleccionados, rolloId],
+    }));
+  }
+
+  function actualizarCantidadProductoEnvio(codigo: string, cantidadTexto: string) {
+    setFormularioEnvio((actual) => {
+      const cantidad = cantidadTexto.trim();
+      const resto = actual.itemsProducto.filter((it) => it.codigo !== codigo);
+      if (!cantidad) return { ...actual, itemsProducto: resto };
+      return { ...actual, itemsProducto: [...resto, { codigo, cantidad }] };
+    });
+  }
+
+  async function crearEnvio(evento: { preventDefault: () => void }) {
+    evento.preventDefault();
+    const f = formularioEnvio;
+    if (!f.bodegaDestinoId) {
+      setErrorFormularioEnvio("Selecciona la bodega destino.");
+      return;
+    }
+    const itemsRollo = f.rollosSeleccionados.map((rolloId) => ({ rollo_id: rolloId }));
+    const itemsProducto = f.itemsProducto
+      .filter((it) => Number(it.cantidad) > 0)
+      .map((it) => ({ producto_codigo: it.codigo, cantidad: Number(it.cantidad) }));
+    const items = [...itemsRollo, ...itemsProducto];
+    if (items.length === 0) {
+      setErrorFormularioEnvio("Selecciona al menos un rollo o una cantidad de producto para enviar.");
+      return;
+    }
+    setGuardandoEnvio(true);
+    setErrorFormularioEnvio("");
+    try {
+      await api.post("/envios", {
+        bodega_destino_id: Number(f.bodegaDestinoId),
+        items,
+        observaciones: f.observaciones,
+      });
+      await Promise.all([cargarEnviosEnviados(), cargarInventarioPropio(), cargarComparativo()]);
+      setMostrarFormularioEnvio(false);
+    } catch (err) {
+      setErrorFormularioEnvio(err instanceof ErrorApi ? err.message : "No se pudo crear el envío.");
+    } finally {
+      setGuardandoEnvio(false);
+    }
+  }
+
+  // ---------- Envíos ya enviados (historial con estado) ----------
+  const [enviosEnviados, setEnviosEnviados] = useState<ReturnType<typeof envioDesdeApi>[]>([]);
+  const [cargandoEnvios, setCargandoEnvios] = useState(true);
+
+  const cargarEnviosEnviados = useCallback(async () => {
+    setCargandoEnvios(true);
+    try {
+      const datos = await api.get<Record<string, unknown>[]>("/envios/enviados");
+      setEnviosEnviados((datos || []).map((e) => envioDesdeApi(e, bodegasPorId)));
+    } catch {
+      setEnviosEnviados([]);
+    } finally {
+      setCargandoEnvios(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(bodegasPorId)]);
+
+  useEffect(() => { cargarEnviosEnviados(); }, [cargarEnviosEnviados]);
+
+  return {
+    comparativo, cargandoComparativo,
+
+    rollosResumenPagina, paginacionRollos, paginaRollos, setPaginaRollos,
+    productosResumenPagina, paginacionProductos, paginaProductos, setPaginaProductos,
+
+    codigoRolloExpandido, rollosDelCodigoExpandido, cargandoRollosExpandido, alternarExpandirCodigoRollo,
+
+    misRollos, misProductos, cargandoPropio,
+
+    mostrarFormularioEnvio, formularioEnvio, guardandoEnvio, errorFormularioEnvio,
+    abrirFormularioEnvio, cerrarFormularioEnvio, actualizarCampoEnvio,
+    alternarRolloEnvio, actualizarCantidadProductoEnvio, crearEnvio,
+
+    enviosEnviados, cargandoEnvios,
+  };
+}
