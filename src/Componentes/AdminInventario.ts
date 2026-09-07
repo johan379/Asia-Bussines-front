@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, ErrorApi } from "./Api";
 import { envioDesdeApi, rolloDesdeApi } from "./Mapeo";
 import type { AlmacenGlobal, Sesion } from "../types/dominio";
@@ -137,17 +137,32 @@ export function useControladorAdminInventario(sesion: Sesion, almacen: AlmacenGl
   const [formularioEnvio, setFormularioEnvio] = useState<FormularioEnvio>(FORMULARIO_VACIO);
   const [guardandoEnvio, setGuardandoEnvio] = useState(false);
   const [errorFormularioEnvio, setErrorFormularioEnvio] = useState("");
+  const [busquedaRollosEnvio, setBusquedaRollosEnvio] = useState("");
 
   function abrirFormularioEnvio() {
     setFormularioEnvio(FORMULARIO_VACIO);
     setErrorFormularioEnvio("");
+    setBusquedaRollosEnvio("");
     setMostrarFormularioEnvio(true);
   }
 
   function cerrarFormularioEnvio() {
     setMostrarFormularioEnvio(false);
     setErrorFormularioEnvio("");
+    setBusquedaRollosEnvio("");
   }
+
+  function normalizarTexto(texto: string) {
+    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  }
+
+  const misRollosFiltrados = useMemo(() => {
+    const termino = normalizarTexto(busquedaRollosEnvio);
+    if (!termino) return misRollos;
+    return misRollos.filter((r) =>
+      normalizarTexto(r.codigoInterno).includes(termino) || normalizarTexto(r.identificadorRollo).includes(termino)
+    );
+  }, [misRollos, busquedaRollosEnvio]);
 
   function actualizarCampoEnvio(campo: keyof FormularioEnvio, valor: string) {
     setFormularioEnvio((actual) => ({ ...actual, [campo]: valor }));
@@ -235,6 +250,7 @@ export function useControladorAdminInventario(sesion: Sesion, almacen: AlmacenGl
 
     mostrarFormularioEnvio, formularioEnvio, guardandoEnvio, errorFormularioEnvio,
     abrirFormularioEnvio, cerrarFormularioEnvio, actualizarCampoEnvio,
+    busquedaRollosEnvio, setBusquedaRollosEnvio, misRollosFiltrados,
     alternarRolloEnvio, actualizarCantidadProductoEnvio, crearEnvio,
 
     enviosEnviados, cargandoEnvios,

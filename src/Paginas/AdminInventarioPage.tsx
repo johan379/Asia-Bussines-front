@@ -115,36 +115,50 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
               ) : c.misRollos.length === 0 ? (
                 <p className="inventario-carga-ayuda">No tienes rollos sin repartir en este momento.</p>
               ) : (
-                <div className="inventario-tabla-contenedor">
-                  <table className="inventario-tabla">
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th>Código interno</th>
-                        <th>Referencia</th>
-                        <th>Color</th>
-                        <th>Metros disponibles</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {c.misRollos.map((r) => (
-                        <tr key={r.id}>
-                          <td>
-                            <input
-                              type="checkbox"
-                              checked={c.formularioEnvio.rollosSeleccionados.includes(r.id)}
-                              onChange={() => c.alternarRolloEnvio(r.id)}
-                            />
-                          </td>
-                          <td>{r.codigoInterno}</td>
-                          <td>{r.identificadorRollo}</td>
-                          <td>{r.colorMaterial || "—"}</td>
-                          <td>{r.metrosDisponibles}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <>
+                  <div className="inventario-buscador">
+                    <input
+                      type="text"
+                      placeholder="Buscar por código..."
+                      value={c.busquedaRollosEnvio}
+                      onChange={(e) => c.setBusquedaRollosEnvio(e.target.value)}
+                    />
+                  </div>
+                  {c.misRollosFiltrados.length === 0 ? (
+                    <p className="inventario-carga-ayuda">No hay rollos que coincidan con tu búsqueda.</p>
+                  ) : (
+                    <div className="inventario-tabla-contenedor">
+                      <table className="inventario-tabla">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>Código interno</th>
+                            <th>Referencia</th>
+                            <th>Color</th>
+                            <th>Metros disponibles</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {c.misRollosFiltrados.map((r) => (
+                            <tr key={r.id}>
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  checked={c.formularioEnvio.rollosSeleccionados.includes(r.id)}
+                                  onChange={() => c.alternarRolloEnvio(r.id)}
+                                />
+                              </td>
+                              <td>{r.codigoInterno}</td>
+                              <td>{r.identificadorRollo}</td>
+                              <td>{r.colorMaterial || "—"}</td>
+                              <td>{r.metrosDisponibles}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
               )}
 
               <h3 className="inventario-form-subtitulo">Productos disponibles (indica cuánto envías)</h3>
