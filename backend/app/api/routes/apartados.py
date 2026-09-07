@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_db, requiere_rol, usuario_actual
-from app.models.apartado import Apartado, EstadoApartado
+from app.models.apartado import Apartado, ApartadoItem, EstadoApartado
 from app.models.usuario import RolUsuario, Usuario
 from app.schemas.apartados import (
     ApartadoCrear, ApartadoResponse, DisponibilidadCodigoResponse, DisponibilidadProductoResponse, ReservaCodigoResponse,
@@ -57,7 +57,7 @@ def listar_apartados(
 ) -> list[Apartado]:
     consulta = (
         db.query(Apartado)
-        .options(joinedload(Apartado.items))
+        .options(joinedload(Apartado.items).joinedload(ApartadoItem.producciones))
         .filter(Apartado.bodega_id == usuario.bodega_id)
     )
     if estado: consulta = consulta.filter(Apartado.estado == estado)
@@ -90,6 +90,14 @@ def enviar_a_produccion(apartado_id: int, db: Session = Depends(get_db), usuario
               dependencies=[Depends(requiere_rol(RolUsuario.JEFE_PLANTA))])
 def marcar_produccion_terminada(apartado_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)) -> Apartado:
     apartado = srv.marcar_produccion_terminada(db, apartado_id, usuario)
+    db.commit(); db.refresh(apartado)
+    return apartado
+
+
+@router.patch("/{apartado_id}/confirmar-separacion-stock", response_model=ApartadoResponse,
+              dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO, RolUsuario.JEFE_PLANTA))])
+def confirmar_separacion_stock(apartado_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)) -> Apartado:
+    apartado = srv.confirmar_separacion_stock(db, apartado_id, usuario)
     db.commit(); db.refresh(apartado)
     return apartado
 

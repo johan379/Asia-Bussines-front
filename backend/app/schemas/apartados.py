@@ -53,6 +53,8 @@ class ApartadoItemResponse(BaseModel):
     metros_consumidos: float
     producto_id: int | None = None
     stock_descontado: bool
+    metros_pendientes: float | None = None
+    tiene_produccion_registrada: bool = False
 
 
 class DisponibilidadCodigoResponse(BaseModel):
@@ -103,9 +105,12 @@ class ApartadoResponse(ModeloConFechasUtc):
     fecha_cancelado: datetime | None
     fecha_entregado: datetime | None
     observaciones: str
+    stock_separado_confirmado: bool
+    stock_separado_por: str
+    stock_separado_en: datetime | None
     items: list[ApartadoItemResponse] = []
 
-    @field_serializer("fecha_creacion", "fecha_enviado_a_produccion", "fecha_cancelado", "fecha_entregado", when_used="json")
+    @field_serializer("fecha_creacion", "fecha_enviado_a_produccion", "fecha_cancelado", "fecha_entregado", "stock_separado_en", when_used="json")
     def _serializar_fechas_opcionales(self, valor: datetime | None) -> str | None:
         if valor is None:
             return None

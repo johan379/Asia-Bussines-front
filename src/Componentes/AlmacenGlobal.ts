@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, ErrorApi } from "./Api";
-import { envioDesdeApi, solicitudDesdeApi } from "./Mapeo";
+import { apartadoDesdeApi, envioDesdeApi, solicitudDesdeApi } from "./Mapeo";
 import { useUnidadesFamilia } from "../Hooks/useUnidadesFamilia";
+import { calcularSolicitudesPendientes } from "../Utils/produccion";
 import type { Bodega, Envio, EnvioApi, Sesion, Solicitud, SolicitudApi } from "../types/dominio";
 
 // Notificaciones de solicitudes/envíos entre bodegas: no hay push del
 // servidor, así que se refrescan solas cada cierto tiempo mientras haya
 // sesión, para que el badge de BarraLateral se entere sin recargar.
 const INTERVALO_POLLING_NOTIFICACIONES_MS = 20_000;
+
+// Mismos estados que usa Produccion.ts para filtrar qué apartados cuentan
+// como "pendientes de producción".
+const ESTADOS_PRODUCCION_PENDIENTE = ["enviado_a_produccion", "en_produccion"];
 
 export function useAlmacenGlobal(sesion: Sesion | null | undefined) {
   const [bodegas, setBodegas] = useState<Bodega[]>([]);
@@ -88,12 +93,31 @@ export function useAlmacenGlobal(sesion: Sesion | null | undefined) {
     }
   }, [sesion?.correo]);
 
+  // Badge global de "Registrar Producción" para jefe_planta -- solo ellos
+  // ven ese módulo, así que no hace falta consultar /apartados para nadie
+  // más. Sobrevive la navegación entre Apartados y Producción (este hook
+  // vive en App.tsx, no en cada página) porque se pidió que Planta se
+  // entere sin importar en qué pantalla esté.
+  const [produccionPendienteCount, setProduccionPendienteCount] = useState(0);
+
+  const refrescarProduccionPendiente = useCallback(async () => {
+    if (sesion?.rol !== "jefe_planta") return setProduccionPendienteCount(0);
+    try {
+      const datos = await api.get<Record<string, unknown>[]>("/apartados") || [];
+      const apartadosPendientes = datos.map(apartadoDesdeApi).filter((ap) => ESTADOS_PRODUCCION_PENDIENTE.includes(ap.estado));
+      setProduccionPendienteCount(calcularSolicitudesPendientes(apartadosPendientes).length);
+    } catch {
+      setProduccionPendienteCount(0);
+    }
+  }, [sesion?.rol]);
+
   useEffect(() => {
     cargarBodegas();
     refrescarSolicitudesPendientes();
     refrescarEnviosPendientes();
+    refrescarProduccionPendiente();
     if (sesion?.correo) cargarUnidadesFamilia();
-  }, [cargarBodegas, refrescarSolicitudesPendientes, refrescarEnviosPendientes, cargarUnidadesFamilia, sesion?.correo]);
+  }, [cargarBodegas, refrescarSolicitudesPendientes, refrescarEnviosPendientes, refrescarProduccionPendiente, cargarUnidadesFamilia, sesion?.correo]);
 
   useEffect(() => {
     if (!sesion?.correo) return;
@@ -101,12 +125,14 @@ export function useAlmacenGlobal(sesion: Sesion | null | undefined) {
     const intervalo = setInterval(() => {
       refrescarSolicitudesPendientes();
       refrescarEnviosPendientes();
+      refrescarProduccionPendiente();
     }, INTERVALO_POLLING_NOTIFICACIONES_MS);
 
     function alVolverVisible() {
       if (document.visibilityState === "visible") {
         refrescarSolicitudesPendientes();
         refrescarEnviosPendientes();
+        refrescarProduccionPendiente();
       }
     }
     document.addEventListener("visibilitychange", alVolverVisible);
@@ -115,10 +141,11 @@ export function useAlmacenGlobal(sesion: Sesion | null | undefined) {
       clearInterval(intervalo);
       document.removeEventListener("visibilitychange", alVolverVisible);
     };
-  }, [sesion?.correo, refrescarSolicitudesPendientes, refrescarEnviosPendientes]);
+  }, [sesion?.correo, refrescarSolicitudesPendientes, refrescarEnviosPendientes, refrescarProduccionPendiente]);
 
   return {
     bodegas, solicitudes, envios, cargarBodegas, refrescarSolicitudesPendientes, refrescarEnviosPendientes,
+    produccionPendienteCount, refrescarProduccionPendiente,
     unidadesFamilia, unidadPorFamilia, decimalesPorFamilia, cargarUnidadesFamilia, guardarUnidadFamilia,
     mostrarFormularioBodega, setMostrarFormularioBodega, nombreBodegaNueva, setNombreBodegaNueva,
     guardandoBodega, errorBodega, crearBodega,

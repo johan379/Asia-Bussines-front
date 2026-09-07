@@ -1,9 +1,19 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BarraLateral from "../Componentes/BarraLateral";
+import ModalConfirmacion from "../Componentes/ModalConfirmacion";
 import { formatearFechaColombia } from "../Utils/fechas";
 import { useApartados } from "../Hooks/useApartados";
-import { contarNotificaciones } from "../Utils/notificaciones";
+import { contarNotificacionesBarraLateral } from "../Utils/notificaciones";
+import { calcularSolicitudesPendientes } from "../Utils/produccion";
 import "../Style/Inventario.css";
 import type { AlmacenGlobal, Sesion } from "../types/dominio";
+
+// Flag temporal: la entrega física a cliente es responsabilidad del módulo
+// de Despachos, que todavía no existe -- mismo flag y motivo que
+// backend/app/services/apartados.py::DESPACHOS_INTEGRADO. Cuando Despachos
+// se integre, cambiar a true (o eliminar la condición) en ambos lados.
+const DESPACHOS_INTEGRADO = false;
 
 const ETIQUETAS_ESTADO: Record<string, string> = {
   apartado: "Apartado",
@@ -24,8 +34,22 @@ type ItemDisponibilidad = { cargando?: boolean; error?: boolean; datos?: DatosDi
 function ApartadosPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesion; onCerrarSesion: () => void; almacen: AlmacenGlobal }) {
   const a = useApartados(sesion);
   const disponibilidadItems = a.disponibilidadItems as Record<number, ItemDisponibilidad>;
+  const navigate = useNavigate();
 
-  const notificaciones = contarNotificaciones(almacen, sesion);
+  const notificaciones = contarNotificacionesBarraLateral(almacen, sesion);
+  const [mensajeInformativo, setMensajeInformativo] = useState("");
+
+  // "Iniciar Producción" solo puede navegar de verdad si quien hace clic es
+  // jefe_planta (el único rol con acceso a /produccion) -- para
+  // administrativo (que también ve Apartados) es informativo, ya que
+  // RutaProtegida lo rechazaría si navegara ahí.
+  function irAIniciarProduccion(numeroCotizacion: string) {
+    if (sesion.rol === "jefe_planta") {
+      navigate(`/produccion?cotizacion=${encodeURIComponent(numeroCotizacion)}`);
+    } else {
+      setMensajeInformativo("Esto lo debe iniciar Planta desde \"Registrar Producción\".");
+    }
+  }
 
   return (
     <div className="layout-con-sidebar">
@@ -276,16 +300,39 @@ function ApartadosPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesion; on
                           <td colSpan={6} className="inventario-vacio">No hay apartados registrados.</td>
                         </tr>
                       ) : (
-                        a.apartados.map((ap) => (
+                        a.apartados.map((ap) => {
+                          const itemsRollo = ap.items.filter((it) => it.modalidad === "por_rollo");
+                          const itemsStock = ap.items.filter((it) => it.modalidad === "por_stock");
+                          const rolloPendientes = itemsRollo.filter((it) => (it.metrosPendientes ?? 0) > 0).length;
+                          // Punto unificado: una cotización es un solo Apartado (ver
+                          // UniqueConstraint bodega+numero_cotizacion en el backend) que
+                          // puede mezclar ítems de stock y de rollo -- se ven en la misma
+                          // fila, no en pantallas separadas.
+                          const tieneProduccionPendiente = (ap.estado === "enviado_a_produccion" || ap.estado === "en_produccion")
+                            && calcularSolicitudesPendientes([ap]).length > 0;
+                          return (
                           <tr key={ap.id}>
                             <td>{ap.numeroCotizacion}</td>
                             <td>{ap.cliente || "—"}</td>
                             <td>
-                              {ap.items.map((it) => (
-                                it.modalidad === "por_stock"
-                                  ? `${it.cantidad} × ${it.descripcion || `producto #${it.productoId}`}`
-                                  : `${it.cantidad} × ${it.codigoInterno}${it.descripcion ? ` (${it.descripcion})` : ""}`
-                              )).join("; ")}
+                              <div>
+                                {ap.items.map((it) => (
+                                  it.modalidad === "por_stock"
+                                    ? `${it.cantidad} × ${it.descripcion || `producto #${it.productoId}`}`
+                                    : `${it.cantidad} × ${it.codigoInterno}${it.descripcion ? ` (${it.descripcion})` : ""}`
+                                )).join("; ")}
+                              </div>
+                              {itemsStock.length > 0 && (
+                                <div className="inventario-carga-ayuda" style={{ margin: "0.15rem 0 0" }}>
+                                  Stock ({itemsStock.length}): {ap.stockSeparadoConfirmado ? "separado ✓" : "pendiente de separar"}
+                                </div>
+                              )}
+                              {itemsRollo.length > 0 && (
+                                <div className="inventario-carga-ayuda" style={{ margin: "0.15rem 0 0" }}>
+                                  Rollo: {itemsRollo.length - rolloPendientes} de {itemsRollo.length} producido{itemsRollo.length === 1 ? "" : "s"}
+                                  {rolloPendientes > 0 ? ` — ${rolloPendientes} pendiente${rolloPendientes === 1 ? "" : "s"}` : " ✓"}
+                                </div>
+                              )}
                             </td>
                             <td>{ETIQUETAS_ESTADO[ap.estado] || ap.estado}</td>
                             <td>{formatearFechaColombia(ap.fechaCreacion)}</td>
@@ -296,15 +343,19 @@ function ApartadosPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesion; on
                                   <button className="inventario-boton-eliminar" onClick={() => a.cancelarApartado(ap.id)}>Cancelar</button>
                                 </>
                               )}
+                              {tieneProduccionPendiente && (
+                                <button onClick={() => irAIniciarProduccion(ap.numeroCotizacion)}>Iniciar Producción</button>
+                              )}
                               {a.puedeMarcarTerminado && (ap.estado === "enviado_a_produccion" || ap.estado === "en_produccion") && (
                                 <button onClick={() => a.marcarApartadoProduccionTerminada(ap.id)}>Marcar producción terminada</button>
                               )}
-                              {ap.estado === "produccion_terminada" && (
+                              {DESPACHOS_INTEGRADO && ap.estado === "produccion_terminada" && (
                                 <button onClick={() => a.marcarApartadoEntregado(ap.id)}>Marcar entregado</button>
                               )}
                             </td>
                           </tr>
-                        ))
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
@@ -314,6 +365,13 @@ function ApartadosPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesion; on
           )}
         </div>
       </div>
+      {mensajeInformativo && (
+        <ModalConfirmacion
+          mensaje={mensajeInformativo}
+          textoConfirmar="Entendido"
+          onConfirmar={() => setMensajeInformativo("")}
+        />
+      )}
     </div>
   );
 }

@@ -86,7 +86,9 @@ export function apartadoItemDesdeApi(i: RegistroApi) {
     cantidad: numero(i.cantidad), medida: i.medida == null ? null : numero(i.medida),
     metrosRequeridos: i.metros_requeridos == null ? null : numero(i.metros_requeridos),
     metrosConsumidos: numero(i.metros_consumidos),
-    productoId: i.producto_id == null ? null : numero(i.producto_id), stockDescontado: Boolean(i.stock_descontado) };
+    productoId: i.producto_id == null ? null : numero(i.producto_id), stockDescontado: Boolean(i.stock_descontado),
+    metrosPendientes: i.metros_pendientes == null ? null : numero(i.metros_pendientes),
+    tieneProduccionRegistrada: Boolean(i.tiene_produccion_registrada) };
 }
 
 export function apartadoDesdeApi(a: RegistroApi) {
@@ -97,6 +99,8 @@ export function apartadoDesdeApi(a: RegistroApi) {
     fechaEnviadoAProduccion: a.fecha_enviado_a_produccion == null ? null : texto(a.fecha_enviado_a_produccion),
     canceladoPor: texto(a.cancelado_por), fechaCancelado: a.fecha_cancelado == null ? null : texto(a.fecha_cancelado),
     fechaEntregado: a.fecha_entregado == null ? null : texto(a.fecha_entregado), observaciones: texto(a.observaciones),
+    stockSeparadoConfirmado: Boolean(a.stock_separado_confirmado), stockSeparadoPor: texto(a.stock_separado_por),
+    stockSeparadoEn: a.stock_separado_en == null ? null : texto(a.stock_separado_en),
     items: items.map(apartadoItemDesdeApi) };
 }
 

@@ -27,11 +27,13 @@ type ApartadoItem = {
   id: number; modalidad: string; codigoInterno: string | null; descripcion: string; cantidad: number;
   medida: number | null; metrosRequeridos: number | null; metrosConsumidos: number;
   productoId: number | null; stockDescontado: boolean;
+  metrosPendientes: number | null; tieneProduccionRegistrada: boolean;
 };
 type Apartado = {
   id: number; bodegaId: number; numeroCotizacion: string; cliente: string; creadoPor: string;
   fechaCreacion: string; estado: string; enviadoAProduccionPor: string; fechaEnviadoAProduccion: string | null;
   canceladoPor: string; fechaCancelado: string | null; fechaEntregado: string | null; observaciones: string;
+  stockSeparadoConfirmado: boolean; stockSeparadoPor: string; stockSeparadoEn: string | null;
   items: ApartadoItem[];
 };
 

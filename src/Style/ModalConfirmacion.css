@@ -1,0 +1,70 @@
+/* ── ModalConfirmacion: diálogo genérico (informativo o Sí/No) ────────────── */
+/* Mismas variables de diseño que los modales de Rollos/Bodegas, en clases
+   propias (modal-confirmacion-*) para no acoplarse a una página concreta. */
+
+.modal-confirmacion-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(29, 25, 19, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+
+.modal-confirmacion {
+  width: 100%;
+  max-width: 420px;
+  padding: 1.75rem;
+  background: var(--at-surface, #FFFFFF);
+  border-radius: var(--at-r-lg, 16px);
+  box-shadow: var(--at-shadow-lg, 0 26px 54px -18px rgba(37,28,20,0.26));
+}
+
+.modal-confirmacion h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-family: var(--at-font-mono, "DM Mono", monospace);
+  color: var(--at-text, #251C14);
+}
+
+.modal-confirmacion-mensaje {
+  margin: 0;
+  color: var(--at-text-2, #4A392C);
+  font-size: 0.9rem;
+  font-family: var(--at-font-sans, "Inter", sans-serif);
+  line-height: 1.5;
+}
+
+.modal-confirmacion-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+}
+
+.modal-confirmacion-boton-secundario {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--at-border, #E1D5C0);
+  border-radius: var(--at-r-sm, 7px);
+  background: transparent;
+  color: var(--at-text-2, #4A392C);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.modal-confirmacion-boton-secundario:hover {
+  background: var(--at-surface-3, #E8DCC8);
+}
+
+.modal-confirmacion-boton-primario {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: var(--at-r-sm, 7px);
+  background: var(--at-terra, #B7451F);
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}

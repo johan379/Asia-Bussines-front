@@ -1,8 +1,14 @@
 // @ts-nocheck -- contrato API pendiente de centralizar en src/types.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api, ErrorApi } from "./Api";
 import { apartadoDesdeApi, produccionDesdeApi, rolloDesdeApi } from "./Mapeo";
-import { NOMBRE_POR_TIPO_PRODUCTO, SECCIONES_POR_TIPO_PRODUCTO } from "../Utils/produccion";
+import { calcularSolicitudesPendientes, NOMBRE_POR_TIPO_PRODUCTO, SECCIONES_POR_TIPO_PRODUCTO } from "../Utils/produccion";
+
+// Refresco automático de solicitudes pendientes / historial de producción --
+// mismo patrón e intervalo que AlmacenGlobal.ts (bodegas): ver ese archivo
+// para el razonamiento completo (escala pequeña, sin infraestructura de push).
+const INTERVALO_POLLING_PRODUCCION_MS = 20_000;
 
 const ESTADOS_SOLICITUD_PENDIENTE = ["enviado_a_produccion", "en_produccion"];
 
@@ -144,25 +150,25 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
     cargarSolicitudesPendientes();
   }, [cargarSolicitudesPendientes]);
 
-  const solicitudesPendientes = useMemo(
-    () =>
-      apartadosPendientes.flatMap((ap) =>
-        ap.items
-          .filter((it) => it.metrosRequeridos - it.metrosConsumidos > 0)
-          .map((it) => ({
-            itemId: it.id,
-            apartadoId: ap.id,
-            numeroCotizacion: ap.numeroCotizacion,
-            cliente: ap.cliente,
-            codigoInterno: it.codigoInterno,
-            descripcion: it.descripcion,
-            cantidad: it.cantidad,
-            medida: it.medida,
-            metrosPendientes: redondear(it.metrosRequeridos - it.metrosConsumidos),
-          }))
-      ),
+  const solicitudesPendientesSinOrdenar = useMemo(
+    () => calcularSolicitudesPendientes(apartadosPendientes),
     [apartadosPendientes]
   );
+
+  // La cotización que llega por querystring (botón "Iniciar Producción" de
+  // Apartados) se muestra primero en la lista, para que quien registra la
+  // producción no tenga que buscarla entre las demás solicitudes.
+  const [searchParams] = useSearchParams();
+  const cotizacionResaltada = searchParams.get("cotizacion") || "";
+
+  const solicitudesPendientes = useMemo(() => {
+    if (!cotizacionResaltada) return solicitudesPendientesSinOrdenar;
+    return [...solicitudesPendientesSinOrdenar].sort((a, b) => {
+      const aCoincide = a.numeroCotizacion === cotizacionResaltada;
+      const bCoincide = b.numeroCotizacion === cotizacionResaltada;
+      return aCoincide === bCoincide ? 0 : aCoincide ? -1 : 1;
+    });
+  }, [solicitudesPendientesSinOrdenar, cotizacionResaltada]);
 
   // Regla física de los productos "seccionados" (caballete, flanche): el
   // ancho del rollo se divide siempre en N partes iguales según el tipo
@@ -370,6 +376,11 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
   }, [tipoProducto, infoCorte, stockAdicional.length]);
 
   const [errorValidacion, setErrorValidacion] = useState("");
+  // Apartado pendiente de que se confirme la separación de stock antes de
+  // continuar con enviarProduccion() -- null = sin diálogo abierto. Sustituye
+  // al window.confirm() síncrono: el modal de React no puede bloquear la
+  // ejecución, así que el flujo se retoma en confirmarSeparacionYRegistrar().
+  const [confirmacionStockPendiente, setConfirmacionStockPendiente] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [produccionConfirmada, setProduccionConfirmada] = useState(null);
 
@@ -471,6 +482,42 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
       return;
     }
 
+    // Si esta cotización también tiene ítems de stock sin separar, abre el
+    // modal de confirmación y PAUSA aquí -- el backend igual lo exige
+    // (defensa real, ver _apartado_item_para_produccion), esto solo evita el
+    // rechazo. El flujo continúa en confirmarSeparacionYRegistrar() (botón
+    // "Sí" del modal) o se cancela en cancelarConfirmacionSeparacion() ("No").
+    if (apartadoItemId) {
+      const apartado = apartadosPendientes.find((ap) => ap.items.some((it) => it.id === apartadoItemId));
+      const tieneItemsStock = apartado?.items.some((it) => it.modalidad === "por_stock");
+      if (apartado && tieneItemsStock && !apartado.stockSeparadoConfirmado) {
+        setConfirmacionStockPendiente(apartado);
+        return;
+      }
+    }
+
+    await enviarProduccion();
+  }
+
+  async function confirmarSeparacionYRegistrar() {
+    const apartado = confirmacionStockPendiente;
+    setConfirmacionStockPendiente(null);
+    if (!apartado) return;
+    try {
+      await api.patch(`/apartados/${apartado.id}/confirmar-separacion-stock`);
+    } catch (err) {
+      setErrorValidacion(err instanceof ErrorApi ? err.message : "No se pudo confirmar la separación de stock.");
+      return;
+    }
+    await enviarProduccion();
+  }
+
+  function cancelarConfirmacionSeparacion() {
+    setConfirmacionStockPendiente(null);
+    setErrorValidacion("Primero debe separarse el stock de esta cotización antes de registrar la producción.");
+  }
+
+  async function enviarProduccion() {
     setGuardando(true);
     setErrorValidacion("");
     try {
@@ -559,6 +606,32 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
     cargarProducciones();
   }, [cargarProducciones]);
 
+  // Refresco automático mientras esta pantalla esté abierta (Producción o
+  // Hoja de Vida, que comparten este mismo hook): historial de producción
+  // siempre; solicitudes pendientes solo si puede registrarlas -- evita que
+  // Hoja de Vida (administrativo) consulte /apartados sin necesitarlo. No es
+  // un estado global (a diferencia de AlmacenGlobal.ts): dura lo que dure
+  // esta pantalla montada, que es justo lo que se pidió.
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      if (puedeRegistrarProduccion) cargarSolicitudesPendientes();
+      cargarProducciones();
+    }, INTERVALO_POLLING_PRODUCCION_MS);
+
+    function alVolverVisible() {
+      if (document.visibilityState === "visible") {
+        if (puedeRegistrarProduccion) cargarSolicitudesPendientes();
+        cargarProducciones();
+      }
+    }
+    document.addEventListener("visibilitychange", alVolverVisible);
+
+    return () => {
+      clearInterval(intervalo);
+      document.removeEventListener("visibilitychange", alVolverVisible);
+    };
+  }, [puedeRegistrarProduccion, cargarSolicitudesPendientes, cargarProducciones]);
+
   const misProducciones = produccionesRegistradas;
 
   return {
@@ -600,6 +673,9 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
     errorValidacion,
     guardando,
     registrarProduccion,
+    confirmacionStockPendiente,
+    confirmarSeparacionYRegistrar,
+    cancelarConfirmacionSeparacion,
     cancelar,
 
     produccionConfirmada,
@@ -608,6 +684,7 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
     misProducciones,
 
     solicitudesPendientes,
+    cotizacionResaltada,
     apartadoItemId,
     seleccionarSolicitud,
     limpiarSolicitud,

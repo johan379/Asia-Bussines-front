@@ -43,6 +43,13 @@ ESTADOS_RESERVA_ACTIVA = (
     EstadoApartado.EN_PRODUCCION,
 )
 
+# Flag temporal: la entrega física a cliente es responsabilidad del módulo
+# de Despachos, que todavía no existe -- mismo flag y motivo que
+# src/Paginas/ApartadosPage.tsx::DESPACHOS_INTEGRADO. Cuando Despachos se
+# integre, cambiar a True (o eliminar el chequeo de marcar_entregado) en
+# ambos lados.
+DESPACHOS_INTEGRADO = False
+
 
 def metros_reservados_codigo(db: Session, *, bodega_id: int, codigo_interno: str) -> float:
     total = (
@@ -332,7 +339,27 @@ def marcar_produccion_terminada(db: Session, apartado_id: int, usuario: Usuario)
     return apartado
 
 
+def confirmar_separacion_stock(db: Session, apartado_id: int, usuario: Usuario) -> Apartado:
+    """Confirma que el stock (ítems POR_STOCK) de esta cotización ya fue
+    separado físicamente -- requisito para poder registrar la producción de
+    sus ítems POR_ROLLO (ver `registrar_produccion._apartado_item_para_produccion`).
+    Se guarda a nivel de Apartado, no por ítem: los ítems se crean todos
+    juntos al crear el apartado y la confirmación es una sola acción."""
+    apartado = apartado_de_mi_bodega(db, apartado_id, usuario)
+    if not any(item.modalidad == ModalidadApartado.POR_STOCK for item in apartado.items):
+        raise HTTPException(status_code=400, detail="Este apartado no tiene ítems de stock por separar.")
+    apartado.stock_separado_confirmado = True
+    apartado.stock_separado_por = usuario.correo
+    apartado.stock_separado_en = datetime.now(timezone.utc)
+    return apartado
+
+
 def marcar_entregado(db: Session, apartado_id: int, usuario: Usuario) -> Apartado:
+    if not DESPACHOS_INTEGRADO:
+        raise HTTPException(
+            status_code=403,
+            detail="La entrega de material aún no está habilitada -- pendiente de integrar el módulo de Despachos.",
+        )
     apartado = apartado_de_mi_bodega(db, apartado_id, usuario)
     if apartado.estado != EstadoApartado.PRODUCCION_TERMINADA:
         raise HTTPException(status_code=400, detail="Este apartado todavía no tiene la producción terminada.")

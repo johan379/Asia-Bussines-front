@@ -1,7 +1,8 @@
 // @ts-nocheck -- contrato de controlador pendiente de centralizar.
 import BarraLateral from "../Componentes/BarraLateral";
+import ModalConfirmacion from "../Componentes/ModalConfirmacion";
 import { useControladorProduccion } from "../Componentes/Produccion";
-import { contarNotificaciones } from "../Utils/notificaciones";
+import { contarNotificacionesBarraLateral } from "../Utils/notificaciones";
 import PanelDatosProductoProduccion from "../Componentes/PanelDatosProductoProduccion";
 import PanelProduccionConfirmada from "../Componentes/PanelProduccionConfirmada";
 import PanelStockAdicionalProduccion from "../Componentes/PanelStockAdicionalProduccion";
@@ -15,7 +16,7 @@ import "../Style/Rollos.css";
 function ProduccionPage({ sesion, onCerrarSesion, almacen }) {
   const p = useControladorProduccion(sesion, almacen);
 
-  const notificaciones = contarNotificaciones(almacen, sesion);
+  const notificaciones = contarNotificacionesBarraLateral(almacen, sesion);
 
   return (
     <div className="layout-con-sidebar">
@@ -37,6 +38,7 @@ function ProduccionPage({ sesion, onCerrarSesion, almacen }) {
           {!p.produccionConfirmada && p.solicitudesPendientes.length > 0 && (
             <PanelSolicitudesPendientes
               solicitudesPendientes={p.solicitudesPendientes}
+              cotizacionResaltada={p.cotizacionResaltada}
               errorSolicitudPendiente={p.errorSolicitudPendiente}
               apartadoItemId={p.apartadoItemId}
               limpiarSolicitud={p.limpiarSolicitud}
@@ -131,6 +133,16 @@ function ProduccionPage({ sesion, onCerrarSesion, almacen }) {
           <PanelHistorialProduccion misProducciones={p.misProducciones} />
         </div>
       </div>
+      {p.confirmacionStockPendiente && (
+        <ModalConfirmacion
+          titulo="Confirmar separación de stock"
+          mensaje={`La cotización ${p.confirmacionStockPendiente.numeroCotizacion} también tiene material de stock pendiente. ¿Ya separaste el stock de esta cotización?`}
+          textoConfirmar="Sí"
+          textoCancelar="No"
+          onConfirmar={p.confirmarSeparacionYRegistrar}
+          onCancelar={p.cancelarConfirmacionSeparacion}
+        />
+      )}
     </div>
   );
 }

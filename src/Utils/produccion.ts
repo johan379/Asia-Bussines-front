@@ -9,6 +9,33 @@
 export const SECCIONES_POR_TIPO_PRODUCTO: Record<string, number> = { caballete: 3, flanche: 5 };
 export const NOMBRE_POR_TIPO_PRODUCTO: Record<string, string> = { caballete: "caballete", flanche: "flanche" };
 
+type ApartadoItemPendiente = {
+  id: number; modalidad: string; codigoInterno: string | null; descripcion: string;
+  cantidad: number; medida: number | null; metrosPendientes: number | null;
+};
+type ApartadoParaProduccion = { id: number; numeroCotizacion: string; cliente: string; items: ApartadoItemPendiente[] };
+export type SolicitudProduccionPendiente = {
+  itemId: number; apartadoId: number; numeroCotizacion: string; cliente: string;
+  codigoInterno: string | null; descripcion: string; cantidad: number; medida: number | null; metrosPendientes: number;
+};
+
+/** Ítems POR_ROLLO de apartados ya enviados a producción que todavía tienen
+ * metros pendientes por producir -- explícito por `modalidad` (nunca por un
+ * efecto colateral de que `metrosPendientes` sea `null` en los ítems
+ * POR_STOCK). Compartido entre el panel de "Registrar Producción" y el
+ * botón "Iniciar Producción" de Apartados, para no duplicar el criterio. */
+export function calcularSolicitudesPendientes(apartados: ApartadoParaProduccion[]): SolicitudProduccionPendiente[] {
+  return apartados.flatMap((ap) =>
+    ap.items
+      .filter((it) => it.modalidad === "por_rollo" && (it.metrosPendientes ?? 0) > 0)
+      .map((it) => ({
+        itemId: it.id, apartadoId: ap.id, numeroCotizacion: ap.numeroCotizacion, cliente: ap.cliente,
+        codigoInterno: it.codigoInterno, descripcion: it.descripcion, cantidad: it.cantidad, medida: it.medida,
+        metrosPendientes: it.metrosPendientes ?? 0,
+      }))
+  );
+}
+
 /** `ancho_rollo` (m) de un stock, dividido por el número de secciones que
  * le corresponde según su `tipoProducto` — o null si no aplica (tejas y
  * cualquier producto que no venga de un tipo seccionado). */

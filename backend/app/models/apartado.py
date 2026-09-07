@@ -59,6 +59,15 @@ class Apartado(Base):
 
     observaciones: Mapped[str] = mapped_column(Text, default="")
 
+    # Confirmacion de que el stock (items POR_STOCK) de esta cotizacion ya se
+    # separo fisicamente -- requisito para registrar produccion de sus items
+    # POR_ROLLO (ver services/produccion.py::_apartado_item_para_produccion).
+    # A nivel de Apartado, no por item: se crean todos juntos y es una sola
+    # confirmacion por cotizacion.
+    stock_separado_confirmado: Mapped[bool] = mapped_column(default=False)
+    stock_separado_por: Mapped[str] = mapped_column(String(150), default="")
+    stock_separado_en: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     items = relationship("ApartadoItem", back_populates="apartado", cascade="all, delete-orphan")
 
 
@@ -99,6 +108,17 @@ class ApartadoItem(Base):
 
     producto_id: Mapped[int | None] = mapped_column(ForeignKey("productos.id"), nullable=True)  # solo POR_STOCK
     stock_descontado: Mapped[bool] = mapped_column(default=False)  # solo POR_STOCK
+
+    @property
+    def metros_pendientes(self) -> float | None:
+        """Solo tiene sentido para POR_ROLLO -- None para POR_STOCK."""
+        if self.metros_requeridos is None:
+            return None
+        return round(self.metros_requeridos - self.metros_consumidos, 2)
+
+    @property
+    def tiene_produccion_registrada(self) -> bool:
+        return bool(self.producciones)
 
     apartado = relationship("Apartado", back_populates="items")
     producciones = relationship("Produccion", back_populates="apartado_item")

@@ -7,7 +7,7 @@ from secrets import token_hex
 from fastapi import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from app.models.apartado import ApartadoItem, EstadoApartado
+from app.models.apartado import ApartadoItem, EstadoApartado, ModalidadApartado
 from app.models.movimiento import Movimiento, TipoMovimiento
 from app.models.produccion import Produccion, RolloUtilizadoProduccion
 from app.models.producto import Producto
@@ -43,6 +43,19 @@ def _apartado_item_para_produccion(db: Session, apartado_item_id: int, usuario: 
         raise HTTPException(status_code=404, detail="Solicitud de producción no encontrada.")
     if item.apartado.estado not in (EstadoApartado.ENVIADO_A_PRODUCCION, EstadoApartado.EN_PRODUCCION):
         raise HTTPException(status_code=400, detail="Ese apartado no está disponible para registrar producción.")
+    # Si esta cotización también tiene ítems de stock, no se deja avanzar la
+    # producción del rollo hasta que alguien confirme (PATCH
+    # /apartados/{id}/confirmar-separacion-stock) que ya se separó -- esta es
+    # la validación real (el frontend solo pregunta antes para evitar el
+    # rechazo, pero el servidor la exige sin importar qué haga el cliente).
+    if not item.apartado.stock_separado_confirmado and any(
+        i.modalidad == ModalidadApartado.POR_STOCK for i in item.apartado.items
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Debe confirmarse que el stock de esta cotización ya fue separado "
+            "antes de registrar la producción (PATCH /apartados/{}/confirmar-separacion-stock).".format(item.apartado_id),
+        )
     return item
 
 

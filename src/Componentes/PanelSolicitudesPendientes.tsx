@@ -6,6 +6,7 @@
 // props.
 function PanelSolicitudesPendientes({
   solicitudesPendientes,
+  cotizacionResaltada,
   errorSolicitudPendiente,
   apartadoItemId,
   limpiarSolicitud,
@@ -36,7 +37,11 @@ function PanelSolicitudesPendientes({
           </thead>
           <tbody>
             {solicitudesPendientes.map((s) => (
-              <tr key={s.itemId} style={apartadoItemId === s.itemId ? { fontWeight: 600 } : undefined}>
+              <tr
+                key={s.itemId}
+                className={cotizacionResaltada && s.numeroCotizacion === cotizacionResaltada ? "produccion-fila-resaltada" : undefined}
+                style={apartadoItemId === s.itemId ? { fontWeight: 600 } : undefined}
+              >
                 <td>{s.numeroCotizacion}</td>
                 <td>{s.cliente || "—"}</td>
                 <td>{s.codigoInterno}{s.descripcion ? ` — ${s.descripcion}` : ""}</td>
