@@ -24,6 +24,7 @@ from app.schemas.recepcion import (
     PrevisualizacionRecepcionResponse,
     ProcesarRecepcionRequest,
     RecepcionResponse,
+    SeleccionarHojaRecepcionRequest,
     TablasEquivalenciaResponse,
     VerificacionRecepcionResponse,
 )
@@ -160,10 +161,39 @@ async def previsualizar_archivo(
 
     return PrevisualizacionRecepcionResponse(
         nombre_archivo=archivo.filename or "archivo.xlsx",
+        hoja_actual=hoja_principal,
+        hojas_disponibles=nombres_hojas,
         encabezados=encabezados,
         mapeo_sugerido=mapeo_sugerido,
         filas_totales=len(df),
         nota_importacion_equivalencias=nota,
+    )
+
+
+@router.post("/hoja", response_model=PrevisualizacionRecepcionResponse,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO, RolUsuario.ADMIN_INVENTARIO))])
+def cambiar_hoja_recepcion(
+    datos: SeleccionarHojaRecepcionRequest, usuario: Usuario = Depends(usuario_actual),
+) -> PrevisualizacionRecepcionResponse:
+    """Cambia qué hoja del Excel ya subido se usa, sin tener que volver a subirlo."""
+    en_proceso = archivos_recepcion.obtener(usuario.id)
+    if not en_proceso:
+        raise HTTPException(status_code=400, detail="Primero sube un archivo con /recepcion/previsualizar.")
+    if datos.hoja not in en_proceso["hojas"]:
+        raise HTTPException(status_code=400, detail=f"La hoja '{datos.hoja}' no existe en el archivo.")
+
+    en_proceso["hoja_principal"] = datos.hoja
+    archivos_recepcion.guardar(usuario.id, en_proceso)
+
+    df = en_proceso["hojas"][datos.hoja]
+    encabezados = list(df.columns)
+    return PrevisualizacionRecepcionResponse(
+        nombre_archivo=en_proceso["nombre_archivo"] or "archivo.xlsx",
+        hoja_actual=datos.hoja,
+        hojas_disponibles=list(en_proceso["hojas"].keys()),
+        encabezados=encabezados,
+        mapeo_sugerido=srv.auto_detectar_mapeo(encabezados),
+        filas_totales=len(df),
     )
 
 

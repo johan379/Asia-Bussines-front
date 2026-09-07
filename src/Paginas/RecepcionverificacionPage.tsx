@@ -152,6 +152,21 @@ function RecepcionVerificacionPage({ sesion, onCerrarSesion, almacen }) {
                   </p>
                 )}
 
+                {c.hojasDisponibles.length > 1 && (
+                  <div className="recepcion-mapeo-campo" style={{ maxWidth: 320, marginBottom: "1rem" }}>
+                    <label>Hoja del Excel</label>
+                    <select
+                      value={c.hojaActual}
+                      disabled={c.cambiandoHoja}
+                      onChange={(e) => c.cambiarHoja(e.target.value)}
+                    >
+                      {c.hojasDisponibles.map((h) => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div className="recepcion-mapeo-grid">
                   {c.TODOS_LOS_CAMPOS.map((campo) => (
                     <div key={campo} className="recepcion-mapeo-campo">

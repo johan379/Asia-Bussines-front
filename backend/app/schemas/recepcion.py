@@ -46,10 +46,16 @@ class ResumenVerificacion(BaseModel):
 
 class PrevisualizacionRecepcionResponse(BaseModel):
     nombre_archivo: str
+    hoja_actual: str
+    hojas_disponibles: list[str]
     encabezados: list[str]
     mapeo_sugerido: dict[str, str]
     filas_totales: int
     nota_importacion_equivalencias: str = ""
+
+
+class SeleccionarHojaRecepcionRequest(BaseModel):
+    hoja: str
 
 
 class ProcesarRecepcionRequest(BaseModel):
