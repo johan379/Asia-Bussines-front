@@ -16,7 +16,9 @@ class Base(DeclarativeBase):
 
 # Importados solo por su efecto secundario (registrar las tablas en Base.metadata).
 from app.models import (  # noqa: E402,F401
+    apartado,
     bodega,
+    envio,
     equivalencias,
     movimiento,
     produccion,
@@ -24,5 +26,6 @@ from app.models import (  # noqa: E402,F401
     recepcion,
     rollo,
     solicitud,
+    unidad_familia,
     usuario,
 )

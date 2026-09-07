@@ -12,7 +12,8 @@ class Recepcion(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     fecha: Mapped[DateTime] = mapped_column(DateTime(timezone=True))
-    bodega_id: Mapped[int] = mapped_column(ForeignKey("bodegas.id"), nullable=False, index=True)
+    # NULL = recepción registrada por Admin Inventario (aún sin repartir a sede).
+    bodega_id: Mapped[int | None] = mapped_column(ForeignKey("bodegas.id"), nullable=True, index=True)
 
     encargado: Mapped[str] = mapped_column(String(150), default="")
     proveedor: Mapped[str] = mapped_column(String(150), default="")

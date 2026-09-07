@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import DateTime, Enum, Float, ForeignKey, String, Text
+from sqlalchemy import DateTime, Enum, Float, ForeignKey, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -20,9 +20,14 @@ class Rollo(Base):
     """
 
     __tablename__ = "rollos"
+    __table_args__ = (
+        Index("ix_rollos_bodega_fecha", "bodega_id", "fecha_ingreso"),
+        Index("ix_rollos_bodega_estado", "bodega_id", "estado"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    bodega_id: Mapped[int] = mapped_column(ForeignKey("bodegas.id"), nullable=False, index=True)
+    # NULL = material de Admin Inventario, aún sin repartir a ninguna sede.
+    bodega_id: Mapped[int | None] = mapped_column(ForeignKey("bodegas.id"), nullable=True, index=True)
     recepcion_id: Mapped[int | None] = mapped_column(ForeignKey("recepciones.id"), nullable=True)
 
     codigo_interno: Mapped[str] = mapped_column(String(60), index=True, nullable=False)
@@ -33,6 +38,13 @@ class Rollo(Base):
     color_material: Mapped[str] = mapped_column(String(60), default="")
     calibre: Mapped[float] = mapped_column(Float, default=0)
     peso_neto: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # Ancho físico del rollo (perpendicular a los metros que se consumen).
+    # Solo lo usa Producción de Caballetes: el ancho se divide siempre en 3
+    # para saber cuánto mide cada sección. La mayoría de rollos miden 122 m
+    # de ancho (el valor por defecto); si un rollo específico es distinto,
+    # se corrige aquí mismo, fila por fila — igual que `familia` — en vez de
+    # que el sistema intente adivinarlo por el código.
+    ancho_material: Mapped[float] = mapped_column(Float, default=122)
 
     metros_proveedor: Mapped[float] = mapped_column(Float, default=0)
     metros_calculados: Mapped[float] = mapped_column(Float, default=0)
