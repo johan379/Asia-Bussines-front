@@ -42,6 +42,15 @@ export function useMovimientosInventario({ sesion, almacen, cargarProductos, car
     setErrorMov("");
     setExitoMov("");
   }
+  // Atajo desde la fila de un producto en la pestaña "Productos" (botón
+  // "Añadir"): precarga tipo=entrada y el producto ya elegido, para que solo
+  // falte el motivo y la cantidad -- reutiliza el mismo formulario/validación
+  // de Movimientos, no un mecanismo aparte.
+  function prepararEntradaProducto(producto: { id: number }) {
+    setFormularioMov({ ...FORMULARIO_VACIO, tipo: "entrada", productoId: String(producto.id) });
+    setErrorMov("");
+    setExitoMov("");
+  }
   async function registrarMovimiento(evento: { preventDefault: () => void }) {
     evento.preventDefault();
     setErrorMov(""); setExitoMov("");
@@ -74,6 +83,6 @@ export function useMovimientosInventario({ sesion, almacen, cargarProductos, car
     } finally { setGuardandoMov(false); }
   }
   return { bodegas, bodegaId, bodegaActual, bodegasDestinoDisponibles, cargandoOpcionesMov: false,
-    formularioMov, errorMov, exitoMov, guardandoMov, actualizarCampoMov, cambiarTipoMov, registrarMovimiento,
+    formularioMov, errorMov, exitoMov, guardandoMov, actualizarCampoMov, cambiarTipoMov, prepararEntradaProducto, registrarMovimiento,
     MOTIVOS_ENTRADA, MOTIVOS_SALIDA };
 }

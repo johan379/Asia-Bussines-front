@@ -43,6 +43,7 @@ function InventarioPage({ sesion, onCerrarSesion, almacen }) {
     guardandoMov,
     actualizarCampoMov,
     cambiarTipoMov,
+    prepararEntradaProducto,
     registrarMovimiento,
     MOTIVOS_ENTRADA,
     MOTIVOS_SALIDA,
@@ -157,6 +158,8 @@ function InventarioPage({ sesion, onCerrarSesion, almacen }) {
           gruposPorFamilia={gruposPorFamilia}
           abrirFormularioEdicionProducto={abrirFormularioEdicionProducto}
           eliminarProducto={eliminarProducto}
+          prepararEntradaProducto={prepararEntradaProducto}
+          setPestanaActiva={setPestanaActiva}
         />
       )}
 

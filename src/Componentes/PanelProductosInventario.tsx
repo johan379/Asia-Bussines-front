@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { FAMILIA_PORCELANATO, FAMILIA_TEJA, normalizarFamilia } from "../Hooks/useProductosInventario";
 import PanelAdminUnidadesFamilia from "./PanelAdminUnidadesFamilia";
+import ModalConfirmacion from "./ModalConfirmacion";
 import { anchoPorSeccion } from "../Utils/produccion";
 import { esSegundaPorCodigo, longitudDesdeCodigo, calibrePantalla } from "../Utils/teja";
 
@@ -27,9 +28,12 @@ function PanelProductosInventario({
   gruposPorFamilia,
   abrirFormularioEdicionProducto,
   eliminarProducto,
+  prepararEntradaProducto,
+  setPestanaActiva,
 }) {
   const [mostrarAdminUnidades, setMostrarAdminUnidades] = useState(false);
   const [gruposFamiliaExpandidos, setGruposFamiliaExpandidos] = useState({});
+  const [productoAEliminar, setProductoAEliminar] = useState(null);
 
   function alternarGrupoFamilia(familia) {
     setGruposFamiliaExpandidos((actual) => ({ ...actual, [familia]: !actual[familia] }));
@@ -343,10 +347,18 @@ function PanelProductosInventario({
                                 : (almacen?.unidadPorFamilia?.[p.familia] || "—")}
                             </td>
                             <td className="inventario-acciones">
-                              <button onClick={() => abrirFormularioEdicionProducto(p)}>Editar</button>
+                              <button
+                                className="inventario-boton"
+                                onClick={() => { prepararEntradaProducto(p); setPestanaActiva("movimientos"); }}
+                              >
+                                Añadir
+                              </button>
+                              <button className="inventario-boton-cancelar" onClick={() => abrirFormularioEdicionProducto(p)}>
+                                Editar
+                              </button>
                               <button
                                 className="inventario-boton-eliminar"
-                                onClick={() => eliminarProducto(p.id)}
+                                onClick={() => setProductoAEliminar(p)}
                               >
                                 Eliminar
                               </button>
@@ -362,6 +374,16 @@ function PanelProductosInventario({
           })}
           </>
         )
+      )}
+      {productoAEliminar && (
+        <ModalConfirmacion
+          titulo="Eliminar producto"
+          mensaje={`¿Estás seguro de que quieres eliminar "${productoAEliminar.codigo} — ${productoAEliminar.descripcion}"? Esta acción no se puede deshacer.`}
+          textoConfirmar="Eliminar"
+          textoCancelar="Cancelar"
+          onConfirmar={() => { eliminarProducto(productoAEliminar.id); setProductoAEliminar(null); }}
+          onCancelar={() => setProductoAEliminar(null)}
+        />
       )}
     </div>
   );
