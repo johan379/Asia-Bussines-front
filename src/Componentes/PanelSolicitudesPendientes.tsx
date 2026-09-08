@@ -18,9 +18,9 @@ function PanelSolicitudesPendientes({
       <h2>Solicitudes de producción pendientes</h2>
       <p className="produccion-vacio" style={{ marginBottom: "0.75rem" }}>
         Vienen de apartados que la encargada de inventario ya envió a producción. Al elegir
-        "Iniciar producción" el sistema escoge automáticamente los rollos de ese código
-        (los más antiguos primero) hasta cubrir los metros pendientes; puedes ajustar la
-        selección abajo antes de registrar. La cotización y el cliente quedan asociados
+        "Iniciar producción" se completan los datos del producto y se muestran los rollos
+        disponibles de ese código en la sección de abajo, para que elijas cuál(es) usar y
+        cuántos metros consumir de cada uno. La cotización y el cliente quedan asociados
         automáticamente.
       </p>
       {errorSolicitudPendiente && <p className="produccion-error">{errorSolicitudPendiente}</p>}

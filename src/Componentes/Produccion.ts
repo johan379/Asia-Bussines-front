@@ -226,23 +226,13 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
     setProductoFabricado(solicitud.descripcion || solicitud.codigoInterno);
     setMedidaProducto(String(solicitud.medida));
     setCantidadProductos(String(solicitud.cantidad));
-    setCodigoBusqueda(solicitud.codigoInterno);
+    setCodigoBusqueda(solicitud.codigoInterno); // llena la tabla de "rollos disponibles" con este código.
 
-    // El material se escoge automáticamente: se toman los rollos más antiguos
-    // de ese código de clasificación hasta cubrir los metros que inventario
-    // dejó pendientes en el apartado. La encargada de planta puede ajustar
-    // la selección después si lo necesita.
-    const candidatos = rollosDeMiBodega
-      .filter((r) => r.codigoInterno === solicitud.codigoInterno && r.estado !== "agotado" && r.metrosDisponibles > 0)
-      .sort((a, b) => new Date(a.fechaIngreso).getTime() - new Date(b.fechaIngreso).getTime());
-
-    const { seleccion: nuevaSeleccion, restanteSinCubrir } = calcularAsignacionRollos(solicitud.metrosPendientes, candidatos, {});
-    setSeleccion(nuevaSeleccion);
-    setAdvertenciaSeleccion(
-      restanteSinCubrir > 0
-        ? `Solo se pudo asignar automáticamente ${redondear(solicitud.metrosPendientes - restanteSinCubrir)} m de los ${solicitud.metrosPendientes} m pendientes: no hay más material disponible de ese código en tu bodega.`
-        : ""
-    );
+    // El rollo físico lo elige Planta a mano en la tabla de abajo (checkbox +
+    // metros por fila) -- ya no se preselecciona por antigüedad (FIFO): en la
+    // práctica se usa el rollo que está a la mano, no el más viejo.
+    setSeleccion({});
+    setAdvertenciaSeleccion("");
   }
 
   function limpiarSolicitud() {
@@ -287,6 +277,25 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
         const { [rollo.id]: _quitado, ...resto } = actual;
         return resto;
       }
+      // Planta elige el rollo, pero los metros a sacarle se siguen sugiriendo
+      // solos -- lo que falte para cubrir el objetivo, sin pasarse de lo
+      // disponible en este rollo. Caballetes/Flanches: el objetivo es el total
+      // EXACTO que exige el corte físico (infoCorte.metrosNecesarios) -- esa
+      // exigencia no cambia, solo quién elige de cuál rollo sale (la sigue
+      // garantizando validar()/el backend, no esta función). Teja: el objetivo
+      // es lo pendiente del apartado. Si no aplica ninguno (producción libre de
+      // teja, o seccionado sin cantidad/medida aún), queda en 0 para escribirlo
+      // a mano, igual que siempre.
+      if (SECCIONES_POR_TIPO_PRODUCTO[tipoProducto]) {
+        if (infoCorte) {
+          return calcularAsignacionRollos(infoCorte.metrosNecesarios, [rollo], actual).seleccion;
+        }
+      } else {
+        const solicitud = apartadoItemId ? solicitudesPendientes.find((s) => s.itemId === apartadoItemId) : null;
+        if (solicitud) {
+          return calcularAsignacionRollos(solicitud.metrosPendientes, [rollo], actual).seleccion;
+        }
+      }
       return { ...actual, [rollo.id]: { seleccionado: true, metrosTexto: "" } };
     });
   }
@@ -326,19 +335,11 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
   const gestionandoStockRef = useRef(false);
 
   useEffect(() => {
-    // Los productos seccionados (caballete, flanche) tienen su propia regla
-    // (ver infoCorte): el objetivo de metros es exacto (cortes × longitud),
-    // no "pendiente del apartado + stock declarado" — así que la lógica de
-    // tejas de aquí abajo NO aplica. Misma función bidireccional para subir
-    // o bajar el rollo.
-    if (SECCIONES_POR_TIPO_PRODUCTO[tipoProducto]) {
-      if (!infoCorte) return;
-      const candidatos = [...rollosDisponibles].sort(
-        (a, b) => new Date(a.fechaIngreso).getTime() - new Date(b.fechaIngreso).getTime()
-      );
-      setSeleccion((actual) => calcularAsignacionRollos(infoCorte.metrosNecesarios, candidatos, actual).seleccion);
-      return;
-    }
+    // Caballetes/Flanches: el rollo lo elige Planta a mano (ver
+    // alternarSeleccionRollo) -- el total EXACTO que exige el corte físico lo
+    // sigue garantizando validar()/el backend, no este efecto. Igual que Teja,
+    // aquí ya no se auto-asigna nada por FIFO.
+    if (SECCIONES_POR_TIPO_PRODUCTO[tipoProducto]) return;
 
     const metrosUnidad = Number(metrosPorUnidad) || 0;
     const metrosNecesariosStock = metrosUnidad > 0
@@ -362,7 +363,7 @@ export function useControladorProduccion(sesion: Sesion, _almacen: unknown) {
     );
     setSeleccion((actual) => calcularAsignacionRollos(objetivoTotal, candidatos, actual).seleccion);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipoProducto, infoCorte, stockAdicional, metrosPorUnidad, apartadoItemId, rollosDisponibles, solicitudesPendientes]);
+  }, [tipoProducto, stockAdicional, metrosPorUnidad, apartadoItemId, rollosDisponibles, solicitudesPendientes]);
 
   // Siembra la línea de stock adicional con el sobrante calculado (5
   // unidades pedidas -> corte de 6 -> 1 de sobrante), pero solo si el
