@@ -34,7 +34,7 @@ export function movimientoDesdeApi(m: RegistroApi) {
     rolloId: m.rollo_id == null ? null : numero(m.rollo_id), identificadorRollo: texto(m.identificador_rollo),
     bodegaOrigenId: numero(m.bodega_origen_id), bodegaDestinoId: numero(m.bodega_destino_id),
     cantidad: numero(m.cantidad), usuario: texto(m.usuario), observaciones: texto(m.observaciones),
-    cotizacion: texto(m.cotizacion) };
+    cotizacion: texto(m.cotizacion), empresaExterna: texto(m.empresa_externa) };
 }
 
 export function solicitudDesdeApi(s: RegistroApi, bodegasPorId: BodegasPorId = {}) {

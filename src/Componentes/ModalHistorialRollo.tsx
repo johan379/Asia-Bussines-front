@@ -80,6 +80,7 @@ function ModalHistorialRollo({
                   <th>Fecha</th>
                   <th>Tipo</th>
                   <th>Motivo</th>
+                  <th>Empresa</th>
                   <th>Cantidad (m)</th>
                   <th>Cotización</th>
                   <th>Observaciones</th>
@@ -91,6 +92,7 @@ function ModalHistorialRollo({
                     <td>{formatearFechaColombia(m.fecha)}</td>
                     <td>{m.tipo}</td>
                     <td>{m.motivo || "—"}</td>
+                    <td>{m.empresaExterna || "—"}</td>
                     <td>{m.cantidad}</td>
                     <td>{m.cotizacion || "—"}</td>
                     <td>{m.observaciones || "—"}</td>

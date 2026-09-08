@@ -102,6 +102,15 @@ function ReportesPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesion; onC
                 />
               </div>
               <div>
+                <label>Empresa (salida externa)</label>
+                <input
+                  type="text"
+                  value={r.filtros.empresaExterna}
+                  onChange={(e) => r.actualizarFiltro("empresaExterna", e.target.value)}
+                  placeholder="Ej. Tejas del Norte"
+                />
+              </div>
+              <div>
                 <label>Desde</label>
                 <input
                   type="date"
@@ -151,6 +160,7 @@ function ReportesPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesion; onC
                       <th>Motivo</th>
                       <th>Producto</th>
                       <th>Referencia</th>
+                      <th>Empresa</th>
                       <th>Cantidad</th>
                       <th>Usuario</th>
                       <th>Observaciones</th>
@@ -171,6 +181,7 @@ function ReportesPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesion; onC
                           {m.productoCodigo} — {m.productoDescripcion}
                         </td>
                         <td>{m.identificadorRollo || "—"}</td>
+                        <td>{m.empresaExterna || "—"}</td>
                         <td>{m.cantidad}</td>
                         <td>{m.usuario}</td>
                         <td>{m.observaciones || "—"}</td>

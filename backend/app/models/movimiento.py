@@ -41,3 +41,6 @@ class Movimiento(Base):
     usuario: Mapped[str] = mapped_column(String(150), default="")
     observaciones: Mapped[str] = mapped_column(Text, default="")
     cotizacion: Mapped[str] = mapped_column(String(32), default="")
+    # Solo se informa en salidas hacia terceros (intercambio con otra
+    # empresa, motivo="intercambio_externo") -- vacío en todo lo demás.
+    empresa_externa: Mapped[str] = mapped_column(String(150), default="", index=True)

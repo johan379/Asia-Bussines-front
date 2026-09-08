@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../Componentes/Api";
 import { movimientoDesdeApi } from "../Componentes/Mapeo";
 
-const FILTROS_VACIOS = { codigoProducto: "", cotizacion: "", fechaDesde: "", fechaHasta: "" };
+const FILTROS_VACIOS = { codigoProducto: "", cotizacion: "", empresaExterna: "", fechaDesde: "", fechaHasta: "" };
 
 /** Consulta, filtros y paginación del historial; no depende de la interfaz. */
-type Filtros = { codigoProducto: string; cotizacion: string; fechaDesde: string; fechaHasta: string };
+type Filtros = { codigoProducto: string; cotizacion: string; empresaExterna: string; fechaDesde: string; fechaHasta: string };
 type Paginacion = { total: number; pagina: number; total_paginas: number };
 
 type RespuestaHistorial = { items: Record<string, unknown>[] } & Paginacion;
@@ -25,6 +25,7 @@ export function useHistorialInventario(bodegaId: number | undefined) {
       const parametros = new URLSearchParams({ paginado: "true", pagina: String(paginaHistorial), tamano: "30" });
       if (filtros.codigoProducto) parametros.set("codigo_producto", filtros.codigoProducto);
       if (filtros.cotizacion) parametros.set("cotizacion", filtros.cotizacion);
+      if (filtros.empresaExterna) parametros.set("empresa_externa", filtros.empresaExterna);
       if (filtros.fechaDesde) parametros.set("fecha_desde", filtros.fechaDesde);
       if (filtros.fechaHasta) parametros.set("fecha_hasta", filtros.fechaHasta);
       const datos = await api.get<RespuestaHistorial>(`/inventario/historial?${parametros.toString()}`);

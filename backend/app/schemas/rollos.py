@@ -90,6 +90,13 @@ class ConsumoRolloCrear(BaseModel):
     observaciones: str = ""
 
 
+class SalidaExternaRolloCrear(BaseModel):
+    """Salida del rollo completo hacia otra empresa (intercambio externo) --
+    nunca una cantidad parcial, igual que "solicitar un rollo" entre bodegas."""
+    empresa: str = Field(min_length=1)
+    observaciones: str = ""
+
+
 class ActualizarObservacionesRollo(BaseModel):
     observaciones: str
 

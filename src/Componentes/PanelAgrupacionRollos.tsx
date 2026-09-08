@@ -15,6 +15,7 @@ function PanelAgrupacionRollos({
   actualizarAnchoRollo,
   abrirConsumo,
   abrirHistorial,
+  abrirSalidaExterna,
 }) {
   const [gruposExpandidos, setGruposExpandidos] = useState({});
 
@@ -144,6 +145,14 @@ function PanelAgrupacionRollos({
                           onClick={() => abrirHistorial(rollo)}
                         >
                           Ver historial
+                        </button>
+                        <button
+                          type="button"
+                          className="rollos-boton-secundario"
+                          disabled={rollo.estado === "agotado"}
+                          onClick={() => abrirSalidaExterna(rollo)}
+                        >
+                          Salida externa
                         </button>
                       </td>
                     </tr>

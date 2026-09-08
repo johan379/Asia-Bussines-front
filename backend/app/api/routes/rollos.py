@@ -13,12 +13,13 @@ from app.schemas.inventario import MovimientoResponse
 from app.schemas.rollos import (
     ActualizarAnchoRollo, ActualizarFamiliaRollo, ActualizarObservacionesRollo, ClasificacionSugeridaResponse, ConfirmarCargaRollosRequest,
     ConsumoRolloCrear, PaginaRollos, PrevisualizacionCargaRollosResponse, ResultadoCargaRollosResponse, RolloCrear,
+    SalidaExternaRolloCrear,
     RolloResponse, SeleccionarHojaCargaRollosRequest, SugerenciaReferenciaResponse,
 )
 from app.services import archivos_carga_rollos
 from app.services import carga_rollos as srv_carga
 from app.services import clasificacion as srv_excel
-from app.services.consumos_rollo import registrar_consumo_rollo
+from app.services.consumos_rollo import registrar_consumo_rollo, registrar_salida_externa_rollo
 
 router = APIRouter(prefix="/rollos", tags=["Rollos almacenados"])
 
@@ -260,6 +261,19 @@ def registrar_consumo(
     """Endpoint delgado; la validación, trazabilidad y bloqueo viven en el servicio."""
     rollo = registrar_consumo_rollo(db, rollo_id=rollo_id, cantidad=datos.cantidad,
                                     observaciones=datos.observaciones, usuario=usuario)
+    db.commit()
+    db.refresh(rollo)
+    return rollo
+
+
+@router.post("/{rollo_id}/salida-externa", response_model=RolloResponse,
+             dependencies=[Depends(requiere_rol(RolUsuario.ADMINISTRATIVO, RolUsuario.ADMIN_INVENTARIO))])
+def registrar_salida_externa(
+    rollo_id: int, datos: SalidaExternaRolloCrear, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual),
+) -> Rollo:
+    """Salida del rollo completo hacia otra empresa (intercambio externo)."""
+    rollo = registrar_salida_externa_rollo(db, rollo_id=rollo_id, empresa=datos.empresa,
+                                           observaciones=datos.observaciones, usuario=usuario)
     db.commit()
     db.refresh(rollo)
     return rollo

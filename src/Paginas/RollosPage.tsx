@@ -3,6 +3,7 @@ import BarraLateral from "../Componentes/BarraLateral";
 import { useControladorRollos } from "../Componentes/Rollos";
 import Paginacion from "../Componentes/Paginacion";
 import ModalConsumoRollo from "../Componentes/ModalConsumoRollo";
+import ModalSalidaExternaRollo from "../Componentes/ModalSalidaExternaRollo";
 import ModalHistorialRollo from "../Componentes/ModalHistorialRollo";
 import PanelFiltrosRollos from "../Componentes/PanelFiltrosRollos";
 import PanelCargaMasivaRollos from "../Componentes/PanelCargaMasivaRollos";
@@ -81,6 +82,7 @@ function RollosPage({ sesion, onCerrarSesion, almacen }) {
             actualizarAnchoRollo={r.actualizarAnchoRollo}
             abrirConsumo={r.abrirConsumo}
             abrirHistorial={r.abrirHistorial}
+            abrirSalidaExterna={r.abrirSalidaExterna}
           />
 
           {/* ================== MODAL: INGRESO MANUAL DE ROLLO ================== */}
@@ -123,6 +125,21 @@ function RollosPage({ sesion, onCerrarSesion, almacen }) {
               cargandoHistorial={r.cargandoHistorial}
               errorHistorial={r.errorHistorial}
               historialRollo={r.historialRollo}
+            />
+          )}
+
+          {/* ================== MODAL: SALIDA EXTERNA (INTERCAMBIO) ================== */}
+          {r.rolloParaSalidaExterna && (
+            <ModalSalidaExternaRollo
+              rolloParaSalidaExterna={r.rolloParaSalidaExterna}
+              empresaSalidaExterna={r.empresaSalidaExterna}
+              setEmpresaSalidaExterna={r.setEmpresaSalidaExterna}
+              observacionesSalidaExterna={r.observacionesSalidaExterna}
+              setObservacionesSalidaExterna={r.setObservacionesSalidaExterna}
+              errorSalidaExterna={r.errorSalidaExterna}
+              guardandoSalidaExterna={r.guardandoSalidaExterna}
+              cerrarSalidaExterna={r.cerrarSalidaExterna}
+              registrarSalidaExterna={r.registrarSalidaExterna}
             />
           )}
         </div>

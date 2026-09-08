@@ -40,3 +40,38 @@ def registrar_consumo_rollo(
         observaciones=observaciones or "Consumo en producción.",
     ))
     return rollo
+
+
+def registrar_salida_externa_rollo(
+    db: Session, *, rollo_id: int, empresa: str, observaciones: str, usuario: Usuario
+) -> Rollo:
+    """Saca el rollo COMPLETO hacia otra empresa (intercambio externo, no una
+    transferencia entre nuestras bodegas). Reutiliza el mismo mecanismo que
+    el consumo: mueve todos los metros disponibles a consumidos y deja que
+    `recalcular_estado()` derive AGOTADO -- nunca se toca `estado` a mano."""
+    rollo = (
+        db.query(Rollo)
+        .filter(Rollo.id == rollo_id, coincide_bodega(Rollo.bodega_id, usuario.bodega_id))
+        .with_for_update()
+        .first()
+    )
+    if rollo is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rollo no encontrado.")
+    empresa = empresa.strip()
+    if not empresa:
+        raise HTTPException(status_code=400, detail="El nombre de la empresa es obligatorio.")
+    if rollo.metros_disponibles <= 0:
+        raise HTTPException(status_code=400, detail="Este rollo ya está agotado, no tiene metros disponibles.")
+    ahora = datetime.now(timezone.utc)
+    cantidad = rollo.metros_disponibles
+    rollo.metros_consumidos += cantidad
+    rollo.metros_disponibles = 0
+    rollo.recalcular_estado()
+    db.add(Movimiento(
+        fecha=ahora, tipo=TipoMovimiento.SALIDA, motivo="intercambio_externo", producto_codigo=rollo.codigo_interno,
+        producto_descripcion=f"{rollo.descripcion} (rollo {rollo.identificador_rollo})",
+        rollo_id=rollo.id, identificador_rollo=rollo.identificador_rollo,
+        bodega_origen_id=usuario.bodega_id, bodega_destino_id=None, cantidad=cantidad, usuario=usuario.correo,
+        empresa_externa=empresa, observaciones=observaciones or f"Intercambio con {empresa}.",
+    ))
+    return rollo

@@ -45,6 +45,15 @@ function PanelHistorialInventario({
           </div>
 
           <div>
+            <label>Empresa (salida externa)</label>
+            <input
+              value={filtros.empresaExterna}
+              onChange={(e) => actualizarFiltro("empresaExterna", e.target.value)}
+              placeholder="Ej: Tejas del Norte"
+            />
+          </div>
+
+          <div>
             <label>Desde</label>
             <input
               type="date"
@@ -91,6 +100,7 @@ function PanelHistorialInventario({
                 <th>Referencia</th>
                 <th>Origen</th>
                 <th>Destino</th>
+                <th>Empresa</th>
                 <th>Cantidad</th>
                 <th>Usuario</th>
                 <th>Observaciones</th>
@@ -99,7 +109,7 @@ function PanelHistorialInventario({
             <tbody>
               {historial.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="inventario-vacio">
+                  <td colSpan={12} className="inventario-vacio">
                     No hay movimientos que coincidan con los filtros.
                   </td>
                 </tr>
@@ -118,6 +128,7 @@ function PanelHistorialInventario({
                     <td>{m.identificadorRollo || "—"}</td>
                     <td>{bodegas.find((b) => b.id === m.bodegaOrigenId)?.nombre || "—"}</td>
                     <td>{bodegas.find((b) => b.id === m.bodegaDestinoId)?.nombre || "—"}</td>
+                    <td>{m.empresaExterna || "—"}</td>
                     <td>{m.cantidad}</td>
                     <td>{m.usuario}</td>
                     <td>{m.observaciones || "—"}</td>

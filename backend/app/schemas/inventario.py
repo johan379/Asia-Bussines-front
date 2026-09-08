@@ -72,6 +72,7 @@ class MovimientoResponse(ModeloConFechasUtc):
     usuario: str
     observaciones: str
     cotizacion: str = ""
+    empresa_externa: str = ""
 
 
 class PaginaProductos(BaseModel):

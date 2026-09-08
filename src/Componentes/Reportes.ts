@@ -7,6 +7,7 @@ const FILTROS_VACIOS = {
   codigoProducto: "",
   codigoRollo: "",
   cotizacion: "",
+  empresaExterna: "",
   fechaDesde: "",
   fechaHasta: "",
 };
@@ -43,6 +44,7 @@ export function useControladorReportes(_sesion: unknown, _almacen: unknown) {
       if (filtros.codigoProducto) parametros.set("codigo_producto", filtros.codigoProducto);
       if (filtros.codigoRollo) parametros.set("codigo_rollo", filtros.codigoRollo);
       if (filtros.cotizacion) parametros.set("cotizacion", filtros.cotizacion);
+      if (filtros.empresaExterna) parametros.set("empresa_externa", filtros.empresaExterna);
       if (filtros.tipo) parametros.set("tipo", filtros.tipo);
       if (filtros.fechaDesde) parametros.set("fecha_desde", filtros.fechaDesde);
       if (filtros.fechaHasta) parametros.set("fecha_hasta", filtros.fechaHasta);

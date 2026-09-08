@@ -157,6 +157,24 @@ export function useControladorRollos(_sesion: unknown, _almacen: unknown) {
     setErrorConsumo("");
   }
 
+  const [rolloParaSalidaExterna, setRolloParaSalidaExterna] = useState<Rollo | null>(null);
+  const [empresaSalidaExterna, setEmpresaSalidaExterna] = useState("");
+  const [observacionesSalidaExterna, setObservacionesSalidaExterna] = useState("");
+  const [errorSalidaExterna, setErrorSalidaExterna] = useState("");
+  const [guardandoSalidaExterna, setGuardandoSalidaExterna] = useState(false);
+
+  function abrirSalidaExterna(rollo: Rollo) {
+    setRolloParaSalidaExterna(rollo);
+    setEmpresaSalidaExterna("");
+    setObservacionesSalidaExterna("");
+    setErrorSalidaExterna("");
+  }
+
+  function cerrarSalidaExterna() {
+    setRolloParaSalidaExterna(null);
+    setErrorSalidaExterna("");
+  }
+
   const FORMULARIO_ROLLO_VACIO = {
     codigoInterno: "", identificadorRollo: "", codigoProveedor: "", descripcion: "",
     colorMaterial: "", calibre: "", pesoNeto: "", metrosProveedor: "", metrosDisponibles: "",
@@ -332,6 +350,34 @@ export function useControladorRollos(_sesion: unknown, _almacen: unknown) {
     }
   }
 
+  async function registrarSalidaExterna(evento: { preventDefault: () => void }) {
+    evento.preventDefault();
+    if (!rolloParaSalidaExterna) return;
+
+    if (!empresaSalidaExterna.trim()) {
+      setErrorSalidaExterna("El nombre de la empresa es obligatorio.");
+      return;
+    }
+
+    setGuardandoSalidaExterna(true);
+    setErrorSalidaExterna("");
+    try {
+      await api.post(`/rollos/${rolloParaSalidaExterna.id}/salida-externa`, {
+        empresa: empresaSalidaExterna.trim(),
+        observaciones: observacionesSalidaExterna,
+      });
+
+      await cargarRollos();
+      setRolloParaSalidaExterna(null);
+    } catch (err) {
+      setErrorSalidaExterna(
+        err instanceof ErrorApi ? err.message : "No se pudo registrar la salida. Intenta de nuevo."
+      );
+    } finally {
+      setGuardandoSalidaExterna(false);
+    }
+  }
+
   async function actualizarObservacionesRollo(idRollo: number, texto: string) {
     try {
       await api.patch(`/rollos/${idRollo}/observaciones`, { observaciones: texto });
@@ -433,6 +479,17 @@ export function useControladorRollos(_sesion: unknown, _almacen: unknown) {
     abrirConsumo,
     cerrarConsumo,
     registrarConsumo,
+
+    rolloParaSalidaExterna,
+    empresaSalidaExterna,
+    setEmpresaSalidaExterna,
+    observacionesSalidaExterna,
+    setObservacionesSalidaExterna,
+    errorSalidaExterna,
+    guardandoSalidaExterna,
+    abrirSalidaExterna,
+    cerrarSalidaExterna,
+    registrarSalidaExterna,
 
     actualizarObservacionesRollo,
     actualizarFamiliaRollo,
