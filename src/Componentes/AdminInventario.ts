@@ -88,8 +88,39 @@ export function useControladorAdminInventario(sesion: Sesion, almacen: AlmacenGl
   // ---------- Paginación del resumen (10 por página, cada tabla aparte) ----------
   const [paginaRollos, setPaginaRollos] = useState(1);
   const [paginaProductos, setPaginaProductos] = useState(1);
-  const { items: rollosResumenPagina, paginacion: paginacionRollos } = paginar(comparativo.rollos, paginaRollos);
-  const { items: productosResumenPagina, paginacion: paginacionProductos } = paginar(comparativo.productos, paginaProductos);
+
+  // ---------- Búsqueda del resumen (por código o descripción, cada tabla aparte) ----------
+  const [busquedaResumenRollos, setBusquedaResumenRollos] = useState("");
+  const [busquedaResumenProductos, setBusquedaResumenProductos] = useState("");
+
+  const rollosResumenFiltrados = useMemo(() => {
+    const termino = normalizarTexto(busquedaResumenRollos);
+    if (!termino) return comparativo.rollos;
+    return comparativo.rollos.filter((f) =>
+      normalizarTexto(f.codigo).includes(termino) || normalizarTexto(f.descripcion).includes(termino)
+    );
+  }, [comparativo.rollos, busquedaResumenRollos]);
+
+  const productosResumenFiltrados = useMemo(() => {
+    const termino = normalizarTexto(busquedaResumenProductos);
+    if (!termino) return comparativo.productos;
+    return comparativo.productos.filter((f) =>
+      normalizarTexto(f.codigo).includes(termino) || normalizarTexto(f.descripcion).includes(termino)
+    );
+  }, [comparativo.productos, busquedaResumenProductos]);
+
+  function buscarResumenRollos(texto: string) {
+    setBusquedaResumenRollos(texto);
+    setPaginaRollos(1);
+  }
+
+  function buscarResumenProductos(texto: string) {
+    setBusquedaResumenProductos(texto);
+    setPaginaProductos(1);
+  }
+
+  const { items: rollosResumenPagina, paginacion: paginacionRollos } = paginar(rollosResumenFiltrados, paginaRollos);
+  const { items: productosResumenPagina, paginacion: paginacionProductos } = paginar(productosResumenFiltrados, paginaProductos);
 
   // ---------- Expandir una fila del resumen: ver cada rollo individual (con su peso) ----------
   const [codigoRolloExpandido, setCodigoRolloExpandido] = useState<string | null>(null);
@@ -249,6 +280,7 @@ export function useControladorAdminInventario(sesion: Sesion, almacen: AlmacenGl
 
     rollosResumenPagina, paginacionRollos, paginaRollos, setPaginaRollos,
     productosResumenPagina, paginacionProductos, paginaProductos, setPaginaProductos,
+    busquedaResumenRollos, buscarResumenRollos, busquedaResumenProductos, buscarResumenProductos,
 
     codigoRolloExpandido, rollosDelCodigoExpandido, cargandoRollosExpandido, alternarExpandirCodigoRollo,
 

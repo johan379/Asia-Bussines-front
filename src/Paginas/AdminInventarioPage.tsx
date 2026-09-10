@@ -238,6 +238,14 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                 <p className="inventario-cargando">Cargando...</p>
               ) : (
                 <>
+                  <div className="inventario-buscador">
+                    <input
+                      type="text"
+                      placeholder="Buscar por código o descripción..."
+                      value={c.busquedaResumenRollos}
+                      onChange={(e) => c.buscarResumenRollos(e.target.value)}
+                    />
+                  </div>
                   <div className="inventario-tabla-contenedor">
                     <table className="inventario-tabla">
                       <thead>
@@ -254,7 +262,9 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                       </thead>
                       <tbody>
                         {c.rollosResumenPagina.length === 0 ? (
-                          <tr><td colSpan={bodegas.length + 7} className="inventario-vacio">Sin datos.</td></tr>
+                          <tr><td colSpan={bodegas.length + 7} className="inventario-vacio">
+                            {c.busquedaResumenRollos ? "Sin resultados para tu búsqueda." : "Sin datos."}
+                          </td></tr>
                         ) : (
                           c.rollosResumenPagina.map((f) => {
                             const colorClase = claseColorMaterial(f.colorMaterial);
@@ -406,6 +416,14 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                     Igual que la tabla de arriba, pero para productos (mercancía por unidades, no rollos de
                     materia prima).
                   </p>
+                  <div className="inventario-buscador">
+                    <input
+                      type="text"
+                      placeholder="Buscar por código o descripción..."
+                      value={c.busquedaResumenProductos}
+                      onChange={(e) => c.buscarResumenProductos(e.target.value)}
+                    />
+                  </div>
                   <div className="inventario-tabla-contenedor">
                     <table className="inventario-tabla">
                       <thead>
@@ -420,7 +438,9 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                       </thead>
                       <tbody>
                         {c.productosResumenPagina.length === 0 ? (
-                          <tr><td colSpan={bodegas.length + 5} className="inventario-vacio">Sin datos.</td></tr>
+                          <tr><td colSpan={bodegas.length + 5} className="inventario-vacio">
+                            {c.busquedaResumenProductos ? "Sin resultados para tu búsqueda." : "Sin datos."}
+                          </td></tr>
                         ) : (
                           c.productosResumenPagina.map((f) => (
                             <tr key={f.codigo}>
