@@ -6,7 +6,7 @@ import type { AlmacenGlobal, Sesion } from "../types/dominio";
 type RolloResumen = {
   codigo: string; descripcion: string; colorMaterial: string; calibre: string;
   porBodega: Record<string, number>; total: number;
-  pesoPorBodega: Record<string, number>; pesoTotal: number;
+  pesoActualPorBodega: Record<string, number>; pesoActualTotal: number; rollosSinPesoActual: number;
   cantidadPorBodega: Record<string, number>; cantidadTotal: number;
 };
 type ProductoResumen = {
@@ -15,12 +15,15 @@ type ProductoResumen = {
 };
 type Comparativo = {
   bodegas: { id: number; nombre: string }[]; rollos: RolloResumen[]; productos: ProductoResumen[];
-  pesoTotalPorBodega: Record<string, number>; pesoTotalGeneral: number;
+  pesoActualTotalPorBodega: Record<string, number>; pesoActualTotalGeneral: number; rollosSinPesoActualTotal: number;
 };
 type ItemProducto = { codigo: string; cantidad: string };
 type FormularioEnvio = { bodegaDestinoId: string; rollosSeleccionados: number[]; itemsProducto: ItemProducto[]; observaciones: string };
 
-const COMPARATIVO_VACIO: Comparativo = { bodegas: [], rollos: [], productos: [], pesoTotalPorBodega: {}, pesoTotalGeneral: 0 };
+const COMPARATIVO_VACIO: Comparativo = {
+  bodegas: [], rollos: [], productos: [],
+  pesoActualTotalPorBodega: {}, pesoActualTotalGeneral: 0, rollosSinPesoActualTotal: 0,
+};
 const TAMANO_PAGINA_RESUMEN = 10;
 
 function paginar<T>(items: T[], pagina: number) {
@@ -50,7 +53,8 @@ export function useControladorAdminInventario(sesion: Sesion, almacen: AlmacenGl
       const datos = await api.get<{
         bodegas?: { id: number; nombre: string }[];
         rollos?: Record<string, any>[]; productos?: Record<string, any>[];
-        peso_total_por_bodega?: Record<string, number>; peso_total_general?: number;
+        peso_actual_total_por_bodega?: Record<string, number>; peso_actual_total_general?: number;
+        rollos_sin_peso_actual_total?: number;
       }>("/admin-inventario/comparativo");
       if (!datos) throw new Error("Respuesta vacía del servidor.");
       setComparativo({
@@ -58,15 +62,17 @@ export function useControladorAdminInventario(sesion: Sesion, almacen: AlmacenGl
         rollos: (datos.rollos || []).map((f) => ({
           codigo: f.codigo, descripcion: f.descripcion, colorMaterial: f.color_material, calibre: f.calibre,
           porBodega: f.por_bodega, total: f.total,
-          pesoPorBodega: f.peso_por_bodega || {}, pesoTotal: f.peso_total || 0,
+          pesoActualPorBodega: f.peso_actual_por_bodega || {}, pesoActualTotal: f.peso_actual_total || 0,
+          rollosSinPesoActual: f.rollos_sin_peso_actual || 0,
           cantidadPorBodega: f.cantidad_por_bodega || {}, cantidadTotal: f.cantidad_total || 0,
         })),
         productos: (datos.productos || []).map((f) => ({
           codigo: f.codigo, descripcion: f.descripcion, calibre: f.calibre, familia: f.familia || "",
           porBodega: f.por_bodega, total: f.total,
         })),
-        pesoTotalPorBodega: datos.peso_total_por_bodega || {},
-        pesoTotalGeneral: datos.peso_total_general || 0,
+        pesoActualTotalPorBodega: datos.peso_actual_total_por_bodega || {},
+        pesoActualTotalGeneral: datos.peso_actual_total_general || 0,
+        rollosSinPesoActualTotal: datos.rollos_sin_peso_actual_total || 0,
       });
       setPaginaRollos(1);
       setPaginaProductos(1);

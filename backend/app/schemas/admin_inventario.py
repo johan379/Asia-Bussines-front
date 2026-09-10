@@ -13,10 +13,14 @@ class FilaComparativoResponse(BaseModel):
     familia: str = ""
     por_bodega: dict[int, float]
     total: float
-    # Solo para rollos (peso neto en toneladas y cantidad de rollos); en
-    # productos quedan vacíos — un producto no se cuenta por unidad física.
-    peso_por_bodega: dict[int, float] = {}
-    peso_total: float = 0.0
+    # Solo para rollos (peso ACTUAL en toneladas -- según metros disponibles
+    # hoy, no el peso neto de ingreso -- y cantidad de rollos); en productos
+    # quedan vacíos, un producto no se cuenta por unidad física.
+    peso_actual_por_bodega: dict[int, float] = {}
+    peso_actual_total: float = 0.0
+    # Rollos de este código que no entraron en la suma de arriba porque su
+    # calibre no está en la tabla de equivalencias (mt_por_ton desconocido).
+    rollos_sin_peso_actual: int = 0
     cantidad_por_bodega: dict[int, int] = {}
     cantidad_total: int = 0
 
@@ -28,5 +32,6 @@ class ComparativoInventarioResponse(BaseModel):
     bodegas: list[BodegaResponse]
     rollos: list[FilaComparativoResponse]
     productos: list[FilaComparativoResponse]
-    peso_total_por_bodega: dict[int, float] = {}
-    peso_total_general: float = 0.0
+    peso_actual_total_por_bodega: dict[int, float] = {}
+    peso_actual_total_general: float = 0.0
+    rollos_sin_peso_actual_total: int = 0

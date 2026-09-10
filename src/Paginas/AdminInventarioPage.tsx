@@ -38,7 +38,8 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
       }
       fila["Total empresa (m)"] = f.total;
       fila["Total rollos"] = f.cantidadTotal;
-      fila["Peso total (t)"] = f.pesoTotal;
+      fila["Peso actual (t)"] = f.pesoActualTotal;
+      fila["Rollos sin peso actual"] = f.rollosSinPesoActual;
       return fila;
     });
     exportarArregloAExcel(filas, "Resumen_Rollos_Por_Codigo.xlsx", "Rollos por código");
@@ -248,7 +249,7 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                           <th>Calibre</th>
                           {bodegas.map((b) => <th key={b.id}>{b.nombre}</th>)}
                           <th>Total empresa</th>
-                          <th>Peso total (t)</th>
+                          <th>Peso actual (t)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -300,7 +301,21 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                                       {f.cantidadTotal} rollo{f.cantidadTotal === 1 ? "" : "s"}
                                     </span>
                                   </td>
-                                  <td>{f.pesoTotal} t</td>
+                                  <td>
+                                    {f.pesoActualTotal} t
+                                    {f.rollosSinPesoActual > 0 && (
+                                      <>
+                                        <br />
+                                        <span
+                                          className="rollos-texto-ayuda"
+                                          style={{ margin: 0 }}
+                                          title="Estos rollos no tienen su calibre registrado en la tabla de equivalencias, así que no se pueden sumar aquí."
+                                        >
+                                          no incluye {f.rollosSinPesoActual} sin calibre
+                                        </span>
+                                      </>
+                                    )}
+                                  </td>
                                 </tr>
                                 {expandido && (
                                   <tr>
@@ -352,12 +367,12 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                       {c.comparativo.rollos.length > 0 && (
                         <tfoot>
                           <tr>
-                            <td colSpan={5}><strong>Peso total por bodega (t)</strong></td>
+                            <td colSpan={5}><strong>Peso actual por bodega (t)</strong></td>
                             {bodegas.map((b) => (
-                              <td key={b.id}><strong>{c.comparativo.pesoTotalPorBodega[b.id] ?? 0} t</strong></td>
+                              <td key={b.id}><strong>{c.comparativo.pesoActualTotalPorBodega[b.id] ?? 0} t</strong></td>
                             ))}
                             <td></td>
-                            <td><strong>{c.comparativo.pesoTotalGeneral} t</strong></td>
+                            <td><strong>{c.comparativo.pesoActualTotalGeneral} t</strong></td>
                           </tr>
                         </tfoot>
                       )}
@@ -366,9 +381,18 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                   <Paginacion paginacion={c.paginacionRollos} alCambiarPagina={c.setPaginaRollos} etiqueta="códigos" />
                   <p className="inventario-carga-ayuda" style={{ marginTop: "0.5rem" }}>
                     En cada sede se muestran los metros disponibles y, debajo, cuántos rollos de esa
-                    clasificación hay ahí. El peso es el total de esos rollos, no de uno solo — dale clic
-                    a ▼ para ver cada rollo individual con su propio peso, bodega y referencia.
+                    clasificación hay ahí. El peso es el peso ACTUAL de esos rollos (según lo que les
+                    queda hoy, no el peso con el que llegaron) — dale clic a ▼ para ver cada rollo
+                    individual con su propio peso, bodega y referencia.
                   </p>
+                  {c.comparativo.rollosSinPesoActualTotal > 0 && (
+                    <p className="inventario-carga-ayuda" style={{ marginTop: "0.25rem" }}>
+                      ⚠ {c.comparativo.rollosSinPesoActualTotal} rollo{c.comparativo.rollosSinPesoActualTotal === 1 ? "" : "s"} en
+                      total no {c.comparativo.rollosSinPesoActualTotal === 1 ? "tiene" : "tienen"} su calibre registrado en la
+                      tabla de equivalencias, así que no {c.comparativo.rollosSinPesoActualTotal === 1 ? "está incluido" : "están incluidos"} en
+                      estos totales de peso — corrígelo en Administrar tablas de equivalencias.
+                    </p>
+                  )}
 
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <h2 className="inventario-form-subtitulo" style={{ margin: 0 }}>Resumen — productos por código en toda la empresa</h2>

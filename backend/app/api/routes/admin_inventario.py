@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, literal
+from sqlalchemy import case, func, literal, or_
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, requiere_rol
 from app.api.routes.rollos import asignar_peso_actual
 from app.models.bodega import Bodega
+from app.models.equivalencias import TablaEspesorEquivalencia
 from app.models.producto import Producto
 from app.models.rollo import Rollo
 from app.models.usuario import RolUsuario
@@ -20,17 +21,21 @@ router = APIRouter(
 def _pivotear(filas, *, con_color: bool, con_peso: bool = False, con_familia: bool = False) -> list[FilaComparativoResponse]:
     """`con_color=True` para rollos (pinta la fila por color_material en el
     frontend); productos no tienen ese concepto, solo llevan calibre.
-    `con_peso=True` también agrega peso neto (toneladas) y cantidad de
-    rollos por bodega — solo aplica a rollos, un producto no se cuenta por
-    unidad física ni tiene peso_neto. `con_familia=True` (solo productos)
-    agrega la familia para resolver su unidad de medida en el frontend."""
+    `con_peso=True` también agrega peso ACTUAL (toneladas, según metros
+    disponibles hoy -- no el peso neto de ingreso) y cantidad de rollos por
+    bodega -- solo aplica a rollos, un producto no se cuenta por unidad
+    física. `con_familia=True` (solo productos) agrega la familia para
+    resolver su unidad de medida en el frontend. `con_peso` y `con_familia`
+    nunca se usan juntos, así que ambos reutilizan la posición 8 de `fila`."""
     agrupado: dict[str, dict] = {}
     for fila in filas:
         codigo, descripcion, bodega_id, total, extra, calibre, peso, cantidad_rollos = fila[:8]
         familia = fila[8] if con_familia else ""
+        sin_peso_actual = fila[8] if con_peso else 0
         entrada = agrupado.setdefault(
             codigo, {"descripcion": "", "color_material": "", "calibre": "", "familia": "", "por_bodega": {}, "total": 0.0,
-                     "peso_por_bodega": {}, "peso_total": 0.0, "cantidad_por_bodega": {}, "cantidad_total": 0}
+                     "peso_actual_por_bodega": {}, "peso_actual_total": 0.0, "rollos_sin_peso_actual": 0,
+                     "cantidad_por_bodega": {}, "cantidad_total": 0}
         )
         cantidad = round(float(total or 0), 2)
         entrada["por_bodega"][bodega_id] = cantidad
@@ -45,8 +50,9 @@ def _pivotear(filas, *, con_color: bool, con_peso: bool = False, con_familia: bo
             entrada["familia"] = familia
         if con_peso:
             peso_valor = round(float(peso or 0), 2)
-            entrada["peso_por_bodega"][bodega_id] = peso_valor
-            entrada["peso_total"] = round(entrada["peso_total"] + peso_valor, 2)
+            entrada["peso_actual_por_bodega"][bodega_id] = peso_valor
+            entrada["peso_actual_total"] = round(entrada["peso_actual_total"] + peso_valor, 2)
+            entrada["rollos_sin_peso_actual"] += int(sin_peso_actual or 0)
             entrada["cantidad_por_bodega"][bodega_id] = int(cantidad_rollos or 0)
             entrada["cantidad_total"] += int(cantidad_rollos or 0)
     return [
@@ -54,7 +60,8 @@ def _pivotear(filas, *, con_color: bool, con_peso: bool = False, con_familia: bo
                                  color_material=datos["color_material"], calibre=datos["calibre"],
                                  familia=datos["familia"],
                                  por_bodega=datos["por_bodega"], total=datos["total"],
-                                 peso_por_bodega=datos["peso_por_bodega"], peso_total=datos["peso_total"],
+                                 peso_actual_por_bodega=datos["peso_actual_por_bodega"], peso_actual_total=datos["peso_actual_total"],
+                                 rollos_sin_peso_actual=datos["rollos_sin_peso_actual"],
                                  cantidad_por_bodega=datos["cantidad_por_bodega"], cantidad_total=datos["cantidad_total"])
         for codigo, datos in sorted(agrupado.items())
     ]
@@ -69,11 +76,28 @@ def comparativo_inventario(db: Session = Depends(get_db)) -> dict:
     /inventario/productos, no aquí."""
     bodegas = db.query(Bodega).order_by(Bodega.nombre).all()
 
+    # Peso ACTUAL por rollo (no el peso neto de ingreso): metros disponibles
+    # hoy / mt_por_ton del espesor real. Si el calibre del rollo no está en
+    # la tabla de equivalencias, mt_por_ton sale NULL del LEFT JOIN y ese
+    # rollo queda fuera del SUM (SUM ignora NULL) -- se cuenta aparte en
+    # sin_peso_actual_expr para poder avisarlo en el frontend, en vez de
+    # subestimar el peso total en silencio.
+    peso_actual_expr = case(
+        (TablaEspesorEquivalencia.mt_por_ton > 0, Rollo.metros_disponibles / TablaEspesorEquivalencia.mt_por_ton),
+        else_=None,
+    )
+    sin_peso_actual_expr = case(
+        (or_(TablaEspesorEquivalencia.mt_por_ton.is_(None), TablaEspesorEquivalencia.mt_por_ton <= 0), 1),
+        else_=0,
+    )
+
     filas_rollos = (
         db.query(
             Rollo.codigo_interno, func.max(Rollo.descripcion), Rollo.bodega_id, func.sum(Rollo.metros_disponibles),
-            func.max(Rollo.color_material), func.max(Rollo.calibre), func.sum(Rollo.peso_neto), func.count(Rollo.id),
+            func.max(Rollo.color_material), func.max(Rollo.calibre), func.sum(peso_actual_expr), func.count(Rollo.id),
+            func.sum(sin_peso_actual_expr),
         )
+        .outerjoin(TablaEspesorEquivalencia, TablaEspesorEquivalencia.espesor == Rollo.calibre)
         .filter(Rollo.bodega_id.isnot(None))
         .group_by(Rollo.codigo_interno, Rollo.bodega_id)
         .all()
@@ -94,17 +118,18 @@ def comparativo_inventario(db: Session = Depends(get_db)) -> dict:
     )
 
     rollos_pivotados = _pivotear(filas_rollos, con_color=True, con_peso=True)
-    peso_total_por_bodega: dict[int, float] = {}
+    peso_actual_total_por_bodega: dict[int, float] = {}
     for fila in rollos_pivotados:
-        for bodega_id, peso in fila.peso_por_bodega.items():
-            peso_total_por_bodega[bodega_id] = round(peso_total_por_bodega.get(bodega_id, 0) + peso, 2)
+        for bodega_id, peso in fila.peso_actual_por_bodega.items():
+            peso_actual_total_por_bodega[bodega_id] = round(peso_actual_total_por_bodega.get(bodega_id, 0) + peso, 2)
 
     return {
         "bodegas": bodegas,
         "rollos": rollos_pivotados,
         "productos": _pivotear(filas_productos, con_color=False, con_familia=True),
-        "peso_total_por_bodega": peso_total_por_bodega,
-        "peso_total_general": round(sum(peso_total_por_bodega.values()), 2),
+        "peso_actual_total_por_bodega": peso_actual_total_por_bodega,
+        "peso_actual_total_general": round(sum(peso_actual_total_por_bodega.values()), 2),
+        "rollos_sin_peso_actual_total": sum(fila.rollos_sin_peso_actual for fila in rollos_pivotados),
     }
 
 
