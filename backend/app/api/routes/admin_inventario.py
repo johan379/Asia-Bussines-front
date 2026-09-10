@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import case, func, literal, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import get_db, requiere_rol
 from app.api.routes.rollos import asignar_peso_actual
@@ -143,6 +143,7 @@ def rollos_por_codigo(
     cuánto y en qué sede está."""
     rollos = (
         db.query(Rollo)
+        .options(selectinload(Rollo.historial_consumos))
         .filter(Rollo.codigo_interno == codigo_interno, Rollo.bodega_id.isnot(None))
         .order_by(Rollo.bodega_id.asc(), Rollo.fecha_ingreso.desc())
         .all()

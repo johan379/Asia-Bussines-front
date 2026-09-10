@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from app.api.deps import get_db, requiere_rol, usuario_actual
+from app.api.deps import coincide_bodega, get_db, requiere_rol, usuario_actual
 from app.models.produccion import Produccion
 from app.models.usuario import RolUsuario, Usuario
 from app.schemas.produccion import ProduccionCrear, ProduccionResponse
@@ -16,4 +16,4 @@ def registrar_produccion(datos: ProduccionCrear, db: Session = Depends(get_db), 
 
 @router.get("", response_model=list[ProduccionResponse])
 def listar_producciones(db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual)) -> list[Produccion]:
-    return db.query(Produccion).filter(Produccion.bodega_id == usuario.bodega_id).order_by(Produccion.fecha.desc()).all()
+    return db.query(Produccion).filter(coincide_bodega(Produccion.bodega_id, usuario.bodega_id)).order_by(Produccion.fecha.desc()).all()

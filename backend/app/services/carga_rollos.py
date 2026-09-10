@@ -117,6 +117,15 @@ class ResultadoCarga:
 def procesar_filas(df: pd.DataFrame, mapeo: dict[str, str], db, bodega_id: int | None) -> ResultadoCarga:
     resultado = ResultadoCarga(filas_totales=len(df))
 
+    # Una sola consulta para toda la bodega en vez de un SELECT por fila del
+    # Excel (mismo patrón que ya usa recepcion.py para la tabla de
+    # equivalencia de espesores).
+    filtro_bodega_todos = Rollo.bodega_id.is_(None) if bodega_id is None else Rollo.bodega_id == bodega_id
+    existentes = {
+        r.identificador_rollo: r
+        for r in db.query(Rollo).filter(filtro_bodega_todos).all()
+    }
+
     for indice, fila in df.iterrows():
         numero_fila = indice + 2  # +1 índice 0-based, +1 fila de encabezado.
         codigo_interno = _texto(fila, mapeo, "codigo_interno")
@@ -151,12 +160,7 @@ def procesar_filas(df: pd.DataFrame, mapeo: dict[str, str], db, bodega_id: int |
         proveedor = _texto(fila, mapeo, "proveedor")
         lote = _texto(fila, mapeo, "lote")
 
-        filtro_bodega = Rollo.bodega_id.is_(None) if bodega_id is None else Rollo.bodega_id == bodega_id
-        existente = (
-            db.query(Rollo)
-            .filter(filtro_bodega, Rollo.identificador_rollo == identificador_rollo)
-            .first()
-        )
+        existente = existentes.get(identificador_rollo)
         if existente:
             existente.codigo_interno = codigo_interno
             existente.metros_disponibles = metros_disponibles
@@ -184,10 +188,11 @@ def procesar_filas(df: pd.DataFrame, mapeo: dict[str, str], db, bodega_id: int |
             )
             nuevo.recalcular_estado()
             db.add(nuevo)
-            # Flush inmediato: si la misma referencia vuelve a aparecer más
-            # abajo en el archivo, la siguiente consulta debe encontrarla y
-            # actualizarla en vez de crear un duplicado (autoflush=False).
+            # Flush defensivo + registrar en el dict: si la misma referencia
+            # vuelve a aparecer más abajo en el archivo, la siguiente
+            # iteración la encuentra en `existentes` (autoflush=False).
             db.flush()
+            existentes[identificador_rollo] = nuevo
             resultado.creados += 1
 
     return resultado

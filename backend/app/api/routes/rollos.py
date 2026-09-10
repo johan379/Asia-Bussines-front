@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import coincide_bodega, get_db, requiere_rol, usuario_actual
 from app.core.config import settings
@@ -38,7 +38,11 @@ def listar_rollos(
     fecha_hasta: datetime | None = None, pagina: int = Query(1, ge=1), tamano: int = Query(30, ge=1, le=100),
     paginado: bool = False, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_actual),
 ) -> list[Rollo] | PaginaRollos:
-    consulta = db.query(Rollo).filter(coincide_bodega(Rollo.bodega_id, usuario.bodega_id))
+    consulta = (
+        db.query(Rollo)
+        .options(selectinload(Rollo.historial_consumos))
+        .filter(coincide_bodega(Rollo.bodega_id, usuario.bodega_id))
+    )
     if codigo_interno: consulta = consulta.filter(Rollo.codigo_interno.ilike(f"%{codigo_interno}%"))
     if identificador_rollo: consulta = consulta.filter(Rollo.identificador_rollo.ilike(f"%{identificador_rollo}%"))
     if codigo_proveedor: consulta = consulta.filter(Rollo.codigo_proveedor.ilike(f"%{codigo_proveedor}%"))

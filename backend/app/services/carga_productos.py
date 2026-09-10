@@ -71,6 +71,15 @@ class ResultadoCarga:
 def procesar_filas(df: pd.DataFrame, mapeo: dict[str, str], db, bodega_id: int | None) -> ResultadoCarga:
     resultado = ResultadoCarga(filas_totales=len(df))
 
+    # Una sola consulta para toda la bodega en vez de un SELECT por fila del
+    # Excel (mismo patrón que ya usa recepcion.py para la tabla de
+    # equivalencia de espesores).
+    filtro_bodega_todos = Producto.bodega_id.is_(None) if bodega_id is None else Producto.bodega_id == bodega_id
+    existentes = {
+        p.codigo: p
+        for p in db.query(Producto).filter(filtro_bodega_todos).all()
+    }
+
     for indice, fila in df.iterrows():
         numero_fila = indice + 2  # +1 por índice 0-based, +1 por la fila de encabezado.
         codigo = _valor(fila, mapeo, "codigo")
@@ -107,12 +116,7 @@ def procesar_filas(df: pd.DataFrame, mapeo: dict[str, str], db, bodega_id: int |
         calibre = _valor(fila, mapeo, "calibre")
         codigo_importacion = _valor(fila, mapeo, "codigo_importacion")
 
-        filtro_bodega = Producto.bodega_id.is_(None) if bodega_id is None else Producto.bodega_id == bodega_id
-        existente = (
-            db.query(Producto)
-            .filter(filtro_bodega, Producto.codigo == codigo)
-            .first()
-        )
+        existente = existentes.get(codigo)
         if existente:
             existente.stock = stock
             existente.entrada = entrada
@@ -127,16 +131,18 @@ def procesar_filas(df: pd.DataFrame, mapeo: dict[str, str], db, bodega_id: int |
             # en vez de dejarlo en blanco (el campo lo espera el resto de la
             # app, ej. la búsqueda de productos por código de importación).
             codigo_importacion_final = codigo_importacion or f"IMP-{token_hex(4).upper()}"
-            db.add(Producto(
+            nuevo = Producto(
                 bodega_id=bodega_id, codigo=codigo, referencia=referencia, descripcion=descripcion,
                 familia=familia, calibre=calibre, codigo_importacion=codigo_importacion_final,
                 entrada=entrada, stock=stock,
-            ))
-            # Flush inmediato: si el mismo código vuelve a aparecer más abajo
-            # en el mismo archivo, la siguiente consulta debe encontrarlo y
-            # actualizarlo en vez de crear un duplicado (autoflush=False en
+            )
+            db.add(nuevo)
+            # Flush defensivo + registrar en el dict: si el mismo código
+            # vuelve a aparecer más abajo en el archivo, la siguiente
+            # iteración lo encuentra en `existentes` (autoflush=False en
             # esta app — ver app/db/session.py).
             db.flush()
+            existentes[codigo] = nuevo
             resultado.creados += 1
 
     return resultado

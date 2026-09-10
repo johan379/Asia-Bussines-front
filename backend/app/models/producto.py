@@ -1,4 +1,4 @@
-from sqlalchemy import DateTime, ForeignKey, Numeric, String
+from sqlalchemy import DateTime, ForeignKey, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -12,6 +12,10 @@ class Producto(Base):
     """
 
     __tablename__ = "productos"
+    # NULL en bodega_id (pool de Admin Inventario) NO queda cubierto por esta
+    # constraint -- NULL nunca es igual a otro NULL en SQL estándar. Cubre
+    # bodegas reales, que es el escenario de cargas simultáneas que importaba.
+    __table_args__ = (UniqueConstraint("bodega_id", "codigo", name="uq_productos_bodega_codigo"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     # NULL = material de Admin Inventario, aún sin repartir a ninguna sede.
