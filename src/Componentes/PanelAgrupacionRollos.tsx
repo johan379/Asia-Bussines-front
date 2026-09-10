@@ -84,6 +84,7 @@ function PanelAgrupacionRollos({
                     <th>Proveedor</th>
                     <th>Código proveedor</th>
                     <th>Peso neto (t)</th>
+                    <th>Peso actual (t)</th>
                     <th>Metros proveedor</th>
                     <th>Metros calculados</th>
                     <th>Disponibles</th>
@@ -121,6 +122,7 @@ function PanelAgrupacionRollos({
                       <td>{rollo.proveedor || "—"}</td>
                       <td>{rollo.codigoProveedor || "—"}</td>
                       <td>{rollo.pesoNeto ?? "—"}</td>
+                      <td>{rollo.pesoActualToneladas ?? "—"}</td>
                       <td>{rollo.metrosProveedor ?? "—"}</td>
                       <td>{rollo.metrosCalculados ?? "—"}</td>
                       <td>{rollo.metrosDisponibles}</td>

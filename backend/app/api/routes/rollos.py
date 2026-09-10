@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import coincide_bodega, get_db, requiere_rol, usuario_actual
 from app.core.config import settings
-from app.models.equivalencias import TablaColorEquivalencia, TablaTipoMaterialEquivalencia
+from app.models.equivalencias import TablaColorEquivalencia, TablaEspesorEquivalencia, TablaTipoMaterialEquivalencia
 from app.models.movimiento import Movimiento
 from app.models.rollo import EstadoRollo, Rollo
 from app.models.usuario import RolUsuario, Usuario
@@ -55,10 +55,23 @@ def listar_rollos(
     if fecha_desde: consulta = consulta.filter(Rollo.fecha_ingreso >= fecha_desde)
     if fecha_hasta: consulta = consulta.filter(Rollo.fecha_ingreso <= fecha_hasta)
     consulta = consulta.order_by(Rollo.codigo_interno.asc(), Rollo.fecha_ingreso.desc())
-    if not paginado: return consulta.all()
+    if not paginado:
+        rollos = consulta.all()
+        asignar_peso_actual(db, rollos)
+        return rollos
     total = consulta.count()
-    return PaginaRollos(items=consulta.offset((pagina - 1) * tamano).limit(tamano).all(), total=total,
+    items = consulta.offset((pagina - 1) * tamano).limit(tamano).all()
+    asignar_peso_actual(db, items)
+    return PaginaRollos(items=items, total=total,
                          pagina=pagina, tamano=tamano, total_paginas=max(1, (total + tamano - 1) // tamano))
+
+
+def asignar_peso_actual(db: Session, rollos: list[Rollo]) -> None:
+    """Una sola consulta a la tabla de equivalencias para toda la página,
+    en vez de una por rollo."""
+    espesores = {e.espesor: e for e in db.query(TablaEspesorEquivalencia).all()}
+    for rollo in rollos:
+        rollo.peso_actual_toneladas = srv_excel.peso_actual_toneladas(rollo.calibre, rollo.metros_disponibles, espesores)
 
 
 @router.get("/{rollo_id}/historial", response_model=list[MovimientoResponse])

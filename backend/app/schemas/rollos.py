@@ -37,6 +37,7 @@ class RolloResponse(ModeloConFechasUtc):
     observaciones: str
     proveedor: str
     lote: str
+    peso_actual_toneladas: float | None = None
     historial_consumos: list[HistorialConsumoResponse] = []
 
 

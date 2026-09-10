@@ -298,6 +298,21 @@ def _crear_codigo_interno(codigo_tipo: str, color: dict, espesor: float) -> str:
     return f"{codigo_tipo}{inicial_color}{ral_sin_prefijo}{espesor_texto}"
 
 
+def peso_actual_toneladas(
+    calibre: float | None, metros_disponibles: float, espesores: dict[float, "TablaEspesorEquivalencia"]
+) -> float | None:
+    """Inverso de metros_calculados: cuánto pesa HOY un rollo según los metros
+    que le quedan, usando el mismo espesor->mt_por_ton que ya convierte peso a
+    metros en Recepción -- nunca se deriva del peso_neto original (que puede
+    no existir, ej. ingreso manual), solo del espesor real del rollo."""
+    if calibre is None:
+        return None
+    info_espesor = espesores.get(calibre)
+    if info_espesor is None or not info_espesor.mt_por_ton:
+        return None
+    return round(metros_disponibles / info_espesor.mt_por_ton, 3)
+
+
 def resumen_verificacion(rollos: list[RolloClasificado]) -> dict:
     return {
         "total_rollos": len(rollos),

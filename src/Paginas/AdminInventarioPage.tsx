@@ -314,6 +314,7 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                                               <th>Bodega</th>
                                               <th>Referencia</th>
                                               <th>Peso neto (t)</th>
+                                              <th>Peso actual (t)</th>
                                               <th>Metros disponibles</th>
                                               <th>Metros consumidos</th>
                                               <th>Ingreso</th>
@@ -326,6 +327,7 @@ function AdminInventarioPage({ sesion, onCerrarSesion, almacen }: { sesion: Sesi
                                                 <td>{bodegas.find((b) => b.id === rollo.bodegaId)?.nombre || "—"}</td>
                                                 <td>{rollo.identificadorRollo}</td>
                                                 <td><strong>{rollo.pesoNeto ?? "—"}</strong></td>
+                                                <td>{rollo.pesoActualToneladas ?? "—"}</td>
                                                 <td>{rollo.metrosDisponibles}</td>
                                                 <td>{rollo.metrosConsumidos}</td>
                                                 <td>{formatearFechaColombia(rollo.fechaIngreso, false)}</td>

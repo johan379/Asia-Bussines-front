@@ -3,6 +3,7 @@ from sqlalchemy import func, literal
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, requiere_rol
+from app.api.routes.rollos import asignar_peso_actual
 from app.models.bodega import Bodega
 from app.models.producto import Producto
 from app.models.rollo import Rollo
@@ -115,9 +116,11 @@ def rollos_por_codigo(
     estado) de un código específico, en todas las sedes — para poder ver,
     desde una fila del resumen comparativo, exactamente cuál rollo pesa
     cuánto y en qué sede está."""
-    return (
+    rollos = (
         db.query(Rollo)
         .filter(Rollo.codigo_interno == codigo_interno, Rollo.bodega_id.isnot(None))
         .order_by(Rollo.bodega_id.asc(), Rollo.fecha_ingreso.desc())
         .all()
     )
+    asignar_peso_actual(db, rollos)
+    return rollos
